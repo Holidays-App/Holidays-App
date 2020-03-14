@@ -1,0 +1,62 @@
+{
+  "en": {
+    "upcomingHolidays":{
+      "title": "Upcoming holidays"
+    },
+    "settings":{
+      "title":"Settings",
+      "languageButtonText":"Language"
+    },
+    "settingsLanguage":{
+      "title":"Language",
+      "warningMessageText":"Attention!!! When you change the language, the application will restart",
+      "applyButtonText":"Apply"
+    },
+    "categoriesHolidays":{
+      "title": "Categories"
+    },
+    "months":["January","February","March","April","May","June","July","August","September","October","November","December"],
+    "backButtonText": "Back",
+    "categories":{
+      "Religious holiday":"Religious holidays",
+      "General holidays":"General holidays",
+      "anniversaries":"Anniversaries",
+      "name-days":"Name-days",
+      "Birthdays":"Birthdays",
+      "Cultural Holiday":"Cultural holidays",
+      "Professional Holiday":"Job's holidays",
+      "Traditional holidays":"Traditional holidays",
+      "Carnivals and festivals":"Carnivals and festivals"
+    }
+  },
+  "ru":{
+    "upcomingHolidays":{
+      "title": "Предстоящие праздники"
+    },
+    "settings":{
+      "title":"Настройки",
+      "languageButtonText":"Язык"
+    },
+    "settingsLanguage":{
+      "title" : "Язык",
+      "warningMessageText":"Внимание!!! При смене языка приложение перезапустится",
+      "applyButtonText":"Применить"
+    },
+    "categoriesHolidays":{
+      "title": "Категории"
+    },
+    "months":["Января","Февраля","Марта","Апреля","Майя","Июня","Июля","Августа","Сентября","Октября","Ноября","Декабря"],
+    "backButtonText": "Назад",
+    "categories":{
+      "Religious holiday":"Религиозные праздники",
+      "General holidays":"Общие праздники",
+      "anniversaries":"Годовщины",
+      "name-days":"Именины",
+      "Birthdays":"Дни рожденья",
+      "Cultural Holiday":"Культурные праздники",
+      "Professional Holiday":"Праздники професий",
+      "Traditional holidays":"Традиционные праздники",
+      "Carnivals and festivals":"Фестивали"
+    }
+  }
+}
