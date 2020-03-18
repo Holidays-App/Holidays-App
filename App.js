@@ -47,22 +47,6 @@ const resurces = {
 
 const dictinory = resurces.dictinory;
 
-Notifications.scheduleLocalNotificationAsync(
-  {
-    title: "111",
-    body: "Tapolinui puh semen petuh!!!!!!",
-    android: {
-        icon: './assets/icon.png'
-      },
-    ios: {
-      sound: true,
-    },
-  },
-  {
-    time: (new Date).value+60000
-  }
-);
-
 function sortByDate(holidaysList) {
   let holidayListL = holidaysList;
   holidayListL.sort((a, b) => (
@@ -120,7 +104,7 @@ async function loadHolidays(){
 async function loadUpdatedHolidays(){
   try {
     var updatedHolidaysOnDevise = await AsyncStorage.getItem('updatedHolidays');
-    var updatedHolidays = await fetch('http://holidaysapp.github.io/db/updatedHolidays.json');
+    var updatedHolidays = await fetch('http://holidays-app.github.io/db/updatedHolidays.json');
     updatedHolidays = await updatedHolidays.json()
 
     if (updatedHolidaysOnDevise != updatedHolidays){
@@ -210,6 +194,7 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
+      backgroundColor: '#FFFFFF'
     },
     item: {
       flex: 1,
@@ -238,6 +223,7 @@ const styles = StyleSheet.create({
       fontSize: 22,
       top: 20,
       left: "4%",
+      color: "#666666",
     },
     name: {
       fontSize: 19,
@@ -254,7 +240,6 @@ const styles = StyleSheet.create({
     holidayDescription: {
       fontSize: 19,
       top: 35,
-      color: "#666666",
     },
     holidayScreenView: {
       paddingLeft: "3%",
@@ -268,16 +253,6 @@ const styles = StyleSheet.create({
       right: "-45%",
       top: "-20%",
     },
-    settingsScreenView: {
-      height: 60,
-      paddingRight: "4%",
-      paddingLeft: "3%",
-      borderColor: '#d6d7da',
-      borderTopWidth: 1.5,
-      borderBottomWidth: 1.5,
-      top: '20%',
-      justifyContent: 'center',
-    },
     settingsScreenAngleRight: {
       right: "-45%",
       top: "-25%",
@@ -287,12 +262,14 @@ const styles = StyleSheet.create({
       top: "33%",
     },
     russiaFlagButton: {
-      left: "20%",
+      left: screenWidth/5,
       top: screenWidth/5,
+      position: 'absolute',
     },
     unitedStatesFlagButton: {
-      left: "60%",
-      top: "0%",
+      left: screenWidth/5*3,
+      top: screenWidth/5,
+      position: 'absolute',
     },
     FlagImage: {
       width: screenWidth/5,
@@ -301,12 +278,15 @@ const styles = StyleSheet.create({
     warningMessage: {
       fontSize: 16,
       top: '50%',
+      left: '10%',
+      width: '80%',
       textAlign: 'center',
       color: '#666666',
+      position: 'absolute',
     },
     applyButton: {
       left: '12.5%',
-      bottom: "-150%",
+      bottom: "0%",
       alignItems: "center",
       position: 'absolute',
     },
@@ -366,7 +346,10 @@ class upcomingHolidaysScreen extends React.Component {
                               (item.date.day == date.getDate() && item.date.month == (date.getMonth()+1)) ?
                               {borderColor: '#f7941d', borderWidth: 3}
                               :
-                              {borderTopColor: '#d6d7da', borderTopWidth: 1.5}
+                              (this.state.holidaysList.indexOf(item)==0?
+                                {}
+                                :
+                                {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10})
                             )
             }>
               <Text style={Object.assign({}, styles.name, (item.important)?{fontWeight: "500"}:{})}>{item[this.state.language].name}</Text>
@@ -437,7 +420,13 @@ class categoriesHolidaysScreen extends React.Component {
           data={this.state.categoriesHolidaysList}
           renderItem={({ item }) => (
           <TouchableOpacity onPress={() => this.openСategoryHolidayScreen(item)}>
-            <View style={styles.categoryItem}>
+            <View style={Object.assign({},
+                          styles.item,
+                          this.state.categoriesHolidaysList.indexOf(item)==0?
+                            {}
+                            :
+                            {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10}
+                        )}>
               <Text style={styles.name}>{dictinory[this.state.language].categories[item]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesHolidaysScreenAngleRight}/>
             </View>
@@ -542,13 +531,15 @@ class settingsScreen extends React.Component {
   }
   render() {
     return(
-      <View style={styles.settingsScreenView}>
-        <TouchableOpacity onPress={() => this.openSettingsLanguageScreen()}>
-          <View>
-            <Text style={styles.settingsScreenSectionName}>{dictinory[this.state.language].settings.languageButtonText}</Text>
-            <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={60} iconStyle={styles.settingsScreenAngleRight}/>
-          </View>
-        </TouchableOpacity>
+      <View style={styles.container}>
+        <View style={Object.assign({}, styles.item, {borderBottomWidth: 1.5, height:60, borderTopWidth: 1.5, borderColor: '#d6d7da', top: "30%"})}>
+          <TouchableOpacity onPress={() => this.openSettingsLanguageScreen()}>
+            <View>
+              <Text style={styles.settingsScreenSectionName}>{dictinory[this.state.language].settings.languageButtonText}</Text>
+              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={60} iconStyle={styles.settingsScreenAngleRight}/>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     )
   }
@@ -581,7 +572,7 @@ class settingsLanguageScreen extends React.Component {
   }
   render() {
     return(
-      <View>
+      <View style={styles.container}>
         <TouchableOpacity onPress={() => this.changeLocalLanguage('ru')} style={styles.russiaFlagButton}>
           <Image
             style={styles.FlagImage}
