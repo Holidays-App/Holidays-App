@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
       paddingLeft: "3%",
       paddingRight: "3%",
       flex: 1,
+      backgroundColor: '#FFFFFF'
     },
     holidayScreenScrollView: {
       paddingBottom: 60,
@@ -494,9 +495,12 @@ class categoryHolidaysScreen extends React.Component {
                               (item.date.day == date.getDate() && item.date.month == (date.getMonth()+1)) ?
                               {borderColor: '#f7941d', borderWidth: 3}
                               :
-                              {borderTopColor: '#d6d7da', borderTopWidth: 1.5}
+                              (this.state.categoryHolidaysList.indexOf(item)==0?
+                              {}
+                              :
+                              {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10})
                             )
-            }>
+                          }>
               <Text style={Object.assign({}, styles.name, (item.important)?{fontWeight: "500"}:{})}>{item[this.state.language].name}</Text>
               <Text style={styles.holidayDate}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.angleRight}/>
