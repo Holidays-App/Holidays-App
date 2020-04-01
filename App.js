@@ -117,11 +117,11 @@ async function loadUpdatedHolidays(){
 async function setNotifications(){
   try {
 
-    var notificationsHolidaysList = [];
+    var holidaysWithNotificationsList = [];
 
     var notificationsList = await AsyncStorage.getItem('notificationsList');
 
-    if (true){
+    if (notificationsList == null){
       await AsyncStorage.setItem('notificationsList', JSON.stringify([]));
       notificationsList = [];
     } else {
@@ -129,10 +129,13 @@ async function setNotifications(){
     }
 
     for (let i = 0; i < notificationsList.length; i++) {
-      if (date>notificationsList[i].date) {
-        delete notificationsList[i];
+      console.log(notificationsList[i])
+      if (date.getTime()>=notificationsList[i].date) {
+        console.log(1)
+        notificationsList.splice(i, 1);;
       } else {
-        notificationsHolidaysList.push(notificationsList[i].holiday);
+        console.log(2)
+        holidaysWithNotificationsList.push(notificationsList[i].holiday);
         }
     }
 
@@ -148,17 +151,17 @@ async function setNotifications(){
 
     var language = await AsyncStorage.getItem('language');
     var language = language=='ru'||language=='ruByDevice'?'ru':'en';
-    console.log(notificationsHolidaysList)
+    console.log(holidaysWithNotificationsList)
     for (let i = 0; i < holidaysList.length; i++){
-      console.log(holidaysList[i][language].name)
-      if (notificationsHolidaysList.indexOf(holidaysList[i][language].name) == -1) {
+      if (holidaysWithNotificationsList.indexOf(holidaysList[i][language].name) == -1) {
 
-        var notificationDate = null;
+        console.log(holidaysList[i][language].name)
+        var notificationDate;
 
         if ((holidaysList[i].date.day/100+holidaysList[i].date.month)>((date.getMonth()+1)+date.getDate()/100)) {
-          notificationDate = new Date(date.getFullYear(), holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 3, 4, 567);
+          notificationDate = (new Date(date.getFullYear(), holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
         } else {
-          notificationDate = new Date(date.getFullYear()+1, holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 3, 4, 567);
+          notificationDate = (new Date(date.getFullYear()+1, holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
         }
         console.log(notificationDate)
         await Notifications.scheduleLocalNotificationAsync(
@@ -177,7 +180,6 @@ async function setNotifications(){
             time: notificationDate
           }
         );
-
         notificationsList.push({
           holiday: holidaysList[i][language].name,
           date: notificationDate
