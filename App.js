@@ -116,9 +116,6 @@ async function loadUpdatedHolidays(){
 
 async function setNotifications(){
   try {
-
-    var holidaysWithNotificationsList = [];
-
     var notificationsList = await AsyncStorage.getItem('notificationsList');
 
     if (notificationsList == null){
@@ -129,14 +126,12 @@ async function setNotifications(){
     }
 
     for (let i = 0; i < notificationsList.length; i++) {
-      console.log(notificationsList[i])
+      console.log(notificationsList[i], i, notificationsList.length)
       if (date.getTime()>=notificationsList[i].date) {
         console.log(1)
-        notificationsList.splice(i, 1);;
-      } else {
-        console.log(2)
-        holidaysWithNotificationsList.push(notificationsList[i].holiday);
-        }
+        notificationsList.splice(i, 1);
+        i--;
+      }
     }
 
     await Permissions.askAsync(Permissions.NOTIFICATIONS);
@@ -145,45 +140,42 @@ async function setNotifications(){
 
     var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
     var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
-    var updatedHolidays = JSON.parse(await AsyncStorage.getItem('updatedHolidays'));
 
-    var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
+    var holidaysList = defaultHolidays.concat(customHolidays);
 
+    await loadLanguage();
     var language = await AsyncStorage.getItem('language');
     var language = language=='ru'||language=='ruByDevice'?'ru':'en';
-    console.log(holidaysWithNotificationsList)
+
+    console.log(notificationsList);
     for (let i = 0; i < holidaysList.length; i++){
-      if (holidaysWithNotificationsList.indexOf(holidaysList[i][language].name) == -1) {
 
-        console.log(holidaysList[i][language].name)
-        var notificationDate;
+      var notificationDate;
+      if ((holidaysList[i].date.day/100+holidaysList[i].date.month)>((date.getMonth()+1)+date.getDate()/100)) {
+        notificationDate = (new Date(date.getFullYear(), holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
+      } else {
+        notificationDate = (new Date(date.getFullYear()+1, holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
+      }
 
-        if ((holidaysList[i].date.day/100+holidaysList[i].date.month)>((date.getMonth()+1)+date.getDate()/100)) {
-          notificationDate = (new Date(date.getFullYear(), holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
-        } else {
-          notificationDate = (new Date(date.getFullYear()+1, holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
-        }
-        console.log(notificationDate)
+      var notification = {
+        holiday: holidaysList[i][language].name,
+        date: notificationDate
+      }
+
+      var includesFunc = function(element){return(JSON.stringify(element) == JSON.stringify(notification))};
+
+      if (!notificationsList.some(includesFunc)) {
+
         await Notifications.scheduleLocalNotificationAsync(
           {
             title: holidaysList[i][language].name,
             body: holidaysList[i][language].message,
-            android: {
-                sound: true,
-                icon: './assets/icon.png'
-              },
-            ios: {
-              sound: true,
-            },
           },
           {
             time: notificationDate
           }
         );
-        notificationsList.push({
-          holiday: holidaysList[i][language].name,
-          date: notificationDate
-        });
+        notificationsList.push(notification);
         await AsyncStorage.setItem('notificationsList', JSON.stringify(notificationsList));
       }
     }
@@ -562,7 +554,7 @@ class settingsLanguageScreen extends React.Component {
       ruFlagIcon: '',
       warningMessageText: '',
       buttonText: '',
-      lang: ''
+      language: ''
     }
   }
   async componentDidMount() {
@@ -573,7 +565,7 @@ class settingsLanguageScreen extends React.Component {
       ruFlagIcon: selectedLanguage=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
       warningMessageText: dictinory[selectedLanguage].settingsLanguage.warningMessageText,
       buttonText: dictinory[selectedLanguage].settingsLanguage.applyButtonText,
-      lang: selectedLanguage
+      language: selectedLanguage
     })
   }
   render() {
@@ -604,18 +596,20 @@ class settingsLanguageScreen extends React.Component {
       </View>
     )
   }
-  changeLocalLanguage(lang){
-    this.props.navigation.setOptions({ title: dictinory[lang].settingsLanguage.title });
+  changeLocalLanguage(language){
+    this.props.navigation.setOptions({ title: dictinory[language].settingsLanguage.title });
     this.setState({
-      lang: lang,
-      enFlagIcon: lang=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag,
-      ruFlagIcon: lang=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
-      warningMessageText: dictinory[lang].settingsLanguage.warningMessageText,
-      buttonText: dictinory[lang].settingsLanguage.applyButtonText,
+      language: language,
+      enFlagIcon: language=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag,
+      ruFlagIcon: language=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
+      warningMessageText: dictinory[language].settingsLanguage.warningMessageText,
+      buttonText: dictinory[language].settingsLanguage.applyButtonText,
     })
   }
   async apply(){
-    await AsyncStorage.setItem('language', this.state.lang);
+    await AsyncStorage.setItem('language', this.state.language);
+    await AsyncStorage.removeItem('notificationsList')
+    await Notifications.cancelAllScheduledNotificationsAsync()
     Updates.reload();
   }
 }
@@ -764,7 +758,6 @@ export default class App extends React.Component {
     super(props);
   }
   async componentDidMount() {
-    loadLanguage();
     setNotifications();
   }
   render() {
