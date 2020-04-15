@@ -16,7 +16,9 @@ import {
   Button
 } from 'react-native';
 
-import { Icon } from 'react-native-elements'
+import { Icon } from 'react-native-elements';
+
+import NetInfo from '@react-native-community/netinfo';
 
 import { Updates, Notifications } from 'expo';
 
@@ -46,6 +48,21 @@ const resurces = {
 };
 
 const dictinory = resurces.dictinory;
+
+const localNotification = {
+            title: 'done',
+            body: 'done!'
+        };
+
+        const schedulingOptions = {
+            time: (new Date()).getTime() + 5000
+        }
+
+        // Notifications show only when app is not active.
+        // (ie. another app being used or device's screen is locked)
+        Notifications.scheduleLocalNotificationAsync(
+            localNotification, schedulingOptions
+        );
 
 function sortByDate(holidaysList) {
   let holidayListL = holidaysList;
@@ -126,9 +143,7 @@ async function setNotifications(){
     }
 
     for (let i = 0; i < notificationsList.length; i++) {
-      console.log(notificationsList[i], i, notificationsList.length)
       if (date.getTime()>=notificationsList[i].date) {
-        console.log(1)
         notificationsList.splice(i, 1);
         i--;
       }
@@ -141,13 +156,18 @@ async function setNotifications(){
     var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
     var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
 
-    var holidaysList = defaultHolidays.concat(customHolidays);
+    if ((await NetInfo.fetch()).isInternetReachable) {
+      await loadUpdatedHolidays();
+    }
+    var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
+    updatedHolidays = updatedHolidays==null?[]:JSON.parse(updatedHolidays);
+
+    var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
 
     await loadLanguage();
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
-    console.log(notificationsList);
     for (let i = 0; i < holidaysList.length; i++){
 
       var notificationDate;
@@ -165,7 +185,7 @@ async function setNotifications(){
       var includesFunc = function(element){return(JSON.stringify(element) == JSON.stringify(notification))};
 
       if (!notificationsList.some(includesFunc)) {
-
+        console.log(notification);
         await Notifications.scheduleLocalNotificationAsync(
           {
             title: holidaysList[i][language].name,
@@ -175,6 +195,7 @@ async function setNotifications(){
             time: notificationDate
           }
         );
+
         notificationsList.push(notification);
         await AsyncStorage.setItem('notificationsList', JSON.stringify(notificationsList));
       }
@@ -312,7 +333,7 @@ class upcomingHolidaysScreen extends React.Component {
     var holidaysList = sortByDate((defaultHolidays.concat(customHolidays)).concat(updatedHolidays));
 
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({holidaysList: holidaysList, language: language});
 
@@ -375,7 +396,7 @@ class holidayScreen extends React.Component {
   }
   async componentDidMount() {
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({ language: language });
   }
@@ -399,12 +420,12 @@ class categoriesHolidaysScreen extends React.Component {
   }
   async componentDidMount() {
     var categories = [];
-    for (var key in dictinory.en.categories) {
+    for (let key in dictinory.en.categories) {
       categories.push(key);
     };
 
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({ language: language, categoriesHolidaysList: categories });
   }
@@ -458,7 +479,7 @@ class categoryHolidaysScreen extends React.Component {
     }));
 
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({categoryHolidaysList: categoryHolidaysList, language: language});
 
@@ -523,7 +544,7 @@ class settingsScreen extends React.Component {
   }
   async componentDidMount() {
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({ language: language });
   }
@@ -623,7 +644,7 @@ class firstScreen extends React.Component {
   async componentDidMount() {
     await loadLanguage();
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({ language: language });
   }
@@ -665,7 +686,7 @@ class secondScreen extends React.Component {
   async componentDidMount() {
     await loadLanguage();
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({ language: language });
   }
@@ -718,7 +739,7 @@ class thirdScreen extends React.Component {
   async componentDidMount() {
     await loadLanguage();
     var language = await AsyncStorage.getItem('language');
-    var language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({ language: language });
   }
