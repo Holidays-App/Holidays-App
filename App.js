@@ -46,7 +46,7 @@ const resurces = {
   defaultHolidays: require('./assets/db/defaultHolidays.json'),
   dictinory: require('./assets/db/dictinory.json'),
 };
-
+///////test
 const dictinory = resurces.dictinory;
 
 const localNotification = {
@@ -63,7 +63,7 @@ const localNotification = {
         Notifications.scheduleLocalNotificationAsync(
             localNotification, schedulingOptions
         );
-
+///////test
 function sortByDate(holidaysList) {
   let holidayListL = holidaysList;
   holidayListL.sort((a, b) => (
@@ -328,7 +328,12 @@ class upcomingHolidaysScreen extends React.Component {
 
     var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
     var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
-    var updatedHolidays = JSON.parse(await AsyncStorage.getItem('updatedHolidays'));
+
+    if ((await NetInfo.fetch()).isInternetReachable) {
+      await loadUpdatedHolidays();
+    }
+    var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
+    updatedHolidays = updatedHolidays==null?[]:JSON.parse(updatedHolidays);
 
     var holidaysList = sortByDate((defaultHolidays.concat(customHolidays)).concat(updatedHolidays));
 
@@ -336,17 +341,6 @@ class upcomingHolidaysScreen extends React.Component {
     language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({holidaysList: holidaysList, language: language});
-
-    var upcomingHolidaysScreen = this;
-    loadUpdatedHolidays().then(() => {
-      AsyncStorage.getItem('updatedHolidays').then((value) => {
-        updatedHolidays = JSON.parse(value);
-        holidaysList = sortByDate((defaultHolidays.concat(customHolidays)).concat(updatedHolidays));
-        if(upcomingHolidaysScreen.state.holidaysList != holidaysList){
-          upcomingHolidaysScreen.setState({holidaysList: holidaysList});
-        }
-      })
-    });
   }
   render() {
     return(
@@ -470,7 +464,12 @@ class categoryHolidaysScreen extends React.Component {
 
     var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
     var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
-    var updatedHolidays = JSON.parse(await AsyncStorage.getItem('updatedHolidays'));
+
+    if ((await NetInfo.fetch()).isInternetReachable) {
+      await loadUpdatedHolidays();
+    }
+    var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
+    updatedHolidays = updatedHolidays==null?[]:JSON.parse(updatedHolidays);
 
     var holidaysList = defaultHolidays.concat(customHolidays).concat(updatedHolidays);
 
@@ -482,19 +481,6 @@ class categoryHolidaysScreen extends React.Component {
     language = language=='ru'||language=='ruByDevice'?'ru':'en';
 
     this.setState({categoryHolidaysList: categoryHolidaysList, language: language});
-
-    loadUpdatedHolidays().then(() => {
-      AsyncStorage.getItem('updatedHolidays').then((value) => {
-        updatedHolidays = JSON.parse(value);
-        holidaysList = defaultHolidays.concat(customHolidays).concat(updatedHolidays);
-        categoryHolidaysList = sortByDate(holidaysList.filter(function(holiday) {
-          return (holiday.category == upcomingHolidaysScreen.props.route.params.category);
-        }));
-        if(upcomingHolidaysScreen.state.categoryHolidaysList != categoryHolidaysList){
-          upcomingHolidaysScreen.setState({categoryHolidaysList: categoryHolidaysList});
-        }
-      })
-    });
   }
   render() {
     return(
