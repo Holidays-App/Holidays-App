@@ -63,7 +63,11 @@ const localNotification = {
         Notifications.scheduleLocalNotificationAsync(
             localNotification, schedulingOptions
         );
+<<<<<<< HEAD
 ///////test
+=======
+
+>>>>>>> 8442873f8725cd80cb575c5c13bead293f76d308
 function sortByDate(holidaysList) {
   let holidayListL = holidaysList;
   holidayListL.sort((a, b) => (
