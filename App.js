@@ -23,6 +23,8 @@ import NetInfo from '@react-native-community/netinfo';
 
 import { Updates, Notifications } from 'expo';
 
+import * as Font from 'expo-font';
+
 import Constants from 'expo-constants';
 
 import * as Permissions from 'expo-permissions';
@@ -47,9 +49,10 @@ const resurces = {
   defaultHolidays: require('./assets/db/defaultHolidays.json'),
   dictinory: require('./assets/db/dictinory.json'),
 };
-///////test
+
 const dictinory = resurces.dictinory;
 
+///////test
 const localNotification = {
             title: 'done',
             body: 'done!'
@@ -64,6 +67,7 @@ const schedulingOptions = {
 Notifications.scheduleLocalNotificationAsync(
             localNotification, schedulingOptions
         );
+//////// test
 
 function sortByDate(holidaysList) {
   const date = new Date();
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      backgroundColor: '#FFFFFF'
+      backgroundColor: '#FFFFFF',
     },
     item: {
       flex: 1,
@@ -363,7 +367,7 @@ class holidaysListScreen extends React.Component {
                                 {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10})
                             )
             }>
-              <Text style={Object.assign({}, styles.name, (item.important)?{fontWeight: "500"}:{})}>{item[this.state.language].name}</Text>
+              <Text style={styles.name}>{item[this.state.language].name}</Text>
               <Text style={styles.holidayDate}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.angleRight}/>
             </View>
@@ -588,6 +592,8 @@ class firstScreen extends React.Component {
         name="upcomingHolidaysScreen"
         component={holidaysListScreen}
         options={{
+          swipeEnabled: false,
+          animationEnabled: false,
           headerBackTitle: dictinory[this.state.language].backButtonText,
           title: dictinory[this.state.language].upcomingHolidays.title,
           headerTitleStyle: {
@@ -717,15 +723,23 @@ export default class App extends React.Component {
   render() {
     return (
       <NavigationContainer>
-        <Tab.Navigator tabBarOptions={{
+        <Tab.Navigator
+        tabBarOptions={{
           activeTintColor: '#f7941d',
           tabStyle: { justifyContent: 'center' },
-          showLabel: false
-        }}>
+          showLabel: false,
+        }}
+        options={{
+          swipeEnabled: false,
+          animationEnabled: false,
+        }}
+        >
           <Tab.Screen
           name="firstScreen"
           component={firstScreen}
           options={{
+            swipeEnabled: false,
+            animationEnabled: false,
             tabBarIcon: ({ color }) => (
               <Icon name='calendar' type='foundation' color={color} size={38} iconStyle={{textAlignVertical: 'center'}}/>
             ),
