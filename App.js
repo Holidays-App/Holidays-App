@@ -738,8 +738,6 @@ export default class App extends React.Component {
           name="firstScreen"
           component={firstScreen}
           options={{
-            swipeEnabled: false,
-            animationEnabled: false,
             tabBarIcon: ({ color }) => (
               <Icon name='calendar' type='foundation' color={color} size={38} iconStyle={{textAlignVertical: 'center'}}/>
             ),
