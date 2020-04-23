@@ -5,16 +5,15 @@ import {
   View,
   Image,
   TouchableOpacity,
-  TouchableHighlight,
   ScrollView,
-  SafeAreaView,
   AsyncStorage,
   FlatList,
   Dimensions,
   NativeModules,
   Platform,
   Button,
-  RefreshControl
+  RefreshControl,
+  InteractionManager
 } from 'react-native';
 
 import { Icon } from 'react-native-elements';
@@ -53,20 +52,20 @@ const resurces = {
 const dictinory = resurces.dictinory;
 
 ///////test
-const localNotification = {
+/*const localNotification = {
             title: 'done',
             body: 'done!'
-        };
+        };*/
 
-const schedulingOptions = {
+/*const schedulingOptions = {
             time: (new Date()).getTime() + 5000
-        }
+        }*/
 
 // Notifications show only when app is not active.
 // (ie. another app being used or device's screen is locked)
-Notifications.scheduleLocalNotificationAsync(
+/*Notifications.scheduleLocalNotificationAsync(
             localNotification, schedulingOptions
-        );
+        );*/
 //////// test
 
 function sortByDate(holidaysList) {
@@ -263,7 +262,7 @@ const styles = StyleSheet.create({
     holidayScreenScrollView: {
       paddingBottom: 60,
     },
-    categoriesHolidaysScreenAngleRight: {
+    categoriesHolidaysAngleRight: {
       right: "-45%",
       top: "-20%",
     },
@@ -429,7 +428,7 @@ class holidayScreen extends React.Component {
   }
 }
 
-class categoriesHolidaysScreen extends React.Component {
+class categoriesHolidays extends React.Component {
   constructor(props) {
     super(props);
     this.state = { categoriesHolidaysList: [], language: 'en' }
@@ -460,7 +459,7 @@ class categoriesHolidaysScreen extends React.Component {
                             {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10}
                         )}>
               <Text style={styles.name}>{dictinory[this.state.language].categories[item]}</Text>
-              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesHolidaysScreenAngleRight}/>
+              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesHolidaysAngleRight}/>
             </View>
           </TouchableOpacity>
           )}
@@ -576,26 +575,25 @@ class settingsLanguageScreen extends React.Component {
 class firstScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: 'en' };
+    this.state = { language: '' };
   }
-  async componentDidMount() {
-    await loadLanguage();
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
-
-    this.setState({ language: language });
+  componentDidMount() {
+    InteractionManager.runAfterInteractions(async () => {
+      await loadLanguage();
+      language = await AsyncStorage.getItem('language');
+      language = language=='ru'||language=='ruByDevice'?'ru':'en';
+      this.setState({language: language });
+    })
   }
   render() {
     return(
       <Stack.Navigator>
       <Stack.Screen
-        name="upcomingHolidaysScreen"
+        name="upcomingHolidays"
         component={holidaysListScreen}
         options={{
-          swipeEnabled: false,
-          animationEnabled: false,
-          headerBackTitle: dictinory[this.state.language].backButtonText,
-          title: dictinory[this.state.language].upcomingHolidays.title,
+          headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+          title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidays.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -605,8 +603,8 @@ class firstScreen extends React.Component {
         name="holidayScreen"
         component={holidayScreen}
         options={{
-          headerBackTitle: dictinory[this.state.language].backButtonText,
-          title: dictinory[this.state.language].upcomingHolidays.title,
+          headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+          title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidays.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -620,24 +618,23 @@ class firstScreen extends React.Component {
 class secondScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: 'en' };
+    this.state = { language: '' };
   }
   async componentDidMount() {
-    await loadLanguage();
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
-
-    this.setState({ language: language });
+      await loadLanguage();
+      language = await AsyncStorage.getItem('language');
+      language = language=='ru'||language=='ruByDevice'?'ru':'en';
+      this.setState({language: language });
   }
   render() {
     return(
       <Stack.Navigator>
         <Stack.Screen
-          name="categoriesHolidaysScreen"
-          component={categoriesHolidaysScreen}
+          name="categoriesHolidays"
+          component={categoriesHolidays}
           options={{
-            headerBackTitle: dictinory[this.state.language].backButtonText,
-            title: dictinory[this.state.language].categoriesHolidays.title,
+            headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+            title: this.state.language==''?'':dictinory[this.state.language].categoriesHolidays.title,
             headerTitleStyle: {
               fontSize: 21,
             },
@@ -647,8 +644,8 @@ class secondScreen extends React.Component {
           name="categoryHolidaysScreen"
           component={holidaysListScreen}
           options={({ route }) => ({
-            headerBackTitle: dictinory[this.state.language].backButtonText,
-            title: dictinory[this.state.language].categories[route.params.category],
+            headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+            title: this.state.language==''?'':dictinory[this.state.language].categories[route.params.category],
             headerTitleStyle: {
               fontSize: 21,
             },
@@ -658,8 +655,8 @@ class secondScreen extends React.Component {
           name="holidayScreen"
           component={holidayScreen}
           options={{
-            headerBackTitle: dictinory[this.state.language].backButtonText,
-            title: dictinory[this.state.language].upcomingHolidays.title,
+            headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+            title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidays.title,
             headerTitleStyle: {
               fontSize: 21,
             },
@@ -673,14 +670,13 @@ class secondScreen extends React.Component {
 class thirdScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: 'en' };
+    this.state = { language: '' };
   }
   async componentDidMount() {
-    await loadLanguage();
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
-
-    this.setState({ language: language });
+      await loadLanguage();
+      language = await AsyncStorage.getItem('language');
+      language = language=='ru'||language=='ruByDevice'?'ru':'en';
+      this.setState({language: language });
   }
   render() {
     return(
@@ -689,8 +685,8 @@ class thirdScreen extends React.Component {
         name="settingsScreen"
         component={settingsScreen}
         options={{
-          headerBackTitle: dictinory[this.state.language].backButtonText,
-          title: dictinory[this.state.language].settings.title,
+          headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+          title: this.state.language==''?'':dictinory[this.state.language].settings.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -700,8 +696,8 @@ class thirdScreen extends React.Component {
         name="settingsLanguageScreen"
         component={settingsLanguageScreen}
         options={{
-          headerBackTitle: dictinory[this.state.language].backButtonText,
-          title: dictinory[this.state.language].settingsLanguage.title,
+          headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+          title: this.state.language==''?'':dictinory[this.state.language].settingsLanguage.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -717,7 +713,7 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
   }
-  async componentDidMount() {
+  componentDidMount() {
     setNotifications();
   }
   render() {
@@ -729,10 +725,6 @@ export default class App extends React.Component {
           tabStyle: { justifyContent: 'center' },
           showLabel: false,
         }}
-        options={{
-          swipeEnabled: false,
-          animationEnabled: false,
-        }}
         >
           <Tab.Screen
           name="firstScreen"
@@ -741,7 +733,8 @@ export default class App extends React.Component {
             tabBarIcon: ({ color }) => (
               <Icon name='calendar' type='foundation' color={color} size={38} iconStyle={{textAlignVertical: 'center'}}/>
             ),
-          }}/>
+          }}
+          />
           <Tab.Screen
           name="secondScreen"
           component={secondScreen}
