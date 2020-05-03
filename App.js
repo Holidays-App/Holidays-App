@@ -5,6 +5,7 @@ import {
   View,
   Image,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   ScrollView,
   AsyncStorage,
   FlatList,
@@ -12,8 +13,7 @@ import {
   NativeModules,
   Platform,
   Button,
-  RefreshControl,
-  InteractionManager
+  RefreshControl
 } from 'react-native';
 
 import { Icon } from 'react-native-elements';
@@ -85,51 +85,59 @@ function sortByDate(holidaysList) {
   return holidayListL;
 }
 
-async function loadLanguage() {
+async function loadLanguage(){
   try {
     var language = await AsyncStorage.getItem('language');
-    if (language == null || language == 'ruByDevice' || language == 'enByDevice'){
+    if (language == null){
       let deviceLanguage =
           Platform.OS === 'ios'
             ? NativeModules.SettingsManager.settings.AppleLocale ||
               NativeModules.SettingsManager.settings.AppleLanguages[0] // iOS 13
             : NativeModules.I18nManager.localeIdentifier;
-      await AsyncStorage.setItem('language', (deviceLanguage=='ru_RU'?'ru':'en')+'ByDevice');
+      language = (deviceLanguage=='ru_RU'?'ru':'en')
     }
+    return(language);
   } catch (e) {console.log('ERROR: '+e)}
 };
 
 async function loadHolidays(){
   try {
-    var defaultHolidays = await AsyncStorage.getItem('defaultHolidays');
-    if (defaultHolidays != resurces.defaultHolidays){
-      defaultHolidays = resurces.defaultHolidays;
-      await AsyncStorage.setItem('defaultHolidays', JSON.stringify(defaultHolidays));
-    }
-  } catch (e) {console.log('ERROR: '+e)}
-
-  try {
     var customHolidays = await AsyncStorage.getItem('customHolidays');
     if (customHolidays == null){
+      customHolidays = [];
       await AsyncStorage.setItem('customHolidays', JSON.stringify([]));
     }
   } catch (e) {console.log('ERROR: '+e)}
 
   try {
-    if ((await NetInfo.fetch()).isInternetReachable) {
-      var updatedHolidaysOnDevise = await AsyncStorage.getItem('updatedHolidays');
-      var updatedHolidays = await fetch('http://holidays-app.github.io/db/updatedHolidays.json');
-      updatedHolidays = await updatedHolidays.json();
-
-      if (updatedHolidaysOnDevise != JSON.stringify(updatedHolidays)){
-        await AsyncStorage.setItem('updatedHolidays', JSON.stringify(updatedHolidays));
-      }
-    }
     var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
-    if (updatedHolidays == null){
-      await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
+
+    if ((await NetInfo.fetch()).isInternetReachable) {
+
+      var updatedHolidaysFromNet = await fetch('http://holidays-app.github.io/db/updatedHolidays.json');
+      updatedHolidaysFromNet = JSON.stringify(await updatedHolidaysFromNet.json());
+
+      if (updatedHolidays != updatedHolidaysFromNet){
+        updatedHolidays = updatedHolidaysFromNet;
+        await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
+      }
+
+    } else {
+
+      if (updatedHolidays == null){
+        updatedHolidays = [];
+        await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
+      }
+
     }
   } catch (e) {console.log('ERROR: '+e)}
+
+  var defaultHolidays = resurces.defaultHolidays;
+  var customHolidays = JSON.parse(customHolidays);
+  var updatedHolidays = JSON.parse(updatedHolidays);
+
+  var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
+  return(holidaysList);
 };
 
 async function setNotifications(){
@@ -153,17 +161,9 @@ async function setNotifications(){
 
     await Permissions.askAsync(Permissions.NOTIFICATIONS);
 
-    await loadHolidays();
+    var holidaysList =  await holidaysPromise;
 
-    var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
-    var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
-    var updatedHolidays = JSON.parse(await AsyncStorage.getItem('updatedHolidays'));
-
-    var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
-
-    await loadLanguage();
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    var language = await languagePromise;
 
     for (let i = 0; i < holidaysList.length; i++){
 
@@ -200,6 +200,17 @@ async function setNotifications(){
 
   } catch (e) {console.log('ERROR: '+e)}
 }
+
+var languagePromise = new Promise(async (resolve, reject) => {
+  language = await loadLanguage();
+  resolve(language);
+})
+
+var holidaysPromise = new Promise(async (resolve, reject) => {
+  holidaysList = await loadHolidays();
+  resolve(holidaysList);
+})
+
 
 const styles = StyleSheet.create({
     container: {
@@ -322,27 +333,21 @@ class holidaysListScreen extends React.Component {
   }
   async componentDidMount() {
     this.setState({refreshing: true});
-    await loadHolidays();
 
-    var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
-    var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
-    var updatedHolidays = JSON.parse(await AsyncStorage.getItem('updatedHolidays'));
-
-    var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
+    var holidaysList = await holidaysPromise;
 
     var holidaysListScreen = this;
     if(this.props.route.params != null){
       if(this.props.route.params.category != null){
-        holidaysList = sortByDate(holidaysList.filter(function(holiday) {
+        holidaysList = holidaysList.filter(function(holiday) {
           return (holiday.category == holidaysListScreen.props.route.params.category);
-        }));
+        });
       }
-    } else {
-      holidaysList = sortByDate(holidaysList);
     }
 
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    holidaysList = sortByDate(holidaysList);
+
+    var language = await languagePromise;
 
     this.setState({holidaysList: holidaysList, language: language, refreshing: false});
   }
@@ -352,7 +357,7 @@ class holidaysListScreen extends React.Component {
       <FlatList
           data={this.state.holidaysList}
           renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => this.openHolidayScreen(item.en.name)}>
+          <TouchableWithoutFeedback onPress={() => this.openHolidayScreen(item.en.name)}>
             <View
               style={
                 Object.assign({},
@@ -370,7 +375,7 @@ class holidaysListScreen extends React.Component {
               <Text style={styles.holidayDate}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.angleRight}/>
             </View>
-          </TouchableOpacity>
+          </TouchableWithoutFeedback>
           )}
           refreshControl={
             <RefreshControl
@@ -386,11 +391,24 @@ class holidaysListScreen extends React.Component {
   async refresh(){
     this.setState({refreshing: true});
 
-    var customHolidays = JSON.parse(await AsyncStorage.getItem('customHolidays'));
-    var defaultHolidays = JSON.parse(await AsyncStorage.getItem('defaultHolidays'));
-    var updatedHolidays = JSON.parse(await AsyncStorage.getItem('updatedHolidays'));
+    holidaysPromise = new Promise(async (resolve, reject) => {
+      holidaysList = await loadHolidays();
+      resolve(holidaysList);
+    });
 
-    var holidaysList = sortByDate((defaultHolidays.concat(customHolidays)).concat(updatedHolidays));
+    var holidaysList = await holidaysPromise;
+
+    var holidaysListScreen = this;
+    if(this.props.route.params != null){
+      if(this.props.route.params.category != null){
+        holidaysList = holidaysList.filter(function(holiday) {
+          return (holiday.category == holidaysListScreen.props.route.params.category);
+        });
+      }
+    }
+
+    holidaysList = sortByDate(holidaysList);
+
     this.setState({holidaysList: holidaysList,refreshing: false});
   }
   openHolidayScreen(name) {
@@ -410,9 +428,7 @@ class holidayScreen extends React.Component {
     this.state = { language: 'en' };
   }
   async componentDidMount() {
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
-
+    var language = await languagePromise;
     this.setState({ language: language });
   }
   render() {
@@ -428,7 +444,7 @@ class holidayScreen extends React.Component {
   }
 }
 
-class categoriesHolidays extends React.Component {
+class categoriesScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = { categoriesHolidaysList: [], language: 'en' }
@@ -439,8 +455,7 @@ class categoriesHolidays extends React.Component {
       categories.push(key);
     };
 
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
+    var language = await languagePromise;
 
     this.setState({ language: language, categoriesHolidaysList: categories });
   }
@@ -450,7 +465,7 @@ class categoriesHolidays extends React.Component {
         <FlatList
           data={this.state.categoriesHolidaysList}
           renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => this.openСategoryHolidayScreen(item)}>
+          <TouchableWithoutFeedback onPress={() => this.openСategoryHolidayScreen(item)}>
             <View style={Object.assign({},
                           styles.item,
                           this.state.categoriesHolidaysList.indexOf(item)==0?
@@ -461,7 +476,7 @@ class categoriesHolidays extends React.Component {
               <Text style={styles.name}>{dictinory[this.state.language].categories[item]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesHolidaysAngleRight}/>
             </View>
-          </TouchableOpacity>
+          </TouchableWithoutFeedback>
           )}
         />
       </View>
@@ -469,7 +484,7 @@ class categoriesHolidays extends React.Component {
   }
   openСategoryHolidayScreen(category) {
     let parameters = {category: category};
-    this.props.navigation.navigate('categoryHolidaysScreen', parameters);
+    this.props.navigation.navigate('categoryScreen', parameters);
   }
 }
 
@@ -479,31 +494,29 @@ class settingsScreen extends React.Component {
     this.state = { language: 'en' };
   }
   async componentDidMount() {
-    var language = await AsyncStorage.getItem('language');
-    language = language=='ru'||language=='ruByDevice'?'ru':'en';
-
+    var language = await languagePromise;
     this.setState({ language: language });
   }
   render() {
     return(
       <View style={styles.container}>
         <View style={Object.assign({}, styles.item, {borderBottomWidth: 1.5, height:60, borderTopWidth: 1.5, borderColor: '#d6d7da', top: "30%"})}>
-          <TouchableOpacity onPress={() => this.openSettingsLanguageScreen()}>
+          <TouchableWithoutFeedback onPress={() => this.openSettingsLanguageScreen()}>
             <View>
-              <Text style={styles.settingsScreenSectionName}>{dictinory[this.state.language].settings.languageButtonText}</Text>
+              <Text style={styles.settingsScreenSectionName}>{dictinory[this.state.language].settingsScreen.languageButtonText}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={60} iconStyle={styles.settingsScreenAngleRight}/>
             </View>
-          </TouchableOpacity>
+          </TouchableWithoutFeedback>
         </View>
       </View>
     )
   }
   openSettingsLanguageScreen() {
-    this.props.navigation.navigate('settingsLanguageScreen', {title: dictinory[this.state.language].settingsLanguage.title});
+    this.props.navigation.navigate('settingsScreen_Language', {title: dictinory[this.state.language].settingsScreen_Language.title});
   }
 }
 
-class settingsLanguageScreen extends React.Component {
+class settingsScreen_Language extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -515,13 +528,14 @@ class settingsLanguageScreen extends React.Component {
     }
   }
   async componentDidMount() {
-    var selectedLanguage = await AsyncStorage.getItem('language');
-    var selectedLanguage = selectedLanguage=='ru'||selectedLanguage=='ruByDevice'?'ru':'en';
+    var selectedLanguage = await languagePromise;
+    var thisComponent = this;
+
     this.setState({
       enFlagIcon: selectedLanguage=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag,
       ruFlagIcon: selectedLanguage=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
-      warningMessageText: dictinory[selectedLanguage].settingsLanguage.warningMessageText,
-      buttonText: dictinory[selectedLanguage].settingsLanguage.applyButtonText,
+      warningMessageText: dictinory[selectedLanguage].settingsScreen_Language.warningMessageText,
+      buttonText: dictinory[selectedLanguage].settingsScreen_Language.applyButtonText,
       language: selectedLanguage
     })
   }
@@ -554,13 +568,13 @@ class settingsLanguageScreen extends React.Component {
     )
   }
   changeLocalLanguage(language){
-    this.props.navigation.setOptions({ title: dictinory[language].settingsLanguage.title });
+    this.props.navigation.setOptions({ title: dictinory[language].settingsScreen_Language.title });
     this.setState({
       language: language,
       enFlagIcon: language=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag,
       ruFlagIcon: language=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
-      warningMessageText: dictinory[language].settingsLanguage.warningMessageText,
-      buttonText: dictinory[language].settingsLanguage.applyButtonText,
+      warningMessageText: dictinory[language].settingsScreen_Language.warningMessageText,
+      buttonText: dictinory[language].settingsScreen_Language.applyButtonText,
     })
   }
   async apply(){
@@ -578,22 +592,18 @@ class firstScreen extends React.Component {
     this.state = { language: '' };
   }
   componentDidMount() {
-    InteractionManager.runAfterInteractions(async () => {
-      await loadLanguage();
-      language = await AsyncStorage.getItem('language');
-      language = language=='ru'||language=='ruByDevice'?'ru':'en';
-      this.setState({language: language });
-    })
+      var thisComponent = this;
+      languagePromise.then((language) => {thisComponent.setState({language: language });});
   }
   render() {
     return(
       <Stack.Navigator>
       <Stack.Screen
-        name="upcomingHolidays"
+        name="upcomingHolidaysScreen"
         component={holidaysListScreen}
         options={{
           headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-          title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidays.title,
+          title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidaysScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -604,7 +614,7 @@ class firstScreen extends React.Component {
         component={holidayScreen}
         options={{
           headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-          title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidays.title,
+          title: this.state.language==''?'':dictinory[this.state.language].holidayScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -620,28 +630,26 @@ class secondScreen extends React.Component {
     super(props);
     this.state = { language: '' };
   }
-  async componentDidMount() {
-      await loadLanguage();
-      language = await AsyncStorage.getItem('language');
-      language = language=='ru'||language=='ruByDevice'?'ru':'en';
-      this.setState({language: language });
+  componentDidMount() {
+    var thisComponent = this;
+    languagePromise.then((language) => {thisComponent.setState({language: language });});
   }
   render() {
     return(
       <Stack.Navigator>
         <Stack.Screen
-          name="categoriesHolidays"
-          component={categoriesHolidays}
+          name="categoriesScreen"
+          component={categoriesScreen}
           options={{
             headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-            title: this.state.language==''?'':dictinory[this.state.language].categoriesHolidays.title,
+            title: this.state.language==''?'':dictinory[this.state.language].categoriesScreen.title,
             headerTitleStyle: {
               fontSize: 21,
             },
           }}
         />
         <Stack.Screen
-          name="categoryHolidaysScreen"
+          name="categoryScreen"
           component={holidaysListScreen}
           options={({ route }) => ({
             headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
@@ -656,7 +664,7 @@ class secondScreen extends React.Component {
           component={holidayScreen}
           options={{
             headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-            title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidays.title,
+            title: this.state.language==''?'':dictinory[this.state.language].holidayScreen.title,
             headerTitleStyle: {
               fontSize: 21,
             },
@@ -672,11 +680,9 @@ class thirdScreen extends React.Component {
     super(props);
     this.state = { language: '' };
   }
-  async componentDidMount() {
-      await loadLanguage();
-      language = await AsyncStorage.getItem('language');
-      language = language=='ru'||language=='ruByDevice'?'ru':'en';
-      this.setState({language: language });
+  componentDidMount() {
+    var thisComponent = this;
+    languagePromise.then((language) => {thisComponent.setState({language: language });});
   }
   render() {
     return(
@@ -686,18 +692,18 @@ class thirdScreen extends React.Component {
         component={settingsScreen}
         options={{
           headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-          title: this.state.language==''?'':dictinory[this.state.language].settings.title,
+          title: this.state.language==''?'':dictinory[this.state.language].settingsScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
         }}
       />
       <Stack.Screen
-        name="settingsLanguageScreen"
-        component={settingsLanguageScreen}
+        name="settingsScreen_Language"
+        component={settingsScreen_Language}
         options={{
           headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-          title: this.state.language==''?'':dictinory[this.state.language].settingsLanguage.title,
+          title: this.state.language==''?'':dictinory[this.state.language].settingsScreen_Language.title,
           headerTitleStyle: {
             fontSize: 21,
           },
