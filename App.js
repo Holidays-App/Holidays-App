@@ -5,7 +5,7 @@ import {
   View,
   Image,
   TouchableOpacity,
-  TouchableWithoutFeedback,
+  TouchableNativeFeedback,
   ScrollView,
   AsyncStorage,
   FlatList,
@@ -35,7 +35,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
@@ -45,6 +44,7 @@ const resurces = {
   russiaFlag: require('./assets/textures/russiaFlag.png'),
   russiaFlagSelect: require('./assets/textures/russiaFlagSelect.png'),
   applyButton: require('./assets/textures/applyButton.png'),
+
   defaultHolidays: require('./assets/db/defaultHolidays.json'),
   dictinory: require('./assets/db/dictinory.json'),
 };
@@ -68,10 +68,21 @@ const dictinory = resurces.dictinory;
         );*/
 //////// test
 
+function fetchTimeLimit(url, limit=1500){
+  return(new Promise(async (resolve, reject) => {
+    fetch(url).then((response) => {
+      resolve(response)
+    })
+    setTimeout(() => {
+      resolve(null)
+    }, limit)
+  }))
+}
+
 function sortByDate(holidaysList) {
   const date = new Date();
-  let holidayListL = holidaysList;
-  holidayListL.sort((a, b) => (
+  let holidaysListLocal = holidaysList;
+  holidaysListLocal.sort((a, b) => (
            ((a.date.month < (date.getMonth()+1)) || (a.date.month == (date.getMonth()+1) && a.date.day < date.getDate())?
            ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100)+12.5
            :
@@ -82,13 +93,13 @@ function sortByDate(holidaysList) {
            :
            ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100))
            ? 1 : -1));
-  return holidayListL;
+  return holidaysListLocal;
 }
 
 async function loadLanguage(){
   try {
     var language = await AsyncStorage.getItem('language');
-    if (language == null){
+    if (!language){
       let deviceLanguage =
           Platform.OS === 'ios'
             ? NativeModules.SettingsManager.settings.AppleLocale ||
@@ -103,7 +114,7 @@ async function loadLanguage(){
 async function loadHolidays(){
   try {
     var customHolidays = await AsyncStorage.getItem('customHolidays');
-    if (customHolidays == null){
+    if (!customHolidays){
       customHolidays = [];
       await AsyncStorage.setItem('customHolidays', JSON.stringify([]));
     }
@@ -111,26 +122,20 @@ async function loadHolidays(){
 
   try {
     var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
-
-    if ((await NetInfo.fetch()).isInternetReachable) {
-
-      var updatedHolidaysFromNet = await fetch('http://holidays-app.github.io/db/updatedHolidays.json');
-      updatedHolidaysFromNet = JSON.stringify(await updatedHolidaysFromNet.json());
-
-      if (updatedHolidays != updatedHolidaysFromNet){
-        updatedHolidays = updatedHolidaysFromNet;
-        await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
+    var updatedHolidaysFromNet = await fetchTimeLimit('http://holidays-app.github.io/db/updatedHolidays.json');
+      if (updatedHolidaysFromNet) {
+        updatedHolidaysFromNet = JSON.stringify(await updatedHolidaysFromNet.json());
+        if (updatedHolidays != updatedHolidaysFromNet){
+          updatedHolidays = updatedHolidaysFromNet;
+          await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
+        }
+      } else {
+        if (!updatedHolidays){
+          updatedHolidays = [];
+          await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
+        }
       }
-
-    } else {
-
-      if (updatedHolidays == null){
-        updatedHolidays = [];
-        await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
-      }
-
-    }
-  } catch (e) {console.log('ERROR: '+e)}
+    } catch (e) {console.log('ERROR: '+e)}
 
   var defaultHolidays = resurces.defaultHolidays;
   var customHolidays = JSON.parse(customHolidays);
@@ -145,7 +150,7 @@ async function setNotifications(){
   try {
     var notificationsList = await AsyncStorage.getItem('notificationsList');
 
-    if (notificationsList == null){
+    if (!notificationsList){
       await AsyncStorage.setItem('notificationsList', JSON.stringify([]));
       notificationsList = [];
     } else {
@@ -167,6 +172,8 @@ async function setNotifications(){
 
     for (let i = 0; i < holidaysList.length; i++){
 
+      if (!holidaysList[i].notify) continue
+
       var notificationDate;
       if ((holidaysList[i].date.day/100+holidaysList[i].date.month)>((date.getMonth()+1)+date.getDate()/100)) {
         notificationDate = (new Date(date.getFullYear(), holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
@@ -182,7 +189,7 @@ async function setNotifications(){
       var includesFunc = function(element){return(JSON.stringify(element) == JSON.stringify(notification))};
 
       if (!notificationsList.some(includesFunc)) {
-        console.log(notification);
+
         await Notifications.scheduleLocalNotificationAsync(
           {
             title: holidaysList[i][language].name,
@@ -337,8 +344,8 @@ class holidaysListScreen extends React.Component {
     var holidaysList = await holidaysPromise;
 
     var holidaysListScreen = this;
-    if(this.props.route.params != null){
-      if(this.props.route.params.category != null){
+    if(this.props.route.params){
+      if(this.props.route.params.category){
         holidaysList = holidaysList.filter(function(holiday) {
           return (holiday.category == holidaysListScreen.props.route.params.category);
         });
@@ -357,7 +364,7 @@ class holidaysListScreen extends React.Component {
       <FlatList
           data={this.state.holidaysList}
           renderItem={({ item }) => (
-          <TouchableWithoutFeedback onPress={() => this.openHolidayScreen(item.en.name)}>
+          <TouchableNativeFeedback onPress={() => this.openHolidayScreen(item.en.name)}>
             <View
               style={
                 Object.assign({},
@@ -375,7 +382,7 @@ class holidaysListScreen extends React.Component {
               <Text style={styles.holidayDate}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.angleRight}/>
             </View>
-          </TouchableWithoutFeedback>
+          </TouchableNativeFeedback>
           )}
           refreshControl={
             <RefreshControl
@@ -399,8 +406,8 @@ class holidaysListScreen extends React.Component {
     var holidaysList = await holidaysPromise;
 
     var holidaysListScreen = this;
-    if(this.props.route.params != null){
-      if(this.props.route.params.category != null){
+    if(this.props.route.params){
+      if(this.props.route.params.category){
         holidaysList = holidaysList.filter(function(holiday) {
           return (holiday.category == holidaysListScreen.props.route.params.category);
         });
@@ -465,7 +472,7 @@ class categoriesScreen extends React.Component {
         <FlatList
           data={this.state.categoriesHolidaysList}
           renderItem={({ item }) => (
-          <TouchableWithoutFeedback onPress={() => this.openСategoryHolidayScreen(item)}>
+          <TouchableNativeFeedback onPress={() => this.openСategoryHolidayScreen(item)}>
             <View style={Object.assign({},
                           styles.item,
                           this.state.categoriesHolidaysList.indexOf(item)==0?
@@ -476,7 +483,7 @@ class categoriesScreen extends React.Component {
               <Text style={styles.name}>{dictinory[this.state.language].categories[item]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesHolidaysAngleRight}/>
             </View>
-          </TouchableWithoutFeedback>
+          </TouchableNativeFeedback>
           )}
         />
       </View>
@@ -501,12 +508,12 @@ class settingsScreen extends React.Component {
     return(
       <View style={styles.container}>
         <View style={Object.assign({}, styles.item, {borderBottomWidth: 1.5, height:60, borderTopWidth: 1.5, borderColor: '#d6d7da', top: "30%"})}>
-          <TouchableWithoutFeedback onPress={() => this.openSettingsLanguageScreen()}>
+          <TouchableNativeFeedback onPress={() => this.openSettingsLanguageScreen()}>
             <View>
               <Text style={styles.settingsScreenSectionName}>{dictinory[this.state.language].settingsScreen.languageButtonText}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={60} iconStyle={styles.settingsScreenAngleRight}/>
             </View>
-          </TouchableWithoutFeedback>
+          </TouchableNativeFeedback>
         </View>
       </View>
     )
