@@ -79,28 +79,49 @@ function fetchTimeLimit(url, limit=1500){
   }))
 }
 
-function sortByDate(holidaysList) {
+function sortByDateAndCategory(holidaysList){
   const date = new Date();
-  let holidaysListLocal = holidaysList;
-  holidaysListLocal.sort((a, b) => (
-           ((a.date.month < (date.getMonth()+1)) || (a.date.month == (date.getMonth()+1) && a.date.day < date.getDate())?
-           ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100)+12.5
-           :
-           ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100))
-           >
-           ((b.date.month < (date.getMonth()+1)) || (b.date.month == (date.getMonth()+1) && b.date.day < date.getDate())?
-           ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100)+12.5
-           :
-           ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100))
-           ? 1 : -1));
+  const categoriesList = [];
+  for (var category in dictinory.en.categories){
+    categoriesList.push(category)
+  }
+
+  var holidaysListLocal = holidaysList;
+
+  holidaysListLocal.sort((a, b) => {
+    var aDate = ((a.date.month < (date.getMonth()+1)) || (a.date.month == (date.getMonth()+1) && a.date.day < date.getDate())?
+            ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100)+12.5
+            :
+            ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100))
+
+    var bDate = ((b.date.month < (date.getMonth()+1)) || (b.date.month == (date.getMonth()+1) && b.date.day < date.getDate())?
+            ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100)+12.5
+            :
+            ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100))
+
+    if(aDate < bDate){
+      return -1;
+    } else if(aDate > bDate){
+      return 1
+    } else if(aDate == bDate){
+      if(categoriesList.indexOf(a.category) < categoriesList.indexOf(b.category)){
+        return -1;
+      } else if(categoriesList.indexOf(a.category) > categoriesList.indexOf(b.category)){
+        return 1;
+      } else if(categoriesList.indexOf(a.category) == categoriesList.indexOf(b.category)){
+        return 0;
+      }
+    }
+  })
+
   return holidaysListLocal;
 }
 
 async function loadLanguage(){
   try {
     var language = await AsyncStorage.getItem('language');
-    if (!language){
-      let deviceLanguage =
+    if (language == null){
+      var deviceLanguage =
           Platform.OS === 'ios'
             ? NativeModules.SettingsManager.settings.AppleLocale ||
               NativeModules.SettingsManager.settings.AppleLanguages[0] // iOS 13
@@ -114,7 +135,7 @@ async function loadLanguage(){
 async function loadHolidays(){
   try {
     var customHolidays = await AsyncStorage.getItem('customHolidays');
-    if (!customHolidays){
+    if (customHolidays == null){
       customHolidays = [];
       await AsyncStorage.setItem('customHolidays', JSON.stringify([]));
     }
@@ -130,7 +151,7 @@ async function loadHolidays(){
           await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
         }
       } else {
-        if (!updatedHolidays){
+        if (updatedHolidays == null){
           updatedHolidays = [];
           await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
         }
@@ -150,14 +171,14 @@ async function setNotifications(){
   try {
     var notificationsList = await AsyncStorage.getItem('notificationsList');
 
-    if (!notificationsList){
+    if (notificationsList == null){
       await AsyncStorage.setItem('notificationsList', JSON.stringify([]));
       notificationsList = [];
     } else {
       notificationsList = JSON.parse(notificationsList);
     }
 
-    for (let i = 0; i < notificationsList.length; i++) {
+    for (var i = 0; i < notificationsList.length; i++) {
       if (date.getTime()>=notificationsList[i].date) {
         notificationsList.splice(i, 1);
         i--;
@@ -170,7 +191,7 @@ async function setNotifications(){
 
     var language = await languagePromise;
 
-    for (let i = 0; i < holidaysList.length; i++){
+    for (var i = 0; i < holidaysList.length; i++){
 
       if (!holidaysList[i].notify) continue
 
@@ -344,15 +365,15 @@ class holidaysListScreen extends React.Component {
     var holidaysList = await holidaysPromise;
 
     var holidaysListScreen = this;
-    if(this.props.route.params){
-      if(this.props.route.params.category){
+    if(this.props.route.params != null){
+      if(this.props.route.params.category != null){
         holidaysList = holidaysList.filter(function(holiday) {
           return (holiday.category == holidaysListScreen.props.route.params.category);
         });
       }
     }
 
-    holidaysList = sortByDate(holidaysList);
+    holidaysList = sortByDateAndCategory(holidaysList);
 
     var language = await languagePromise;
 
@@ -365,19 +386,7 @@ class holidaysListScreen extends React.Component {
           data={this.state.holidaysList}
           renderItem={({ item }) => (
           <TouchableNativeFeedback onPress={() => this.openHolidayScreen(item.en.name)}>
-            <View
-              style={
-                Object.assign({},
-                              styles.item,
-                              (item.date.day == (new Date()).getDate() && item.date.month == ((new Date()).getMonth()+1)) ?
-                              {borderColor: '#f7941d', borderWidth: 3}
-                              :
-                              (this.state.holidaysList.indexOf(item)==0?
-                                {}
-                                :
-                                {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10})
-                            )
-            }>
+            <View style={Object.assign({}, styles.item, this.getBorderStyles(item))}>
               <Text style={styles.name}>{item[this.state.language].name}</Text>
               <Text style={styles.holidayDate}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
               <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.angleRight}/>
@@ -395,6 +404,24 @@ class holidaysListScreen extends React.Component {
       </View>
     )
   }
+  getBorderStyles(item){
+    var BorderStyles = {}
+    if(item.date.day == (new Date()).getDate() && item.date.month == ((new Date()).getMonth()+1)){
+      BorderStyles.borderColor = '#f7941d';
+      BorderStyles.borderWidth = 3;
+      if(this.state.holidaysList.indexOf(item) != 0){
+        BorderStyles.borderTopColor = '#d6d7da';
+        BorderStyles.borderTopWidth = 1.5;
+      }
+      if((this.state.holidaysList[this.state.holidaysList.indexOf(item)+1].date.day == (new Date()).getDate()
+       && this.state.holidaysList[this.state.holidaysList.indexOf(item)+1].date.month == ((new Date()).getMonth()+1))){
+         BorderStyles.borderBottomWidth = 0;
+       }
+    } else if(this.state.holidaysList.indexOf(item) != 0){
+      BorderStyles = {borderTopColor: '#d6d7da', borderTopWidth: 1.5}
+    }
+    return BorderStyles;
+  }
   async refresh(){
     this.setState({refreshing: true});
 
@@ -406,21 +433,21 @@ class holidaysListScreen extends React.Component {
     var holidaysList = await holidaysPromise;
 
     var holidaysListScreen = this;
-    if(this.props.route.params){
-      if(this.props.route.params.category){
+    if(this.props.route.params != null){
+      if(this.props.route.params.category != null){
         holidaysList = holidaysList.filter(function(holiday) {
           return (holiday.category == holidaysListScreen.props.route.params.category);
         });
       }
     }
 
-    holidaysList = sortByDate(holidaysList);
+    holidaysList = sortByDateAndCategory(holidaysList);
 
     this.setState({holidaysList: holidaysList,refreshing: false});
   }
   openHolidayScreen(name) {
-    let parameters = {holiday: {}};
-    for (let i = 0; i < this.state.holidaysList.length; i++) {
+    var parameters = {holiday: {}};
+    for (var i = 0; i < this.state.holidaysList.length; i++) {
       if(name == this.state.holidaysList[i].en.name){
         parameters.holiday = this.state.holidaysList[i];
       }
@@ -458,7 +485,7 @@ class categoriesScreen extends React.Component {
   }
   async componentDidMount() {
     var categories = [];
-    for (let key in dictinory.en.categories) {
+    for (var key in dictinory.en.categories) {
       categories.push(key);
     };
 
@@ -490,7 +517,7 @@ class categoriesScreen extends React.Component {
     )
   }
   openСategoryHolidayScreen(category) {
-    let parameters = {category: category};
+    var parameters = {category: category};
     this.props.navigation.navigate('categoryScreen', parameters);
   }
 }
