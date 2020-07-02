@@ -51,23 +51,6 @@ const resurces = {
 
 const dictinory = resurces.dictinory;
 
-///////test
-/*const localNotification = {
-            title: 'done',
-            body: 'done!'
-        };*/
-
-/*const schedulingOptions = {
-            time: (new Date()).getTime() + 5000
-        }*/
-
-// Notifications show only when app is not active.
-// (ie. another app being used or device's screen is locked)
-/*Notifications.scheduleLocalNotificationAsync(
-            localNotification, schedulingOptions
-        );*/
-//////// test
-
 function fetchTimeLimit(url, limit=1500){
   return(new Promise(async (resolve, reject) => {
     fetch(url).then((response) => {
@@ -77,7 +60,7 @@ function fetchTimeLimit(url, limit=1500){
       resolve(null)
     }, limit)
   }))
-}
+};
 
 function sortByDateAndCategory(holidaysList){
   const date = new Date();
@@ -115,10 +98,16 @@ function sortByDateAndCategory(holidaysList){
   })
 
   return holidaysListLocal;
-}
+};
+
+async function checkLanguage(){
+   var language = await languagePromise;
+   if(this.state.language != language){
+     this.setState({language: language})
+   }
+};
 
 async function loadLanguage(){
-  try {
     var language = await AsyncStorage.getItem('language');
     if (language == null){
       var deviceLanguage =
@@ -129,34 +118,32 @@ async function loadLanguage(){
       language = (deviceLanguage=='ru_RU'?'ru':'en')
     }
     return(language);
-  } catch (e) {console.log('ERROR: '+e)}
 };
 
 async function loadHolidays(){
-  try {
-    var customHolidays = await AsyncStorage.getItem('customHolidays');
-    if (customHolidays == null){
+
+   var customHolidays = await AsyncStorage.getItem('customHolidays');
+
+   if(customHolidays == null){
       customHolidays = [];
       await AsyncStorage.setItem('customHolidays', JSON.stringify([]));
-    }
-  } catch (e) {console.log('ERROR: '+e)}
+   }
 
-  try {
-    var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
-    var updatedHolidaysFromNet = await fetchTimeLimit('http://holidays-app.github.io/db/updatedHolidays.json');
-      if (updatedHolidaysFromNet) {
-        updatedHolidaysFromNet = JSON.stringify(await updatedHolidaysFromNet.json());
-        if (updatedHolidays != updatedHolidaysFromNet){
-          updatedHolidays = updatedHolidaysFromNet;
-          await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
-        }
-      } else {
-        if (updatedHolidays == null){
-          updatedHolidays = [];
-          await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
-        }
+   var updatedHolidays = await AsyncStorage.getItem('updatedHolidays');
+   var updatedHolidaysFromNet = await fetchTimeLimit('http://holidays-app.github.io/db/updatedHolidays.json');
+
+   if (updatedHolidaysFromNet != null) {
+      updatedHolidaysFromNet = JSON.stringify(await updatedHolidaysFromNet.json());
+
+      if (updatedHolidays != updatedHolidaysFromNet){
+         updatedHolidays = updatedHolidaysFromNet;
+         await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
       }
-    } catch (e) {console.log('ERROR: '+e)}
+
+   } else if(updatedHolidays == null){
+      updatedHolidays = [];
+      await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
+   }
 
   var defaultHolidays = resurces.defaultHolidays;
   var customHolidays = JSON.parse(customHolidays);
@@ -168,7 +155,6 @@ async function loadHolidays(){
 
 async function setNotifications(){
   const date = new Date();
-  try {
     var notificationsList = await AsyncStorage.getItem('notificationsList');
 
     if (notificationsList == null){
@@ -193,7 +179,7 @@ async function setNotifications(){
 
     for (var i = 0; i < holidaysList.length; i++){
 
-      if (!holidaysList[i].notify) continue
+      if (!holidaysList[i].notify || holidaysList[i][language].message == '') continue
 
       var notificationDate;
       if ((holidaysList[i].date.day/100+holidaysList[i].date.month)>((date.getMonth()+1)+date.getDate()/100)) {
@@ -207,9 +193,7 @@ async function setNotifications(){
         date: notificationDate
       }
 
-      var includesFunc = function(element){return(JSON.stringify(element) == JSON.stringify(notification))};
-
-      if (!notificationsList.some(includesFunc)) {
+      if (!notificationsList.some((element) => {return(JSON.stringify(element) == JSON.stringify(notification))})) {
 
         await Notifications.scheduleLocalNotificationAsync(
           {
@@ -225,29 +209,27 @@ async function setNotifications(){
         await AsyncStorage.setItem('notificationsList', JSON.stringify(notificationsList));
       }
     }
-
-  } catch (e) {console.log('ERROR: '+e)}
-}
+};
 
 var languagePromise = new Promise(async (resolve, reject) => {
   language = await loadLanguage();
   resolve(language);
-})
+});
 
 var holidaysPromise = new Promise(async (resolve, reject) => {
   holidaysList = await loadHolidays();
   resolve(holidaysList);
-})
+});
 
 
-const styles = StyleSheet.create({
+const styles = {
     container: {
       flex: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
       backgroundColor: '#FFFFFF',
     },
-    item: {
+    listItem: {
       flex: 1,
       width: '100%',
       height: 80,
@@ -255,121 +237,103 @@ const styles = StyleSheet.create({
       paddingRight: "4%",
       paddingLeft: "3%"
     },
-    categoryItem: {
-      flex: 1,
-      width: '100%',
-      height: 80,
-      justifyContent: 'center',
-      paddingRight: "4%",
-      paddingLeft: "3%",
-      borderTopColor: '#d6d7da',
-      borderTopWidth: 1.5,
+    holidaysListScreen: {
+      date: {
+        fontSize: 16,
+        top: "50%",
+        color: '#666666',
+      },
+      name: {
+        fontSize: 19,
+        top: "50%",
+      },
+      angleRight: {
+        right: "-45%",
+        top: "-35%",
+      },
     },
-    holidayDate: {
-      fontSize: 16,
-      top: "50%",
-      color: '#666666',
+    categoriesScreen: {
+      angleRight: {
+        right: "-45%",
+        top: "-20%",
+      },
+      name: {
+        fontSize: 19,
+        top: "50%",
+      }
     },
-    holidayScreenHolidayDate: {
-      fontSize: 22,
-      top: 20,
-      left: "4%",
-      color: "#666666",
+    holidayScreen: {
+      name: {
+        fontSize: 26,
+        top: 10,
+      },
+      date: {
+        fontSize: 22,
+        top: 20,
+        left: "4%",
+        color: "#666666",
+      },
+      description: {
+        fontSize: 19,
+        top: 35,
+      },
+      View: {
+        paddingLeft: "3%",
+        paddingRight: "3%",
+        flex: 1,
+        backgroundColor: '#FFFFFF'
+      },
+      ScrollView: {
+        paddingBottom: 60,
+      }
     },
-    name: {
-      fontSize: 19,
-      top: "50%",
+    settingsScreen: {
+      angleRight: {
+        right: "-45%",
+        top: "-25%",
+      },
+      sectionName: {
+        fontSize: 19,
+        top: "33%",
+      }
     },
-    holidayScreenName: {
-      fontSize: 26,
-      top: 10,
-    },
-    angleRight: {
-      right: "-45%",
-      top: "-35%",
-    },
-    holidayDescription: {
-      fontSize: 19,
-      top: 35,
-    },
-    holidayScreenView: {
-      paddingLeft: "3%",
-      paddingRight: "3%",
-      flex: 1,
-      backgroundColor: '#FFFFFF'
-    },
-    holidayScreenScrollView: {
-      paddingBottom: 60,
-    },
-    categoriesHolidaysAngleRight: {
-      right: "-45%",
-      top: "-20%",
-    },
-    settingsScreenAngleRight: {
-      right: "-45%",
-      top: "-25%",
-    },
-    settingsScreenSectionName: {
-      fontSize: 19,
-      top: "33%",
-    },
-    russiaFlagButton: {
-      left: screenWidth/5,
-      top: screenWidth/5,
-      position: 'absolute',
-    },
-    unitedStatesFlagButton: {
-      left: screenWidth/5*3,
-      top: screenWidth/5,
-      position: 'absolute',
-    },
-    FlagImage: {
-      width: screenWidth/5,
-      height: screenWidth/5,
-    },
-    warningMessage: {
-      fontSize: 16,
-      top: '50%',
-      left: '10%',
-      width: '80%',
-      textAlign: 'center',
-      color: '#666666',
-      position: 'absolute',
-    },
-    applyButton: {
-      left: '12.5%',
-      bottom: "0%",
-      alignItems: "center",
-      position: 'absolute',
-    },
-    applyButtonImage: {
-      width: screenWidth*0.75,
-      height: screenWidth*0.75*0.13715,
-    },
-    applyButtonText: {
-      fontSize: 19,
-      top: '-50%',
-      textAlign: 'center',
-      color: '#FFFFFF',
-    },
-});
+    settingsScreen_Language: {
+      russiaFlagButton: {
+        left: screenWidth/5,
+        top: screenWidth/5,
+        position: 'absolute',
+      },
+      unitedStatesFlagButton: {
+        left: screenWidth/5*3,
+        top: screenWidth/5,
+        position: 'absolute',
+      },
+      flagImage: {
+        width: screenWidth/5,
+        height: screenWidth/5,
+      }
+   }
+};
+
 
 class holidaysListScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { holidaysList: [], language: 'en', refreshing: false };
+    this.state = { holidaysList: [], refreshing: false, language: 'en' };
   }
   async componentDidMount() {
     this.setState({refreshing: true});
+
+    this.props.navigation.addListener('focus', checkLanguage.bind(this));
 
     var holidaysList = await holidaysPromise;
 
     var holidaysListScreen = this;
     if(this.props.route.params != null){
       if(this.props.route.params.category != null){
-        holidaysList = holidaysList.filter(function(holiday) {
-          return (holiday.category == holidaysListScreen.props.route.params.category);
-        });
+        holidaysList = holidaysList.filter((holiday) => {
+          return (holiday.category == holidaysListScreen.props.route.params.category)
+        })
       }
     }
 
@@ -377,7 +341,7 @@ class holidaysListScreen extends React.Component {
 
     var language = await languagePromise;
 
-    this.setState({holidaysList: holidaysList, language: language, refreshing: false});
+    this.setState({holidaysList: holidaysList, refreshing: false, language: language});
   }
   render() {
     return(
@@ -386,10 +350,10 @@ class holidaysListScreen extends React.Component {
           data={this.state.holidaysList}
           renderItem={({ item }) => (
           <TouchableNativeFeedback onPress={() => this.openHolidayScreen(item.en.name)}>
-            <View style={Object.assign({}, styles.item, this.getBorderStyles(item))}>
-              <Text style={styles.name}>{item[this.state.language].name}</Text>
-              <Text style={styles.holidayDate}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
-              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.angleRight}/>
+            <View style={Object.assign({}, styles.listItem, this.getBorderStyles(item))}>
+              <Text style={styles.holidaysListScreen.name}>{item[this.state.language].name}</Text>
+              <Text style={styles.holidaysListScreen.date}>{item.date.day+" "+dictinory[this.state.language].months[item.date.month-1]}</Text>
+              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.holidaysListScreen.angleRight}/>
             </View>
           </TouchableNativeFeedback>
           )}
@@ -403,6 +367,29 @@ class holidaysListScreen extends React.Component {
         />
       </View>
     )
+  }
+  async refresh(){
+    this.setState({refreshing: true});
+
+    holidaysPromise = new Promise(async (resolve, reject) => {
+      holidaysList = await loadHolidays();
+      resolve(holidaysList);
+    });
+
+    var holidaysList = await holidaysPromise;
+
+    var holidaysListScreen = this;
+    if(this.props.route.params != null){
+      if(this.props.route.params.category != null){
+        holidaysList = holidaysList.filter((holiday) => {
+          return (holiday.category == holidaysListScreen.props.route.params.category)
+        })
+      }
+    }
+
+    holidaysList = sortByDateAndCategory(holidaysList);
+
+    this.setState({holidaysList: holidaysList, refreshing: false});
   }
   getBorderStyles(item){
     var BorderStyles = {}
@@ -422,29 +409,6 @@ class holidaysListScreen extends React.Component {
     }
     return BorderStyles;
   }
-  async refresh(){
-    this.setState({refreshing: true});
-
-    holidaysPromise = new Promise(async (resolve, reject) => {
-      holidaysList = await loadHolidays();
-      resolve(holidaysList);
-    });
-
-    var holidaysList = await holidaysPromise;
-
-    var holidaysListScreen = this;
-    if(this.props.route.params != null){
-      if(this.props.route.params.category != null){
-        holidaysList = holidaysList.filter(function(holiday) {
-          return (holiday.category == holidaysListScreen.props.route.params.category);
-        });
-      }
-    }
-
-    holidaysList = sortByDateAndCategory(holidaysList);
-
-    this.setState({holidaysList: holidaysList,refreshing: false});
-  }
   openHolidayScreen(name) {
     var parameters = {holiday: {}};
     for (var i = 0; i < this.state.holidaysList.length; i++) {
@@ -454,7 +418,7 @@ class holidaysListScreen extends React.Component {
     }
     this.props.navigation.navigate('holidayScreen', parameters);
   }
-}
+};
 
 class holidayScreen extends React.Component {
   constructor(props) {
@@ -462,21 +426,23 @@ class holidayScreen extends React.Component {
     this.state = { language: 'en' };
   }
   async componentDidMount() {
+    this.props.navigation.addListener('focus', checkLanguage.bind(this));
+
     var language = await languagePromise;
     this.setState({ language: language });
   }
   render() {
     return(
-        <ScrollView contentContainerStyle={styles.holidayScreenScrollView}>
-          <View style={styles.holidayScreenView}>
-            <Text style={styles.holidayScreenName}>{this.props.route.params.holiday[this.state.language].name}</Text>
-            <Text style={styles.holidayScreenHolidayDate}>{this.props.route.params.holiday.date.day+" "+dictinory[this.state.language].months[this.props.route.params.holiday.date.month-1]}</Text>
-            <Text style={styles.holidayDescription}>{this.props.route.params.holiday[this.state.language].description}</Text>
+        <ScrollView contentContainerStyle={styles.holidayScreen.ScrollView}>
+          <View style={styles.holidayScreen.View}>
+            <Text style={styles.holidayScreen.name}>{this.props.route.params.holiday[this.state.language].name}</Text>
+            <Text style={styles.holidayScreen.date}>{this.props.route.params.holiday.date.day+" "+dictinory[this.state.language].months[this.props.route.params.holiday.date.month-1]}</Text>
+            <Text style={styles.holidayScreen.description}>{this.props.route.params.holiday[this.state.language].description}</Text>
           </View>
         </ScrollView>
     )
   }
-}
+};
 
 class categoriesScreen extends React.Component {
   constructor(props) {
@@ -484,9 +450,14 @@ class categoriesScreen extends React.Component {
     this.state = { categoriesHolidaysList: [], language: 'en' }
   }
   async componentDidMount() {
+    this.props.navigation.addListener('focus', checkLanguage.bind(this));
+
+    var holidaysList = await holidaysPromise;
     var categories = [];
-    for (var key in dictinory.en.categories) {
-      categories.push(key);
+    for (var category in dictinory.en.categories) {
+      if(holidaysList.some((holiday) => (holiday.category == category))) {
+        categories.push(category);
+      };
     };
 
     var language = await languagePromise;
@@ -501,14 +472,14 @@ class categoriesScreen extends React.Component {
           renderItem={({ item }) => (
           <TouchableNativeFeedback onPress={() => this.openСategoryHolidayScreen(item)}>
             <View style={Object.assign({},
-                          styles.item,
+                          styles.listItem,
                           this.state.categoriesHolidaysList.indexOf(item)==0?
                             {}
                             :
                             {borderTopColor: '#d6d7da', borderTopWidth: 1.5, lineHeight: 10}
                         )}>
-              <Text style={styles.name}>{dictinory[this.state.language].categories[item]}</Text>
-              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesHolidaysAngleRight}/>
+              <Text style={styles.categoriesScreen.name}>{dictinory[this.state.language].categories[item]}</Text>
+              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={80} iconStyle={styles.categoriesScreen.angleRight}/>
             </View>
           </TouchableNativeFeedback>
           )}
@@ -520,153 +491,147 @@ class categoriesScreen extends React.Component {
     var parameters = {category: category};
     this.props.navigation.navigate('categoryScreen', parameters);
   }
-}
+};
 
 class settingsScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: 'en' };
+    this.state = { language: 'en' }
   }
   async componentDidMount() {
-    var language = await languagePromise;
-    this.setState({ language: language });
+     this.props.navigation.addListener('focus', this.checkLanguage.bind(this));
+
+     var language = await languagePromise;
+     this.setState({ language: language })
   }
   render() {
     return(
       <View style={styles.container}>
-        <View style={Object.assign({}, styles.item, {borderBottomWidth: 1.5, height:60, borderTopWidth: 1.5, borderColor: '#d6d7da', top: "30%"})}>
+        <View style={Object.assign({}, styles.listItem, {borderBottomWidth: 1.5, height:60, borderTopWidth: 1.5, borderColor: '#d6d7da', top: "30%"})}>
           <TouchableNativeFeedback onPress={() => this.openSettingsLanguageScreen()}>
             <View>
-              <Text style={styles.settingsScreenSectionName}>{dictinory[this.state.language].settingsScreen.languageButtonText}</Text>
-              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={60} iconStyle={styles.settingsScreenAngleRight}/>
+              <Text style={styles.settingsScreen.sectionName}>{this.state.language==''?'':dictinory[this.state.language].settingsScreen.languageButtonText}</Text>
+              <Icon name='angle-right' type='font-awesome' color={'#d6d7da'} size={60} iconStyle={styles.settingsScreen.angleRight}/>
             </View>
           </TouchableNativeFeedback>
         </View>
       </View>
     )
   }
-  openSettingsLanguageScreen() {
-    this.props.navigation.navigate('settingsScreen_Language', {title: dictinory[this.state.language].settingsScreen_Language.title});
+  async checkLanguage(){
+     var language = await languagePromise;
+     if(this.state.language != language){
+       this.props.navigation.setOptions({ title: dictinory[language].settingsScreen.title });
+       this.setState({language: language})
+     }
   }
-}
+  openSettingsLanguageScreen() {
+    this.props.navigation.navigate('settingsScreen_Language');
+  }
+};
 
 class settingsScreen_Language extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      enFlagIcon: '',
-      ruFlagIcon: '',
-      warningMessageText: '',
-      buttonText: '',
-      language: ''
-    }
+    this.state = { language: '' }
   }
   async componentDidMount() {
-    var selectedLanguage = await languagePromise;
-    var thisComponent = this;
-
-    this.setState({
-      enFlagIcon: selectedLanguage=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag,
-      ruFlagIcon: selectedLanguage=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
-      warningMessageText: dictinory[selectedLanguage].settingsScreen_Language.warningMessageText,
-      buttonText: dictinory[selectedLanguage].settingsScreen_Language.applyButtonText,
-      language: selectedLanguage
-    })
+    var language = await languagePromise;
+    this.setState({ language: language })
   }
   render() {
     return(
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => this.changeLocalLanguage('ru')} style={styles.russiaFlagButton}>
+        <TouchableOpacity onPress={() => this.changeLanguage('ru')} style={styles.settingsScreen_Language.russiaFlagButton}>
           <Image
-            style={styles.FlagImage}
-            source={this.state.ruFlagIcon}
+            style={styles.settingsScreen_Language.flagImage}
+            source={this.state.language=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag}
             />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => this.changeLocalLanguage('en')} style={styles.unitedStatesFlagButton}>
+        <TouchableOpacity onPress={() => this.changeLanguage('en')} style={styles.settingsScreen_Language.unitedStatesFlagButton}>
           <Image
-            style={styles.FlagImage}
-            source={this.state.enFlagIcon}
+            style={styles.settingsScreen_Language.flagImage}
+            source={this.state.language=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag}
             />
-        </TouchableOpacity>
-        <Text style={styles.warningMessage}>{this.state.warningMessageText}</Text>
-        <TouchableOpacity onPress={() => this.apply()} style={styles.applyButton}>
-          <View>
-            <Image
-              style={styles.applyButtonImage}
-              source={resurces.applyButton}
-              />
-            <Text style={styles.applyButtonText}>{this.state.buttonText}</Text>
-          </View>
         </TouchableOpacity>
       </View>
     )
   }
-  changeLocalLanguage(language){
-    this.props.navigation.setOptions({ title: dictinory[language].settingsScreen_Language.title });
-    this.setState({
-      language: language,
-      enFlagIcon: language=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag,
-      ruFlagIcon: language=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag,
-      warningMessageText: dictinory[language].settingsScreen_Language.warningMessageText,
-      buttonText: dictinory[language].settingsScreen_Language.applyButtonText,
-    })
-  }
-  async apply(){
-    await AsyncStorage.setItem('language', this.state.language);
-    await AsyncStorage.removeItem('notificationsList')
-    await Notifications.cancelAllScheduledNotificationsAsync()
-    Updates.reload();
-  }
-}
+   async changeLanguage(language){
+
+      if (this.state.language == language) return;
+
+      await AsyncStorage.setItem('language', language);
+      languagePromise = new Promise(async (resolve, reject) => {resolve(language)});
+
+      await AsyncStorage.removeItem('notificationsList');
+      await Notifications.cancelAllScheduledNotificationsAsync();
+
+      setTimeout(async (language) => {
+         if(language == await AsyncStorage.getItem('language')){
+            console.log(1)
+            setNotifications()
+         }
+      }, 10000, language);
+
+      this.props.navigation.setOptions({ title: dictinory[language].settingsScreen_Language.title });
+
+      this.setState({ language: language })
+   }
+};
 
 
 class firstScreen extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { language: '' };
-  }
-  componentDidMount() {
-      var thisComponent = this;
-      languagePromise.then((language) => {thisComponent.setState({language: language });});
-  }
-  render() {
+   constructor(props) {
+    super(props)
+    this.state = { language: '' }
+   }
+   async componentDidMount() {
+      this.props.navigation.addListener('focus', checkLanguage.bind(this));
+
+      var language = await languagePromise;
+      this.setState({ language: language })
+   }
+   render() {
     return(
       <Stack.Navigator>
-      <Stack.Screen
-        name="upcomingHolidaysScreen"
-        component={holidaysListScreen}
-        options={{
-          headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-          title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidaysScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
-        }}
-      />
-      <Stack.Screen
-        name="holidayScreen"
-        component={holidayScreen}
-        options={{
-          headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
-          title: this.state.language==''?'':dictinory[this.state.language].holidayScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
-        }}
-      />
+         <Stack.Screen
+           name="upcomingHolidaysScreen"
+           component={holidaysListScreen}
+           options={{
+             headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+             title: this.state.language==''?'':dictinory[this.state.language].upcomingHolidaysScreen.title,
+             headerTitleStyle: {
+               fontSize: 21,
+             },
+           }}
+         />
+         <Stack.Screen
+           name="holidayScreen"
+           component={holidayScreen}
+           options={{
+             headerBackTitle: this.state.language==''?'':dictinory[this.state.language].backButtonText,
+             title: this.state.language==''?'':dictinory[this.state.language].holidayScreen.title,
+             headerTitleStyle: {
+               fontSize: 21,
+             },
+           }}
+         />
     </Stack.Navigator>
     )
   }
-}
+};
 
 class secondScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: '' };
+    this.state = { language: '' }
   }
-  componentDidMount() {
-    var thisComponent = this;
-    languagePromise.then((language) => {thisComponent.setState({language: language });});
+  async componentDidMount() {
+     this.props.navigation.addListener('focus', checkLanguage.bind(this));
+
+     var language = await languagePromise;
+     this.setState({ language: language })
   }
   render() {
     return(
@@ -680,7 +645,8 @@ class secondScreen extends React.Component {
             headerTitleStyle: {
               fontSize: 21,
             },
-          }}
+         }}
+         initialParams={{ language: this.state.language }}
         />
         <Stack.Screen
           name="categoryScreen"
@@ -707,16 +673,18 @@ class secondScreen extends React.Component {
     </Stack.Navigator>
     )
   }
-}
+};
 
 class thirdScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: '' };
+    this.state = { language: '' }
   }
-  componentDidMount() {
-    var thisComponent = this;
-    languagePromise.then((language) => {thisComponent.setState({language: language });});
+  async componentDidMount() {
+     this.props.navigation.addListener('focus', checkLanguage.bind(this));
+
+     var language = await languagePromise;
+     this.setState({ language: language })
   }
   render() {
     return(
@@ -729,7 +697,7 @@ class thirdScreen extends React.Component {
           title: this.state.language==''?'':dictinory[this.state.language].settingsScreen.title,
           headerTitleStyle: {
             fontSize: 21,
-          },
+          }
         }}
       />
       <Stack.Screen
@@ -740,20 +708,20 @@ class thirdScreen extends React.Component {
           title: this.state.language==''?'':dictinory[this.state.language].settingsScreen_Language.title,
           headerTitleStyle: {
             fontSize: 21,
-          },
+          }
         }}
       />
     </Stack.Navigator>
     )
   }
-}
+};
 
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
   }
-  componentDidMount() {
+  сomponentDidMount() {
     setNotifications();
   }
   render() {
@@ -771,26 +739,31 @@ export default class App extends React.Component {
           component={firstScreen}
           options={{
             tabBarIcon: ({ color }) => (
-              <Icon name='calendar' type='foundation' color={color} size={38} iconStyle={{textAlignVertical: 'center'}}/>
-            ),
+              <Icon name='calendar' type='foundation' color={color} size={38}/>
+            )
           }}
+          initialParams={{ language: '' }}
           />
           <Tab.Screen
           name="secondScreen"
           component={secondScreen}
           options={{
             tabBarIcon: ({ color }) => (
-              <Icon name='align-justify' type='foundation' color={color} size={32} iconStyle={{textAlign: 'center',}}/>
-            ),
-          }}/>
+              <Icon name='align-justify' type='foundation' color={color} size={32}/>
+            )
+          }}
+          initialParams={{ language: '' }}
+          />
           <Tab.Screen
           name="thirdScreen"
           component={thirdScreen}
           options={{
             tabBarIcon: ({ color }) => (
-              <Icon name='cog' type='font-awesome' color={color} size={29} iconStyle={{justifyContent: 'center'}}/>
-            ),
-          }}/>
+              <Icon name='cog' type='font-awesome' color={color} size={29}/>
+           )
+          }}
+          initialParams={{ language: '' }}
+         />
         </Tab.Navigator>
       </NavigationContainer>
     );
