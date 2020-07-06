@@ -29,7 +29,7 @@
       "Carnivals and festivals":"Carnivals and festivals",
       "name-days":"Name-days",
       "Birthdays":"Birthdays",
-    }
+   }
   },
   "ru":{
     "upcomingHolidaysScreen":{
@@ -62,5 +62,9 @@
       "name-days":"Именины",
       "Birthdays":"Дни рожденья"
     }
-  }
+   },
+   "languages": {
+      "ru": "Русский",
+      "en": "English"
+   }
 }

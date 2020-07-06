@@ -20,7 +20,7 @@ import { Icon } from 'react-native-elements';
 
 import NetInfo from '@react-native-community/netinfo';
 
-import { Updates, Notifications } from 'expo';
+import { Notifications } from 'expo';
 
 import * as Font from 'expo-font';
 
@@ -28,9 +28,11 @@ import Constants from 'expo-constants';
 
 import * as Permissions from 'expo-permissions';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useScrollToTop } from '@react-navigation/native';
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,6 +52,7 @@ const resurces = {
 };
 
 const dictinory = resurces.dictinory;
+
 
 function fetchTimeLimit(url, limit=1500){
   return(new Promise(async (resolve, reject) => {
@@ -125,7 +128,7 @@ async function loadHolidays(){
    var customHolidays = await AsyncStorage.getItem('customHolidays');
 
    if(customHolidays == null){
-      customHolidays = [];
+      customHolidays = JSON.stringify([]);
       await AsyncStorage.setItem('customHolidays', JSON.stringify([]));
    }
 
@@ -210,6 +213,7 @@ async function setNotifications(){
       }
     }
 };
+
 
 var languagePromise = new Promise(async (resolve, reject) => {
   language = await loadLanguage();
@@ -301,16 +305,28 @@ const styles = {
       russiaFlagButton: {
         left: screenWidth/5,
         top: screenWidth/5,
-        position: 'absolute',
+        position: 'absolute'
       },
       unitedStatesFlagButton: {
         left: screenWidth/5*3,
         top: screenWidth/5,
-        position: 'absolute',
+        position: 'absolute'
       },
       flagImage: {
         width: screenWidth/5,
-        height: screenWidth/5,
+        height: screenWidth/5
+      },
+      ruLanguageName: {
+         fontSize: 21,
+         left: screenWidth/5,
+         top: screenWidth/5*2.2,
+         position: 'absolute'
+     },
+      enLanguageName: {
+         fontSize: 21,
+         left: screenWidth/5*3,
+         top: screenWidth/5*2.2,
+         position: 'absolute'
       }
    }
 };
@@ -328,12 +344,10 @@ class holidaysListScreen extends React.Component {
 
     var holidaysList = await holidaysPromise;
 
-    var holidaysListScreen = this;
-    if(this.props.route.params != null){
+   if(this.props.route.params != null){
       if(this.props.route.params.category != null){
-        holidaysList = holidaysList.filter((holiday) => {
-          return (holiday.category == holidaysListScreen.props.route.params.category)
-        })
+         const category = this.props.route.params.category;
+         holidaysList = holidaysList.filter((holiday) => (holiday.category == category))
       }
     }
 
@@ -341,10 +355,12 @@ class holidaysListScreen extends React.Component {
 
     var language = await languagePromise;
 
+    holidaysList = holidaysList.filter((holiday) => (holiday[language].name != ''))
+
     this.setState({holidaysList: holidaysList, refreshing: false, language: language});
   }
   render() {
-    return(
+     return(
       <View style={styles.container}>
       <FlatList
           data={this.state.holidaysList}
@@ -533,7 +549,7 @@ class settingsScreen extends React.Component {
 class settingsScreen_Language extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { language: '' }
+    this.state = { language: 'en' }
   }
   async componentDidMount() {
     var language = await languagePromise;
@@ -548,12 +564,14 @@ class settingsScreen_Language extends React.Component {
             source={this.state.language=='ru'?resurces.russiaFlagSelect:resurces.russiaFlag}
             />
         </TouchableOpacity>
+        <Text style={styles.settingsScreen_Language.ruLanguageName}>{dictinory.languages.ru}</Text>
         <TouchableOpacity onPress={() => this.changeLanguage('en')} style={styles.settingsScreen_Language.unitedStatesFlagButton}>
           <Image
             style={styles.settingsScreen_Language.flagImage}
             source={this.state.language=='en'?resurces.unitedStatesFlagSelect:resurces.unitedStatesFlag}
             />
         </TouchableOpacity>
+        <Text style={styles.settingsScreen_Language.enLanguageName}>{dictinory.languages.en}</Text>
       </View>
     )
   }
