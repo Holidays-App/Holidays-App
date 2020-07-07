@@ -1,37 +1,41 @@
 import * as React from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  TouchableNativeFeedback,
-  ScrollView,
-  AsyncStorage,
-  FlatList,
-  Dimensions,
-  NativeModules,
-  Platform,
-  Button,
-  RefreshControl
+   StyleSheet,
+   Text,
+   View,
+   Image,
+   TouchableOpacity,
+   TouchableNativeFeedback,
+   ScrollView,
+   AsyncStorage,
+   FlatList,
+   Dimensions,
+   NativeModules,
+   Platform,
+   Button,
+   RefreshControl
 } from 'react-native';
 
-import { Icon } from 'react-native-elements';
+import {
+   Icon
+} from 'react-native-elements';
 
 import NetInfo from '@react-native-community/netinfo';
 
-import { Notifications } from 'expo';
-
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 import * as Font from 'expo-font';
-
 import Constants from 'expo-constants';
 
-import * as Permissions from 'expo-permissions';
-
-import { NavigationContainer, useScrollToTop } from '@react-navigation/native';
-
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import {
+   NavigationContainer
+} from '@react-navigation/native';
+import {
+   createBottomTabNavigator
+} from '@react-navigation/bottom-tabs';
+import {
+   createStackNavigator
+} from '@react-navigation/stack';
 
 
 const Stack = createStackNavigator();
@@ -41,93 +45,96 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const resurces = {
-  unitedStatesFlag: require('./assets/textures/unitedStatesFlag.png'),
-  unitedStatesFlagSelect: require('./assets/textures/unitedStatesFlagSelect.png'),
-  russiaFlag: require('./assets/textures/russiaFlag.png'),
-  russiaFlagSelect: require('./assets/textures/russiaFlagSelect.png'),
-  applyButton: require('./assets/textures/applyButton.png'),
+   unitedStatesFlag: require('./assets/textures/unitedStatesFlag.png'),
+   unitedStatesFlagSelect: require('./assets/textures/unitedStatesFlagSelect.png'),
+   russiaFlag: require('./assets/textures/russiaFlag.png'),
+   russiaFlagSelect: require('./assets/textures/russiaFlagSelect.png'),
+   applyButton: require('./assets/textures/applyButton.png'),
 
-  defaultHolidays: require('./assets/db/defaultHolidays.json'),
-  dictinory: require('./assets/db/dictinory.json'),
+   defaultHolidays: require('./assets/db/defaultHolidays.json'),
+   dictinory: require('./assets/db/dictinory.json'),
 };
 
 const dictinory = resurces.dictinory;
 
 
-function fetchTimeLimit(url, limit=1500){
-  return(new Promise(async (resolve, reject) => {
-    fetch(url).then((response) => {
-      resolve(response)
-    })
-    setTimeout(() => {
-      resolve(null)
-    }, limit)
-  }))
+function fetchTimeLimit(url, limit = 1500) {
+   return (new Promise(async (resolve, reject) => {
+      fetch(url).then((response) => {
+         resolve(response)
+      })
+      setTimeout(() => {
+         resolve(null)
+      }, limit)
+   }))
 };
 
-function sortByDateAndCategory(holidaysList){
-  const date = new Date();
-  const categoriesList = [];
-  for (var category in dictinory.en.categories){
-    categoriesList.push(category)
-  }
+function sortByDateAndCategory(holidaysList) {
+   const date = new Date();
+   const categoriesList = [];
+   for (var category in dictinory.en.categories) {
+      categoriesList.push(category)
+   }
 
-  var holidaysListLocal = holidaysList;
+   var holidaysListLocal = holidaysList;
 
-  holidaysListLocal.sort((a, b) => {
-    var aDate = ((a.date.month < (date.getMonth()+1)) || (a.date.month == (date.getMonth()+1) && a.date.day < date.getDate())?
-            ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100)+12.5
-            :
-            ((a.date.month-(date.getMonth()+1))+(a.date.day-date.getDate())/100))
+   holidaysListLocal.sort((a, b) => {
+      var aDate = ((a.date.month < (date.getMonth() + 1)) || (a.date.month == (date.getMonth() + 1) && a.date.day <
+            date.getDate()) ?
+         ((a.date.month - (date.getMonth() + 1)) + (a.date.day - date.getDate()) / 100) + 12.5 :
+         ((a.date.month - (date.getMonth() + 1)) + (a.date.day - date.getDate()) / 100))
 
-    var bDate = ((b.date.month < (date.getMonth()+1)) || (b.date.month == (date.getMonth()+1) && b.date.day < date.getDate())?
-            ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100)+12.5
-            :
-            ((b.date.month-(date.getMonth()+1))+(b.date.day-date.getDate())/100))
+      var bDate = ((b.date.month < (date.getMonth() + 1)) || (b.date.month == (date.getMonth() + 1) && b.date.day <
+            date.getDate()) ?
+         ((b.date.month - (date.getMonth() + 1)) + (b.date.day - date.getDate()) / 100) + 12.5 :
+         ((b.date.month - (date.getMonth() + 1)) + (b.date.day - date.getDate()) / 100))
 
-    if(aDate < bDate){
-      return -1;
-    } else if(aDate > bDate){
-      return 1
-    } else if(aDate == bDate){
-      if(categoriesList.indexOf(a.category) < categoriesList.indexOf(b.category)){
-        return -1;
-      } else if(categoriesList.indexOf(a.category) > categoriesList.indexOf(b.category)){
-        return 1;
-      } else if(categoriesList.indexOf(a.category) == categoriesList.indexOf(b.category)){
-        return 0;
+      if (aDate < bDate) {
+         return -1;
+      } else if (aDate > bDate) {
+         return 1
+      } else if (aDate == bDate) {
+         if (categoriesList.indexOf(a.category) < categoriesList.indexOf(b.category)) {
+            return -1;
+         } else if (categoriesList.indexOf(a.category) > categoriesList.indexOf(b.category)) {
+            return 1;
+         } else if (categoriesList.indexOf(a.category) == categoriesList.indexOf(b.category)) {
+            return 0;
+         }
       }
-    }
-  })
+   })
 
-  return holidaysListLocal;
+   return holidaysListLocal;
 };
 
-async function checkLanguage(){
+async function checkLanguage() {
    var language = await languagePromise;
-   if(this.state.language != language){
-     this.setState({language: language})
+   if (this.state.language != language) {
+      this.setState({
+         language: language
+      })
    }
 };
 
-async function loadLanguage(){
-    var language = await AsyncStorage.getItem('language');
-    if (language == null){
+async function loadLanguage() {
+   var language = await AsyncStorage.getItem('language');
+   if (language == null) {
       var deviceLanguage =
-          Platform.OS === 'ios'
-            ? NativeModules.SettingsManager.settings.AppleLocale ||
-              NativeModules.SettingsManager.settings.AppleLanguages[0] // iOS 13
-            : NativeModules.I18nManager.localeIdentifier;
-      language = (deviceLanguage=='ru_RU'?'ru':'en')
-    }
-    return(language);
+         Platform.OS === 'ios' ?
+         NativeModules.SettingsManager.settings.AppleLocale ||
+         NativeModules.SettingsManager.settings.AppleLanguages[0] // iOS 13
+         :
+         NativeModules.I18nManager.localeIdentifier;
+      language = (deviceLanguage == 'ru_RU' ? 'ru' : 'en')
+   }
+   return (language);
 };
 
-async function loadHolidays(){
+async function loadHolidays() {
 
    var customHolidays = await AsyncStorage.getItem('customHolidays');
 
-   if(customHolidays == null){
+   if (customHolidays == null) {
       customHolidays = JSON.stringify([]);
       await AsyncStorage.setItem('customHolidays', JSON.stringify([]));
    }
@@ -138,194 +145,176 @@ async function loadHolidays(){
    if (updatedHolidaysFromNet != null) {
       updatedHolidaysFromNet = JSON.stringify(await updatedHolidaysFromNet.json());
 
-      if (updatedHolidays != updatedHolidaysFromNet){
+      if (updatedHolidays != updatedHolidaysFromNet) {
          updatedHolidays = updatedHolidaysFromNet;
          await AsyncStorage.setItem('updatedHolidays', updatedHolidaysFromNet);
       }
 
-   } else if(updatedHolidays == null){
+   } else if (updatedHolidays == null) {
       updatedHolidays = [];
       await AsyncStorage.setItem('updatedHolidays', JSON.stringify([]));
    }
 
-  var defaultHolidays = resurces.defaultHolidays;
-  var customHolidays = JSON.parse(customHolidays);
-  var updatedHolidays = JSON.parse(updatedHolidays);
+   var defaultHolidays = resurces.defaultHolidays;
+   var customHolidays = JSON.parse(customHolidays);
+   var updatedHolidays = JSON.parse(updatedHolidays);
 
-  var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
-  return(holidaysList);
+   var holidaysList = (defaultHolidays.concat(customHolidays)).concat(updatedHolidays);
+   return (holidaysList);
 };
 
-async function setNotifications(){
-  const date = new Date();
-    var notificationsList = await AsyncStorage.getItem('notificationsList');
+async function setNotifications() {
+   const date = new Date();
 
-    if (notificationsList == null){
-      await AsyncStorage.setItem('notificationsList', JSON.stringify([]));
-      notificationsList = [];
-    } else {
-      notificationsList = JSON.parse(notificationsList);
-    }
+   var notificationsList = await Notifications.getAllScheduledNotificationsAsync();
 
-    for (var i = 0; i < notificationsList.length; i++) {
-      if (date.getTime()>=notificationsList[i].date) {
-        notificationsList.splice(i, 1);
-        i--;
-      }
-    }
+   await Permissions.askAsync(Permissions.NOTIFICATIONS);
 
-    await Permissions.askAsync(Permissions.NOTIFICATIONS);
+   var language = await languagePromise;
 
-    var holidaysList =  await holidaysPromise;
+   var holidaysList = await holidaysPromise;
+   holidaysList = holidaysList.filter((holiday) => (holiday[language].message != '' && holiday[language].name != ''));
 
-    var language = await languagePromise;
-
-    for (var i = 0; i < holidaysList.length; i++){
-
-      if (!holidaysList[i].notify || holidaysList[i][language].message == '') continue
-
+   for (var i = 0; i < holidaysList.length; i++) {
       var notificationDate;
-      if ((holidaysList[i].date.day/100+holidaysList[i].date.month)>((date.getMonth()+1)+date.getDate()/100)) {
-        notificationDate = (new Date(date.getFullYear(), holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
+      if ((holidaysList[i].date.day / 100 + holidaysList[i].date.month) > ((date.getMonth() + 1) + date.getDate() / 100)) {
+         notificationDate = (new Date(date.getFullYear(), holidaysList[i].date.month - 1, holidaysList[i].date.day, 9,
+            2))
       } else {
-        notificationDate = (new Date(date.getFullYear()+1, holidaysList[i].date.month-1, holidaysList[i].date.day, 9, 2)).getTime();
+         notificationDate = (new Date(date.getFullYear() + 1, holidaysList[i].date.month - 1, holidaysList[i].date.day,
+            9, 2))
+      };
+
+      if (!notificationsList.some(
+            (element) => (
+               element.content.title == holidaysList[i][language].name &&
+               element.content.body == holidaysList[i][language].message &&
+               element.trigger.value == notificationDate.getTime()
+            )
+         )) {
+         await Notifications.scheduleNotificationAsync({
+            content: {
+               title: holidaysList[i][language].name,
+               body: holidaysList[i][language].message
+            },
+            trigger: notificationDate
+         })
       }
-
-      var notification = {
-        holiday: holidaysList[i][language].name,
-        date: notificationDate
-      }
-
-      if (!notificationsList.some((element) => {return(JSON.stringify(element) == JSON.stringify(notification))})) {
-
-        await Notifications.scheduleLocalNotificationAsync(
-          {
-            title: holidaysList[i][language].name,
-            body: holidaysList[i][language].message,
-          },
-          {
-            time: notificationDate
-          }
-        );
-
-        notificationsList.push(notification);
-        await AsyncStorage.setItem('notificationsList', JSON.stringify(notificationsList));
-      }
-    }
+   }
 };
 
 
 var languagePromise = new Promise(async (resolve, reject) => {
-  language = await loadLanguage();
-  resolve(language);
+   language = await loadLanguage();
+   resolve(language);
 });
 
 var holidaysPromise = new Promise(async (resolve, reject) => {
-  holidaysList = await loadHolidays();
-  resolve(holidaysList);
+   holidaysList = await loadHolidays();
+   resolve(holidaysList);
 });
 
 
 const styles = {
-    container: {
+   container: {
       flex: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
       backgroundColor: '#FFFFFF',
-    },
-    listItem: {
+   },
+   listItem: {
       flex: 1,
       width: '100%',
       height: 80,
       justifyContent: 'center',
       paddingRight: "4%",
       paddingLeft: "3%"
-    },
-    holidaysListScreen: {
+   },
+   holidaysListScreen: {
       date: {
-        fontSize: 16,
-        top: "50%",
-        color: '#666666',
+         fontSize: 16,
+         top: "50%",
+         color: '#666666',
       },
       name: {
-        fontSize: 19,
-        top: "50%",
+         fontSize: 19,
+         top: "50%",
       },
       angleRight: {
-        right: "-45%",
-        top: "-35%",
+         right: "-45%",
+         top: "-35%",
       },
-    },
-    categoriesScreen: {
+   },
+   categoriesScreen: {
       angleRight: {
-        right: "-45%",
-        top: "-20%",
+         right: "-45%",
+         top: "-20%",
       },
       name: {
-        fontSize: 19,
-        top: "50%",
+         fontSize: 19,
+         top: "50%",
       }
-    },
-    holidayScreen: {
+   },
+   holidayScreen: {
       name: {
-        fontSize: 26,
-        top: 10,
+         fontSize: 26,
+         top: 10,
       },
       date: {
-        fontSize: 22,
-        top: 20,
-        left: "4%",
-        color: "#666666",
+         fontSize: 22,
+         top: 20,
+         left: "4%",
+         color: "#666666",
       },
       description: {
-        fontSize: 19,
-        top: 35,
+         fontSize: 19,
+         top: 35,
       },
       View: {
-        paddingLeft: "3%",
-        paddingRight: "3%",
-        flex: 1,
-        backgroundColor: '#FFFFFF'
+         paddingLeft: "3%",
+         paddingRight: "3%",
+         flex: 1,
+         backgroundColor: '#FFFFFF'
       },
       ScrollView: {
-        paddingBottom: 60,
+         paddingBottom: 60,
       }
-    },
-    settingsScreen: {
+   },
+   settingsScreen: {
       angleRight: {
-        right: "-45%",
-        top: "-25%",
+         right: "-45%",
+         top: "-25%",
       },
       sectionName: {
-        fontSize: 19,
-        top: "33%",
+         fontSize: 19,
+         top: "33%",
       }
-    },
-    settingsScreen_Language: {
+   },
+   settingsScreen_Language: {
       russiaFlagButton: {
-        left: screenWidth/5,
-        top: screenWidth/5,
-        position: 'absolute'
+         left: screenWidth / 5,
+         top: screenWidth / 5,
+         position: 'absolute'
       },
       unitedStatesFlagButton: {
-        left: screenWidth/5*3,
-        top: screenWidth/5,
-        position: 'absolute'
+         left: screenWidth / 5 * 3,
+         top: screenWidth / 5,
+         position: 'absolute'
       },
       flagImage: {
-        width: screenWidth/5,
-        height: screenWidth/5
+         width: screenWidth / 5,
+         height: screenWidth / 5
       },
       ruLanguageName: {
          fontSize: 21,
-         left: screenWidth/5,
-         top: screenWidth/5*2.2,
+         left: screenWidth / 5,
+         top: screenWidth / 5 * 2.2,
          position: 'absolute'
-     },
+      },
       enLanguageName: {
          fontSize: 21,
-         left: screenWidth/5*3,
-         top: screenWidth/5*2.2,
+         left: screenWidth / 5 * 3,
+         top: screenWidth / 5 * 2.2,
          position: 'absolute'
       }
    }
@@ -582,12 +571,10 @@ class settingsScreen_Language extends React.Component {
       await AsyncStorage.setItem('language', language);
       languagePromise = new Promise(async (resolve, reject) => {resolve(language)});
 
-      await AsyncStorage.removeItem('notificationsList');
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       setTimeout(async (language) => {
          if(language == await AsyncStorage.getItem('language')){
-            console.log(1)
             setNotifications()
          }
       }, 10000, language);
@@ -739,8 +726,8 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
   }
-  сomponentDidMount() {
-    setNotifications();
+  componentDidMount() {
+     setNotifications()
   }
   render() {
     return (
