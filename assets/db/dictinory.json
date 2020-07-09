@@ -8,9 +8,7 @@
       "languageButtonText":"Language"
     },
     "settingsScreen_Language":{
-      "title":"Language",
-      "warningMessageText":"Attention!!! When you change the language, the application will restart",
-      "applyButtonText":"Apply"
+      "title":"Language"
     },
     "categoriesScreen":{
       "title": "Categories"
@@ -40,9 +38,7 @@
       "languageButtonText":"Язык"
     },
     "settingsScreen_Language":{
-      "title" : "Язык",
-      "warningMessageText":"Внимание!!! При смене языка приложение перезапустится",
-      "applyButtonText":"Применить"
+      "title" : "Язык"
     },
     "categoriesScreen":{
       "title": "Категории"
