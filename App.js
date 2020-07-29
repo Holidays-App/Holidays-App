@@ -1,8 +1,7 @@
-//console.disableYellowBox = true;
+console.disableYellowBox = true;
 
 import * as React from "react";
 import {
-  StyleSheet,
   Text,
   View,
   Image,
@@ -14,18 +13,14 @@ import {
   Dimensions,
   NativeModules,
   Platform,
-  Button,
   RefreshControl,
 } from "react-native";
 
 import { Icon } from "react-native-elements";
 
-import NetInfo from "@react-native-community/netinfo";
-
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
-import * as Font from "expo-font";
-import Constants from "expo-constants";
+//import * as Font from "expo-font";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -34,7 +29,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const screenHeight = Dimensions.get("window").height;
+//const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
 
 const resurces = {

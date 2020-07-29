@@ -1,1 +1,92 @@
-[{"en":{"name":"New year!","description":"There have been celebrations to mark the beginning of a new year for thousands of years. Sometimes these were simply an opportunity for people to eat, drink and have fun, but in some places the festivities were connected to the land or astronomical events. For example, in Egypt the beginning of the year coincided with when the River Nile flooded, and this normally happened when the star Sirius rose. The Persians and Phoenicians started their new year at the spring equinox (this is around 20 March when the Sun shines more or less directly on the equator and the length of the night and the day are almost the same).","message":"Nights will be dark but days will be light, wish your life to be always bright – Happy New Year."},"ru":{"name":"Новый год!","description":"Новый год в России – государственный праздник, выходной день. Новогодние каникулы продолжаются в среднем 8-10 дней, и заканчиваются после Рождественских праздников.","message":"Желаем, чтобы этот год для вас был ярким, запоминающимся, благополучным, добрым и удачным. С Новым годом!\n\n"},"date":{"day":31,"month":12},"pictures":["./assets/pictures/1.jpg","./assets/pictures/1_1026851.jpg","./assets/pictures/1545730239-1985.jpg","./assets/pictures/755772029979442.jpeg"],"category":"General holidays","icon":"./assets/holidaysIcons/woman.png","important":true}, {"en":{"name":"International Women's Day","description":"International Women's Day is observed annually on March 8th. This global day celebrates the cultural, political, social and economic achievements of women. The day also brings international awareness to gender parity. According to the World Economic Forum, global gender equality is estimated to be achieved by 2133.","message":"Do you know? International Women’s Day is celebrated on March 8 every year. The name provides no clue of the date for english-speaking people but for Chinese people, the date is incorporated into the Chinese name of International Women’s Day, which can be literally translated as “three eight women’s day”."},"ru":{"name":"Международный женский день","description":"Междунаро́дный же́нский день — праздник, отмечаемый ежегодно 8 марта в ряде стран как «женский день». Исторически появился как день солидарности женщин во многих странах в борьбе за равные права и эмансипацию. С марта 1975 года Международный женский день отмечается в ООН.","message":"Вы знали? Есть много творческих методов празднования дня. Например, в 2016 году мужчины в провинции Гуандун в Китае носили платья и высокие каблуки, чтобы подняться на гору, чтобы отпраздновать 8 марта. В 2017 году было несколько забастовок в разных странах мира, таких как «День без женщины» в США и «Strike4Repeal» в Ирландии."},"date":{"day":8,"month":3},"pictures":[""],"category":"General holidays","icon":"./assets/holidaysIcons/woman.png","important":true}, {"en":{"name":"International Day for Protection of Children","description":"The International Day for Protection of Children is observed in many countries as Children's Day on 1 June since 1950. It was established by the Women's International Democratic Federation on its congress in Moscow (4 November 1949).","message":"Do you know? Each Children’s Day is assigned a different theme by Unicef and 2018’s was #GoBlue. It called on world leaders to commit to fulfilling the rights of every child and acknowledge that these rights are non-negotiable.  The theme for 2017 was #KidsTakeOver, with Unicef inviting children across the world to take over “grown-up roles” such as in the media and politics to voice support for children in need."},"ru":{"name":"Международный день защиты детей","description":"Решение о проведении Международного дня защиты детей было принято на Всемирной конференции, посвященной вопросам благополучия детей, которая состоялась в Женеве в 1925 году. Почему этот детский праздник было решено отмечать именно 1 июня? По одной из версий, 1 июня 1925 года Генеральный консул Китая в Сан-Франциско собрал группу китайских детей-сирот и устроил для них празднование Дуань-у цзе (Фестиваля лодок-драконов). По счастливой случайности этот день совпал и со временем проведения «детской» конференции в Женеве.\n\nПосле Второй мировой войны, когда проблемы сохранения здоровья и благополучия детей были как никогда актуальны, в 1949 году в Париже состоялся конгресс женщин, на котором прозвучала клятва о безустанной борьбе за обеспечение прочного мира, как единственной гарантии счастья детей. Через год, 1 июня 1950-года, был проведен первый Международный день защиты детей, после чего этот праздник проводится ежегодно.","message":"Международный день защиты детей отмечается ежегодно более чем в 30 странах мира и является одним из наиболее старых международных праздников. Решение о его проведении было принято в 1925 году на Всемирной конференции в Женеве, посвященной вопросам благополучия детей. Впервые день защиты детей был проведен в 1950 году в 51 стране мира. ООН поддержала эту инициативу и объявила защиту прав, жизни и здоровья детей одним из приоритетных направлений своей деятельности."},"date":{"day":1,"month":6},"pictures":[""],"category":"General holidays","icon":"","important":false}, {"en":{"name":"Christmas (Julian calendar)","description":"Orthodox Christians in central and eastern Europe and other parts of the world celebrate Christmas on January 7. The Christmas dates around January 7 may vary among some churches. The day is a time of reflection, inner thoughts and healing in many eastern European countries. Many Orthodox Christians fast before January 7, usually excluding meat and dairy products.","message":"Wishing you happiness, peace and prosperity for the festive season and every day of the New year."},"ru":{"name":"Рождество (по Юлианскому календарю)","description":"Во всем мире Рождество празднуют 25 декабря, только некоторые страны, которые находятся под православным влиянием, продолжают праздновать Рождество по, так званому, старому стилю - 7 Января. Вся эта суета из-за того, что православная церковь использует давно устаревший Юлианский календарь, введённый Юлием Цезарем. Европа отказалась от Юлианского календаря из-за его погрешностей более 500 лет назад, и в 1582 году перешла на более точный Григорианский календарь. По Юлианскому календарю Рождество выпадает на 7 Января, а Новый год - 14. Например, в Украине можно наблюдать такой парадокс: люди празднуют Рождество (когда родился Иисус) по устаревшему Юлианскому календарю, а Новый год (когда Иисусу дали Имя) - по современному Григорианскому. Парадокс заключается в том, что Новый год получился перед Рождеством.","message":"С Рождеством Христовым! Пусть этот волшебный праздник наполнит вашу жизнь светом, теплом, радостью и благополучием. Желаем вам мира, добра, любви, семейного уюта. "},"date":{"day":7,"month":1},"pictures":[""],"category":"Religious holiday","icon":"","important":true},{"en":{"name":"The Day of the Programmer","description":"The Day of the Programmer is an international professional day that is celebrated on the 256th (2 to 8 degrees) day of each year.\n\nThe number 256 (28) was chosen because it is the number of distinct values that can be represented with a byte, a value well known to programmers. 256 is also the highest power of two that is less than 365, the number of days in a common year.","message":"On the day of technology and progress, we especially celebrate the day of programmers! Programmers are people who are always one step ahead, creating new programs, algorithms, solutions!"},"ru":{"name":"День программиста","description":"День программиста — праздник программистов, отмечаемый в 256-й день года. Число 256 (2 в 8 степени) выбрано потому, что это количество различных значений, которые можно выразить с помощью восьмиразрядного байта (единицы хранения и обработки цифровой информации). Также это максимальная целая степень числа 2, которая не превышает количества дней в году (365 или 366).","message":"В век технологий и прогресса мы особенно празднуем день программистов! Программисты — люди, которые всегда на шаг впереди, создавая новые программы, алгоритмы, решения! Пожелаем не останавливаться надостигнутом!"},"date":{"day":13,"month":9},"pictures":[""],"category":"Professional Holiday","icon":"","important":false}]
+[
+  {
+    "en": {
+      "name": "New year!",
+      "description": "There have been celebrations to mark the beginning of a new year for thousands of years. Sometimes these were simply an opportunity for people to eat, drink and have fun, but in some places the festivities were connected to the land or astronomical events. For example, in Egypt the beginning of the year coincided with when the River Nile flooded, and this normally happened when the star Sirius rose. The Persians and Phoenicians started their new year at the spring equinox (this is around 20 March when the Sun shines more or less directly on the equator and the length of the night and the day are almost the same).",
+      "message": "Nights will be dark but days will be light, wish your life to be always bright – Happy New Year."
+    },
+    "ru": {
+      "name": "Новый год!",
+      "description": "Новый год в России – государственный праздник, выходной день. Новогодние каникулы продолжаются в среднем 8-10 дней, и заканчиваются после Рождественских праздников.",
+      "message": "Желаем, чтобы этот год для вас был ярким, запоминающимся, благополучным, добрым и удачным. С Новым годом!\n\n"
+    },
+    "date": { "day": 31, "month": 12 },
+    "pictures": [
+      "./assets/pictures/1.jpg",
+      "./assets/pictures/1_1026851.jpg",
+      "./assets/pictures/1545730239-1985.jpg",
+      "./assets/pictures/755772029979442.jpeg"
+    ],
+    "category": "General holidays",
+    "icon": "./assets/holidaysIcons/woman.png",
+    "important": true
+  },
+  {
+    "en": {
+      "name": "International Women's Day",
+      "description": "International Women's Day is observed annually on March 8th. This global day celebrates the cultural, political, social and economic achievements of women. The day also brings international awareness to gender parity. According to the World Economic Forum, global gender equality is estimated to be achieved by 2133.",
+      "message": "Do you know? International Women’s Day is celebrated on March 8 every year. The name provides no clue of the date for english-speaking people but for Chinese people, the date is incorporated into the Chinese name of International Women’s Day, which can be literally translated as “three eight women’s day”."
+    },
+    "ru": {
+      "name": "Международный женский день",
+      "description": "Междунаро́дный же́нский день — праздник, отмечаемый ежегодно 8 марта в ряде стран как «женский день». Исторически появился как день солидарности женщин во многих странах в борьбе за равные права и эмансипацию. С марта 1975 года Международный женский день отмечается в ООН.",
+      "message": "Вы знали? Есть много творческих методов празднования дня. Например, в 2016 году мужчины в провинции Гуандун в Китае носили платья и высокие каблуки, чтобы подняться на гору, чтобы отпраздновать 8 марта. В 2017 году было несколько забастовок в разных странах мира, таких как «День без женщины» в США и «Strike4Repeal» в Ирландии."
+    },
+    "date": { "day": 8, "month": 3 },
+    "pictures": [""],
+    "category": "General holidays",
+    "icon": "./assets/holidaysIcons/woman.png",
+    "important": true
+  },
+  {
+    "en": {
+      "name": "International Day for Protection of Children",
+      "description": "The International Day for Protection of Children is observed in many countries as Children's Day on 1 June since 1950. It was established by the Women's International Democratic Federation on its congress in Moscow (4 November 1949).",
+      "message": "Do you know? Each Children’s Day is assigned a different theme by Unicef and 2018’s was #GoBlue. It called on world leaders to commit to fulfilling the rights of every child and acknowledge that these rights are non-negotiable.  The theme for 2017 was #KidsTakeOver, with Unicef inviting children across the world to take over “grown-up roles” such as in the media and politics to voice support for children in need."
+    },
+    "ru": {
+      "name": "Международный день защиты детей",
+      "description": "Решение о проведении Международного дня защиты детей было принято на Всемирной конференции, посвященной вопросам благополучия детей, которая состоялась в Женеве в 1925 году. Почему этот детский праздник было решено отмечать именно 1 июня? По одной из версий, 1 июня 1925 года Генеральный консул Китая в Сан-Франциско собрал группу китайских детей-сирот и устроил для них празднование Дуань-у цзе (Фестиваля лодок-драконов). По счастливой случайности этот день совпал и со временем проведения «детской» конференции в Женеве.\n\nПосле Второй мировой войны, когда проблемы сохранения здоровья и благополучия детей были как никогда актуальны, в 1949 году в Париже состоялся конгресс женщин, на котором прозвучала клятва о безустанной борьбе за обеспечение прочного мира, как единственной гарантии счастья детей. Через год, 1 июня 1950-года, был проведен первый Международный день защиты детей, после чего этот праздник проводится ежегодно.",
+      "message": "Международный день защиты детей отмечается ежегодно более чем в 30 странах мира и является одним из наиболее старых международных праздников. Решение о его проведении было принято в 1925 году на Всемирной конференции в Женеве, посвященной вопросам благополучия детей. Впервые день защиты детей был проведен в 1950 году в 51 стране мира. ООН поддержала эту инициативу и объявила защиту прав, жизни и здоровья детей одним из приоритетных направлений своей деятельности."
+    },
+    "date": { "day": 1, "month": 6 },
+    "pictures": [""],
+    "category": "General holidays",
+    "icon": "",
+    "important": false
+  },
+  {
+    "en": {
+      "name": "Christmas (Julian calendar)",
+      "description": "Orthodox Christians in central and eastern Europe and other parts of the world celebrate Christmas on January 7. The Christmas dates around January 7 may vary among some churches. The day is a time of reflection, inner thoughts and healing in many eastern European countries. Many Orthodox Christians fast before January 7, usually excluding meat and dairy products.",
+      "message": "Wishing you happiness, peace and prosperity for the festive season and every day of the New year."
+    },
+    "ru": {
+      "name": "Рождество (по Юлианскому календарю)",
+      "description": "Во всем мире Рождество празднуют 25 декабря, только некоторые страны, которые находятся под православным влиянием, продолжают праздновать Рождество по, так званому, старому стилю - 7 Января. Вся эта суета из-за того, что православная церковь использует давно устаревший Юлианский календарь, введённый Юлием Цезарем. Европа отказалась от Юлианского календаря из-за его погрешностей более 500 лет назад, и в 1582 году перешла на более точный Григорианский календарь. По Юлианскому календарю Рождество выпадает на 7 Января, а Новый год - 14. Например, в Украине можно наблюдать такой парадокс: люди празднуют Рождество (когда родился Иисус) по устаревшему Юлианскому календарю, а Новый год (когда Иисусу дали Имя) - по современному Григорианскому. Парадокс заключается в том, что Новый год получился перед Рождеством.",
+      "message": "С Рождеством Христовым! Пусть этот волшебный праздник наполнит вашу жизнь светом, теплом, радостью и благополучием. Желаем вам мира, добра, любви, семейного уюта. "
+    },
+    "date": { "day": 7, "month": 1 },
+    "pictures": [""],
+    "category": "Religious holiday",
+    "icon": "",
+    "important": true
+  },
+  {
+    "en": {
+      "name": "The Day of the Programmer",
+      "description": "The Day of the Programmer is an international professional day that is celebrated on the 256th (2 to 8 degrees) day of each year.\n\nThe number 256 (28) was chosen because it is the number of distinct values that can be represented with a byte, a value well known to programmers. 256 is also the highest power of two that is less than 365, the number of days in a common year.",
+      "message": "On the day of technology and progress, we especially celebrate the day of programmers! Programmers are people who are always one step ahead, creating new programs, algorithms, solutions!"
+    },
+    "ru": {
+      "name": "День программиста",
+      "description": "День программиста — праздник программистов, отмечаемый в 256-й день года. Число 256 (2 в 8 степени) выбрано потому, что это количество различных значений, которые можно выразить с помощью восьмиразрядного байта (единицы хранения и обработки цифровой информации). Также это максимальная целая степень числа 2, которая не превышает количества дней в году (365 или 366).",
+      "message": "В век технологий и прогресса мы особенно празднуем день программистов! Программисты — люди, которые всегда на шаг впереди, создавая новые программы, алгоритмы, решения! Пожелаем не останавливаться надостигнутом!"
+    },
+    "date": { "day": 13, "month": 9 },
+    "pictures": [""],
+    "category": "Professional Holiday",
+    "icon": "",
+    "important": false
+  }
+]
