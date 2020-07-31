@@ -1,4 +1,4 @@
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 
 import * as React from "react";
 import {
@@ -58,8 +58,8 @@ function fetchTimeLimit(url, limit = 1500) {
 
 function sortByDateAndCategory(holidaysList) {
   const date = new Date();
-  const categoriesList = [];
-  for (var category in dictinory.en.categories) {
+  var categoriesList = [];
+  for (let category in dictinory.en.categories) {
     categoriesList.push(category);
   }
 
@@ -116,7 +116,7 @@ async function checkLanguage() {
   var language = await languagePromise;
   if (this.state.language != language) {
     this.setState({
-      language: language,
+      language,
     });
   }
 }
@@ -135,39 +135,46 @@ async function loadLanguage() {
 }
 
 async function loadHolidays() {
+  var defaultHolidays = resurces.defaultHolidays;
+
   var customHolidays = await AsyncStorage.getItem("customHolidays");
 
   if (customHolidays == null) {
-    customHolidays = JSON.stringify([]);
+    customHolidays = [];
     await AsyncStorage.setItem("customHolidays", JSON.stringify([]));
+  } else {
+    customHolidays = JSON.parse(customHolidays);
   }
 
-  var updatedHolidays = await AsyncStorage.getItem("updatedHolidays");
+  var updatedHolidays = JSON.parse(
+    await AsyncStorage.getItem("updatedHolidays")
+  );
   var updatedHolidaysFromNet = await fetchTimeLimit(
     "http://holidays-app.github.io/db/updatedHolidays.json"
   );
 
   if (updatedHolidaysFromNet != null) {
-    updatedHolidaysFromNet = JSON.stringify(
-      await updatedHolidaysFromNet.json()
-    );
+    updatedHolidaysFromNet = await updatedHolidaysFromNet.json();
 
-    if (updatedHolidays != updatedHolidaysFromNet) {
+    if (
+      JSON.stringify(updatedHolidays) != JSON.stringify(updatedHolidaysFromNet)
+    ) {
       updatedHolidays = updatedHolidaysFromNet;
-      await AsyncStorage.setItem("updatedHolidays", updatedHolidaysFromNet);
+      await AsyncStorage.setItem(
+        "updatedHolidays",
+        JSON.stringify(updatedHolidaysFromNet)
+      );
     }
   } else if (updatedHolidays == null) {
     updatedHolidays = [];
     await AsyncStorage.setItem("updatedHolidays", JSON.stringify([]));
   }
 
-  var defaultHolidays = resurces.defaultHolidays;
-  var customHolidays = JSON.parse(customHolidays);
-  var updatedHolidays = JSON.parse(updatedHolidays);
-
-  var holidaysList = defaultHolidays
-    .concat(customHolidays)
-    .concat(updatedHolidays);
+  var holidaysList = Array.prototype.concat(
+    defaultHolidays,
+    customHolidays,
+    updatedHolidays
+  );
   return holidaysList;
 }
 
@@ -180,12 +187,11 @@ async function setNotifications() {
 
   var language = await languagePromise;
 
-  var holidaysList = await holidaysPromise;
-  holidaysList = holidaysList.filter(
+  var holidaysList = (await holidaysPromise).filter(
     (holiday) => holiday[language].message != "" && holiday[language].name != ""
   );
 
-  for (var i = 0; i < holidaysList.length; i++) {
+  for (let i = 0; i < holidaysList.length; i++) {
     var notificationDate;
     if (
       holidaysList[i].date.day / 100 + holidaysList[i].date.month >
@@ -227,13 +233,13 @@ async function setNotifications() {
   }
 }
 
-var languagePromise = new Promise(async (resolve, reject) => {
-  language = await loadLanguage();
+var languagePromise = new Promise(async (resolve) => {
+  var language = await loadLanguage();
   resolve(language);
 });
 
-var holidaysPromise = new Promise(async (resolve, reject) => {
-  holidaysList = await loadHolidays();
+var holidaysPromise = new Promise(async (resolve) => {
+  var holidaysList = await loadHolidays();
   resolve(holidaysList);
 });
 
@@ -356,9 +362,8 @@ class holidaysListScreen extends React.Component {
 
     if (this.props.route.params != null) {
       if (this.props.route.params.category != null) {
-        const category = this.props.route.params.category;
         holidaysList = holidaysList.filter(
-          (holiday) => holiday.category == category
+          (holiday) => holiday.category == this.props.route.params.category
         );
       }
     }
@@ -374,7 +379,7 @@ class holidaysListScreen extends React.Component {
     this.setState({
       holidaysList: holidaysList,
       refreshing: false,
-      language: language,
+      language,
     });
   }
   render() {
@@ -384,7 +389,7 @@ class holidaysListScreen extends React.Component {
           data={this.state.holidaysList}
           renderItem={({ item }) => (
             <TouchableNativeFeedback
-              onPress={() => this.openHolidayScreen(item.en.name)}
+              onPress={() => this.openHolidayScreen(item)}
             >
               <View
                 style={Object.assign(
@@ -425,8 +430,8 @@ class holidaysListScreen extends React.Component {
   async refresh() {
     this.setState({ refreshing: true });
 
-    holidaysPromise = new Promise(async (resolve, reject) => {
-      holidaysList = await loadHolidays();
+    holidaysPromise = new Promise(async (resolve) => {
+      var holidaysList = await loadHolidays();
       resolve(holidaysList);
     });
 
@@ -473,13 +478,8 @@ class holidaysListScreen extends React.Component {
     }
     return BorderStyles;
   }
-  openHolidayScreen(name) {
-    var parameters = { holiday: {} };
-    for (var i = 0; i < this.state.holidaysList.length; i++) {
-      if (name == this.state.holidaysList[i].en.name) {
-        parameters.holiday = this.state.holidaysList[i];
-      }
-    }
+  openHolidayScreen(holiday) {
+    var parameters = { holiday };
     this.props.navigation.navigate("holidayScreen", parameters);
   }
 }
@@ -493,7 +493,7 @@ class holidayScreen extends React.Component {
     this.props.navigation.addListener("focus", checkLanguage.bind(this));
 
     var language = await languagePromise;
-    this.setState({ language: language });
+    this.setState({ language });
   }
   render() {
     return (
@@ -521,14 +521,14 @@ class holidayScreen extends React.Component {
 class categoriesScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { categoriesHolidaysList: [], language: "en" };
+    this.state = { categories: [], language: "en" };
   }
   async componentDidMount() {
     this.props.navigation.addListener("focus", checkLanguage.bind(this));
 
     var holidaysList = await holidaysPromise;
     var categories = [];
-    for (var category in dictinory.en.categories) {
+    for (let category in dictinory.en.categories) {
       if (holidaysList.some((holiday) => holiday.category == category)) {
         categories.push(category);
       }
@@ -536,13 +536,13 @@ class categoriesScreen extends React.Component {
 
     var language = await languagePromise;
 
-    this.setState({ language: language, categoriesHolidaysList: categories });
+    this.setState({ language, categories });
   }
   render() {
     return (
       <View style={styles.container}>
         <FlatList
-          data={this.state.categoriesHolidaysList}
+          data={this.state.categories}
           renderItem={({ item }) => (
             <TouchableNativeFeedback
               onPress={() => this.openСategoryHolidayScreen(item)}
@@ -551,7 +551,7 @@ class categoriesScreen extends React.Component {
                 style={Object.assign(
                   {},
                   styles.listItem,
-                  this.state.categoriesHolidaysList.indexOf(item) == 0
+                  this.state.categories.indexOf(item) == 0
                     ? {}
                     : {
                         borderTopColor: "#d6d7da",
@@ -592,7 +592,7 @@ class settingsScreen extends React.Component {
     this.props.navigation.addListener("focus", this.checkLanguage.bind(this));
 
     var language = await languagePromise;
-    this.setState({ language: language });
+    this.setState({ language });
   }
   render() {
     return (
@@ -635,7 +635,7 @@ class settingsScreen extends React.Component {
       this.props.navigation.setOptions({
         title: dictinory[language].settingsScreen.title,
       });
-      this.setState({ language: language });
+      this.setState({ language });
     }
   }
   openSettingsLanguageScreen() {
@@ -650,7 +650,7 @@ class settingsScreen_Language extends React.Component {
   }
   async componentDidMount() {
     var language = await languagePromise;
-    this.setState({ language: language });
+    this.setState({ language });
   }
   render() {
     return (
@@ -700,21 +700,14 @@ class settingsScreen_Language extends React.Component {
 
     await Notifications.cancelAllScheduledNotificationsAsync();
 
-    setTimeout(
-      async (language) => {
-        if (language == (await AsyncStorage.getItem("language"))) {
-          setNotifications();
-        }
-      },
-      10000,
-      language
-    );
+    clearTimeout(this.setNotificationsTimerId);
+    this.setNotificationsTimerId = setTimeout(setNotifications, 10000);
 
     this.props.navigation.setOptions({
       title: dictinory[language].settingsScreen_Language.title,
     });
 
-    this.setState({ language: language });
+    this.setState({ language });
   }
 }
 
@@ -727,7 +720,7 @@ class firstScreen extends React.Component {
     this.props.navigation.addListener("focus", checkLanguage.bind(this));
 
     var language = await languagePromise;
-    this.setState({ language: language });
+    this.setState({ language });
   }
   render() {
     return (
@@ -780,7 +773,7 @@ class secondScreen extends React.Component {
     this.props.navigation.addListener("focus", checkLanguage.bind(this));
 
     var language = await languagePromise;
-    this.setState({ language: language });
+    this.setState({ language });
   }
   render() {
     return (
@@ -853,7 +846,7 @@ class thirdScreen extends React.Component {
     this.props.navigation.addListener("focus", checkLanguage.bind(this));
 
     var language = await languagePromise;
-    this.setState({ language: language });
+    this.setState({ language });
   }
   render() {
     return (
