@@ -1,4 +1,4 @@
-//console.disableYellowBox = true;
+console.disableYellowBox = true;
 
 import * as React from "react";
 import {
@@ -22,7 +22,7 @@ import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 //import * as Font from "expo-font";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, CommonActions } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 
@@ -46,7 +46,7 @@ const resurces = {
 const dictinory = resurces.dictinory;
 
 function fetchTimeLimit(url, limit = 1500) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     fetch(url).then((response) => {
       resolve(response);
     });
@@ -191,24 +191,24 @@ async function setNotifications() {
     (holiday) => holiday[language].message != "" && holiday[language].name != ""
   );
 
-  for (let i = 0; i < holidaysList.length; i++) {
+  for (let index = 0; index < holidaysList.length; index++) {
     var notificationDate;
     if (
-      holidaysList[i].date.day / 100 + holidaysList[i].date.month >
+      holidaysList[index].date.day / 100 + holidaysList[index].date.month >
       date.getMonth() + 1 + date.getDate() / 100
     ) {
       notificationDate = new Date(
         date.getFullYear(),
-        holidaysList[i].date.month - 1,
-        holidaysList[i].date.day,
+        holidaysList[index].date.month - 1,
+        holidaysList[index].date.day,
         9,
         2
       );
     } else {
       notificationDate = new Date(
         date.getFullYear() + 1,
-        holidaysList[i].date.month - 1,
-        holidaysList[i].date.day,
+        holidaysList[index].date.month - 1,
+        holidaysList[index].date.day,
         9,
         2
       );
@@ -217,15 +217,15 @@ async function setNotifications() {
     if (
       !notificationsList.some(
         (element) =>
-          element.content.title == holidaysList[i][language].name &&
-          element.content.body == holidaysList[i][language].message &&
+          element.content.title == holidaysList[index][language].name &&
+          element.content.body == holidaysList[index][language].message &&
           element.trigger.value == notificationDate.getTime()
       )
     ) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: holidaysList[i][language].name,
-          body: holidaysList[i][language].message,
+          title: holidaysList[index][language].name,
+          body: holidaysList[index][language].message,
         },
         trigger: notificationDate,
       });
@@ -356,16 +356,11 @@ class holidaysListScreen extends React.Component {
   async componentDidMount() {
     this.setState({ refreshing: true });
 
-    this.props.navigation.addListener("focus", checkLanguage.bind(this));
-
     var holidaysList = await holidaysPromise;
-
-    if (this.props.route.params != null) {
-      if (this.props.route.params.category != null) {
-        holidaysList = holidaysList.filter(
-          (holiday) => holiday.category == this.props.route.params.category
-        );
-      }
+    if (this.props.route.params.category != undefined) {
+      holidaysList = holidaysList.filter(
+        (holiday) => holiday.category == this.props.route.params.category
+      );
     }
 
     holidaysList = sortByDateAndCategory(holidaysList);
@@ -377,7 +372,7 @@ class holidaysListScreen extends React.Component {
     );
 
     this.setState({
-      holidaysList: holidaysList,
+      holidaysList,
       refreshing: false,
       language,
     });
@@ -399,12 +394,14 @@ class holidaysListScreen extends React.Component {
                 )}
               >
                 <Text style={styles.holidaysListScreen.name}>
-                  {item[this.state.language].name}
+                  {item[this.props.route.params.language].name}
                 </Text>
                 <Text style={styles.holidaysListScreen.date}>
                   {item.date.day +
                     " " +
-                    dictinory[this.state.language].months[item.date.month - 1]}
+                    dictinory[this.props.route.params.language].months[
+                      item.date.month - 1
+                    ]}
                 </Text>
                 <Icon
                   name="angle-right"
@@ -500,17 +497,23 @@ class holidayScreen extends React.Component {
       <ScrollView contentContainerStyle={styles.holidayScreen.ScrollView}>
         <View style={styles.holidayScreen.View}>
           <Text style={styles.holidayScreen.name}>
-            {this.props.route.params.holiday[this.state.language].name}
+            {
+              this.props.route.params.holiday[this.props.route.params.language]
+                .name
+            }
           </Text>
           <Text style={styles.holidayScreen.date}>
             {this.props.route.params.holiday.date.day +
               " " +
-              dictinory[this.state.language].months[
+              dictinory[this.props.route.params.language].months[
                 this.props.route.params.holiday.date.month - 1
               ]}
           </Text>
           <Text style={styles.holidayScreen.description}>
-            {this.props.route.params.holiday[this.state.language].description}
+            {
+              this.props.route.params.holiday[this.props.route.params.language]
+                .description
+            }
           </Text>
         </View>
       </ScrollView>
@@ -524,8 +527,6 @@ class categoriesScreen extends React.Component {
     this.state = { categories: [], language: "en" };
   }
   async componentDidMount() {
-    this.props.navigation.addListener("focus", checkLanguage.bind(this));
-
     var holidaysList = await holidaysPromise;
     var categories = [];
     for (let category in dictinory.en.categories) {
@@ -561,7 +562,7 @@ class categoriesScreen extends React.Component {
                 )}
               >
                 <Text style={styles.categoriesScreen.name}>
-                  {dictinory[this.state.language].categories[item]}
+                  {dictinory[this.props.route.params.language].categories[item]}
                 </Text>
                 <Icon
                   name="angle-right"
@@ -611,9 +612,9 @@ class settingsScreen extends React.Component {
           >
             <View>
               <Text style={styles.settingsScreen.sectionName}>
-                {this.state.language == ""
+                {this.props.route.params.language == ""
                   ? ""
-                  : dictinory[this.state.language].settingsScreen
+                  : dictinory[this.props.route.params.language].settingsScreen
                       .languageButtonText}
               </Text>
               <Icon
@@ -631,7 +632,7 @@ class settingsScreen extends React.Component {
   }
   async checkLanguage() {
     var language = await languagePromise;
-    if (this.state.language != language) {
+    if (this.props.route.params.language != language) {
       this.props.navigation.setOptions({
         title: dictinory[language].settingsScreen.title,
       });
@@ -662,7 +663,7 @@ class settingsScreen_Language extends React.Component {
           <Image
             style={styles.settingsScreen_Language.flagImage}
             source={
-              this.state.language == "ru"
+              this.props.route.params.language == "ru"
                 ? resurces.russiaFlagSelect
                 : resurces.russiaFlag
             }
@@ -678,7 +679,7 @@ class settingsScreen_Language extends React.Component {
           <Image
             style={styles.settingsScreen_Language.flagImage}
             source={
-              this.state.language == "en"
+              this.props.route.params.language == "en"
                 ? resurces.unitedStatesFlagSelect
                 : resurces.unitedStatesFlag
             }
@@ -691,10 +692,10 @@ class settingsScreen_Language extends React.Component {
     );
   }
   async changeLanguage(language) {
-    if (this.state.language == language) return;
+    if (this.props.route.params.language == language) return;
 
     await AsyncStorage.setItem("language", language);
-    languagePromise = new Promise(async (resolve, reject) => {
+    languagePromise = new Promise(async (resolve) => {
       resolve(language);
     });
 
@@ -717,9 +718,23 @@ class firstScreen extends React.Component {
     this.state = { language: "" };
   }
   async componentDidMount() {
-    this.props.navigation.addListener("focus", checkLanguage.bind(this));
-
     var language = await languagePromise;
+
+    this.props.navigation.addListener("focus", () => {
+      switch (language) {
+        case "en":
+          //  this.props.navigation.dispatch((state) =>
+          //    CommonActions.setParams({ language: "ru" })
+          // );
+          break;
+        case "ru":
+          // this.props.navigation.dispatch((state) =>
+          // CommonActions.setParams({ language: "en" })
+          //);
+          break;
+      }
+    });
+
     this.setState({ language });
   }
   render() {
@@ -730,34 +745,38 @@ class firstScreen extends React.Component {
           component={holidaysListScreen}
           options={{
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].upcomingHolidaysScreen.title,
+                : dictinory[this.props.route.params.language]
+                    .upcomingHolidaysScreen.title,
             headerTitleStyle: {
               fontSize: 21,
             },
           }}
+          initialParams={{ navigation: this.props.navigation, language: "en" }}
         />
         <Stack.Screen
           name="holidayScreen"
           component={holidayScreen}
           options={{
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].holidayScreen.title,
+                : dictinory[this.props.route.params.language].holidayScreen
+                    .title,
             headerTitleStyle: {
               fontSize: 21,
             },
           }}
+          initialParams={{ language: "en" }}
         />
       </Stack.Navigator>
     );
@@ -783,54 +802,58 @@ class secondScreen extends React.Component {
           component={categoriesScreen}
           options={{
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].categoriesScreen.title,
+                : dictinory[this.props.route.params.language].categoriesScreen
+                    .title,
             headerTitleStyle: {
               fontSize: 21,
             },
           }}
-          initialParams={{ language: this.state.language }}
+          initialParams={{ navigation: this.props.navigation, language: "en" }}
         />
         <Stack.Screen
           name="categoryScreen"
           component={holidaysListScreen}
           options={({ route }) => ({
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].categories[
+                : dictinory[this.props.route.params.language].categories[
                     route.params.category
                   ],
             headerTitleStyle: {
               fontSize: 21,
             },
           })}
+          initialParams={{ language: "en" }}
         />
         <Stack.Screen
           name="holidayScreen"
           component={holidayScreen}
           options={{
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].holidayScreen.title,
+                : dictinory[this.props.route.params.language].holidayScreen
+                    .title,
             headerTitleStyle: {
               fontSize: 21,
             },
           }}
+          initialParams={{ language: "en" }}
         />
       </Stack.Navigator>
     );
@@ -856,33 +879,45 @@ class thirdScreen extends React.Component {
           component={settingsScreen}
           options={{
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].settingsScreen.title,
+                : dictinory[this.props.route.params.language].settingsScreen
+                    .title,
             headerTitleStyle: {
               fontSize: 21,
             },
           }}
+          initialParams={{ language: "en" }}
         />
         <Stack.Screen
           name="settingsScreen_Language"
           component={settingsScreen_Language}
           options={{
             headerBackTitle:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].backButtonText,
+                : dictinory[this.props.route.params.language].backButtonText,
             title:
-              this.state.language == ""
+              this.props.route.params.language == ""
                 ? ""
-                : dictinory[this.state.language].settingsScreen_Language.title,
+                : dictinory[this.props.route.params.language]
+                    .settingsScreen_Language.title,
             headerTitleStyle: {
               fontSize: 21,
             },
+          }}
+          initialParams={{
+            navigationsList: [
+              this.props.navigation,
+              this.props.route.params.firstScreenNavigation,
+              this.props.route.params.secondScreenNavigation,
+            ],
+            language: "en",
+            test: this.props.navigation,
           }}
         />
       </Stack.Navigator>

@@ -1,0 +1,43 @@
+{
+  "upcomingHolidaysScreen": {
+    "title": "Upcoming holidays"
+  },
+  "settingsScreen": {
+    "title": "Settings",
+    "languageButtonText": "Language"
+  },
+  "settingsScreen_Language": {
+    "title": "Language"
+  },
+  "categoriesScreen": {
+    "title": "Categories"
+  },
+  "holidayScreen": {
+    "title": "Holiday"
+  },
+  "months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ],
+  "backButtonText": "Back",
+  "categories": {
+    "General holidays": "General holidays",
+    "Traditional holidays": "Traditional holidays",
+    "Religious holiday": "Religious holidays",
+    "Professional Holiday": "Job's holidays",
+    "Cultural Holiday": "Cultural holidays",
+    "Carnivals and festivals": "Carnivals and festivals",
+    "name-days": "Name-days",
+    "Birthdays": "Birthdays"
+  }
+}
