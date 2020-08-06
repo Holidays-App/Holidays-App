@@ -40,7 +40,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
-    "babel-preset-expo": "^8.2.3"
+    "babel-preset-expo": "^8.2.3",
+    "eslint": "^7.6.0",
+    "eslint-plugin-react": "^7.20.5",
+    "eslint-plugin-react-hooks": "^4.0.8"
   },
   "private": true
 }
