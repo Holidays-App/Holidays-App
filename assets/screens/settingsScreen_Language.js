@@ -11,13 +11,13 @@ import {
 
 import * as Notifications from "expo-notifications";
 
-import LanguageContext from ".../App.js";
+import { LanguageContext, setNotifications } from "../../App";
 
 const resurces = {
-  unitedStatesFlag: require("./assets/textures/unitedStatesFlag.png"),
-  unitedStatesFlagSelect: require("./assets/textures/unitedStatesFlagSelect.png"),
-  russiaFlag: require("./assets/textures/russiaFlag.png"),
-  russiaFlagSelect: require("./assets/textures/russiaFlagSelect.png"),
+  unitedStatesFlag: require("../textures/unitedStatesFlag.png"),
+  unitedStatesFlagSelect: require("../textures/unitedStatesFlagSelect.png"),
+  russiaFlag: require("../textures/russiaFlag.png"),
+  russiaFlagSelect: require("../textures/russiaFlagSelect.png"),
 };
 
 const screenWidth = Dimensions.get("window").width;
@@ -58,9 +58,9 @@ const styles = StyleSheet.create({
 });
 
 function settingsScreen_Language() {
-  const { dictinory, language } = React.useContext(LanguageContext);
-
   var notificationsTimerId;
+
+  const { dictinory, language } = React.useContext(LanguageContext);
 
   const changeLanguage = async (language1) => {
     if (language == language1) return;

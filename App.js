@@ -14,12 +14,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import holidaysListScreen from "./assets/screens/holidaysListScreen";
-import holidayScreen from "./assets/screens/holidayScreen";
-import categoriesScreen from "./assets/screens/categoriesScreen";
-import SettingsScreen from "./assets/screens/SettingsScreen";
-import settingsScreen_Language from "./assets/screens/settingsScreen_Language";
-
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -30,11 +24,15 @@ const usDictinory = require("./assets/dictinories/us.json");
 const ruDictinory = require("./assets/dictinories/ru.json");
 const defaultDictinory = require("./assets/dictinories/default.json");
 
-function fetchTimeLimit(url, limit = 1500) {
+function fetchTimeLimit(urls, limit = 1500) {
   return new Promise(async (resolve) => {
-    fetch(url).then((response) => {
-      resolve(response);
-    });
+    (async () => {
+      var responseList = [];
+      for (let index = 0; index < urls.length; index++) {
+        responseList.push(await fetch(urls[index]));
+      }
+      resolve(responseList);
+    })();
     setTimeout(() => {
       resolve(null);
     }, limit);
@@ -42,8 +40,6 @@ function fetchTimeLimit(url, limit = 1500) {
 }
 
 async function loadHolidays(language) {
-  var defaultHolidays = require("./assets/db/defaultHolidays.json");
-
   var customHolidays = await AsyncStorage.getItem("customHolidays");
 
   if (customHolidays == null) {
@@ -53,36 +49,37 @@ async function loadHolidays(language) {
     customHolidays = JSON.parse(customHolidays);
   }
 
-  var updatedHolidays = JSON.parse(
-    await AsyncStorage.getItem("updatedHolidays")
-  );
-  var updatedHolidaysFromNet = await fetchTimeLimit(
-    "http://holidays-app.github.io/db/updatedHolidays.json"
-  );
+  var ruHolidays = await AsyncStorage.getItem("ruHolidays");
+  ruHolidays = ruHolidays ? ruHolidays : require("./assets/holidays/ru.json");
 
-  if (updatedHolidaysFromNet != null) {
-    updatedHolidaysFromNet = await updatedHolidaysFromNet.json();
+  var usHolidays = await AsyncStorage.getItem("usHolidays");
+  usHolidays = usHolidays ? usHolidays : require("./assets/holidays/us.json");
 
-    if (
-      JSON.stringify(updatedHolidays) != JSON.stringify(updatedHolidaysFromNet)
-    ) {
-      updatedHolidays = updatedHolidaysFromNet;
-      await AsyncStorage.setItem(
-        "updatedHolidays",
-        JSON.stringify(updatedHolidaysFromNet)
-      );
+  var holidaysFromNet = await fetchTimeLimit([
+    "http://holidays-app.github.io/holidays/ru.json",
+    "http://holidays-app.github.io/holidays/us.json",
+  ]);
+
+  if (holidaysFromNet != null) {
+    var ruHolidaysFromNet = await holidaysFromNet[0].json();
+    var usHolidaysFromNet = await holidaysFromNet[1].json();
+
+    if (JSON.stringify(ruHolidaysFromNet) != JSON.stringify(ruHolidays)) {
+      ruHolidays = ruHolidaysFromNet;
+      await AsyncStorage.setItem("ruHolidays", JSON.stringify(ruHolidays));
     }
-  } else if (updatedHolidays == null) {
-    updatedHolidays = [];
-    await AsyncStorage.setItem("updatedHolidays", JSON.stringify([]));
+
+    if (JSON.stringify(usHolidaysFromNet) != JSON.stringify(usHolidays)) {
+      usHolidays = usHolidaysFromNet;
+      await AsyncStorage.setItem("usHolidays", JSON.stringify(usHolidays));
+    }
   }
 
-  var holidaysList = Array.prototype.concat(
-    defaultHolidays,
-    customHolidays,
-    updatedHolidays
-  );
-  return holidaysList;
+  if (language == "ru") {
+    return [].concat(ruHolidays, customHolidays);
+  } else {
+    return [].concat(usHolidays, customHolidays);
+  }
 }
 
 export async function setNotifications(holidaysList, language) {
@@ -138,22 +135,22 @@ export async function setNotifications(holidaysList, language) {
   }
 }
 
+import holidaysListScreen from "./assets/screens/holidaysListScreen";
+import holidayScreen from "./assets/screens/holidayScreen";
+import categoriesScreen from "./assets/screens/categoriesScreen";
+import settingsScreen from "./assets/screens/settingsScreen";
+import settingsScreen_Language from "./assets/screens/settingsScreen_Language";
+
 function firstScreen() {
-  const { dictinory } = React.useContext(LanguageContext);
+  const { dictinory, language } = React.useContext(LanguageContext);
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="upcomingHolidaysScreen"
         component={holidaysListScreen}
         options={{
-          headerBackTitle:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.upcomingHolidaysScreen.title,
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.upcomingHolidaysScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -163,14 +160,8 @@ function firstScreen() {
         name="holidayScreen"
         component={holidayScreen}
         options={{
-          headerBackTitle:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.holidayScreen.title,
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.holidayScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -181,21 +172,15 @@ function firstScreen() {
 }
 
 function secondScreen() {
-  const { dictinory } = React.useContext(LanguageContext);
+  const { dictinory, language } = React.useContext(LanguageContext);
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="categoriesScreen"
         component={categoriesScreen}
         options={{
-          headerBackTitle:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.categoriesScreen.title,
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.categoriesScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -205,14 +190,8 @@ function secondScreen() {
         name="categoryScreen"
         component={holidaysListScreen}
         options={({ route }) => ({
-          headerBackTitle:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.categories[route.params.category],
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.categories[route.params.category],
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -222,14 +201,8 @@ function secondScreen() {
         name="holidayScreen"
         component={holidayScreen}
         options={{
-          headerBackTitle:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.holidayScreen.title,
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.holidayScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -240,18 +213,15 @@ function secondScreen() {
 }
 
 function thirdScreen() {
-  const { dictinory } = React.useContext(LanguageContext);
+  const { dictinory, language } = React.useContext(LanguageContext);
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="settingsScreen"
         component={settingsScreen}
         options={{
-          headerBackTitle: dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.settingsScreen.title,
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.settingsScreen.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -261,14 +231,8 @@ function thirdScreen() {
         name="settingsScreen_Language"
         component={settingsScreen_Language}
         options={{
-          headerBackTitle:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.backButtonText,
-          title:
-            this.props.route.params.language == ""
-              ? ""
-              : dictinory.settingsScreen_Language.title,
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: !language ? "" : dictinory.settingsScreen_Language.title,
           headerTitleStyle: {
             fontSize: 21,
           },
@@ -279,9 +243,7 @@ function thirdScreen() {
 }
 
 function App() {
-  const [language, setLanguage] = React.useState(
-    Localization.locale == "ru-RU" ? "ru" : "us"
-  );
+  const [language, setLanguage] = React.useState();
   const languageContext = React.useMemo(
     () => ({
       get dictinory() {
@@ -307,9 +269,6 @@ function App() {
       get holidays() {
         return holidays;
       },
-      set holidays(value) {
-        setHolidays(value);
-      },
       async refreshHolidays() {
         setHolidays(await loadHolidays(language));
       },
@@ -317,14 +276,21 @@ function App() {
     [holidays]
   );
 
-  React.useEffect(async () => {
-    {
-      let language = await AsyncStorage.getItem("language");
-      if (language != null) setLanguage(language);
-    }
-    setHolidays(await loadHolidays(language));
+  React.useEffect(() => {
+    (async () => {
+      {
+        let language = await AsyncStorage.getItem("language");
+        if (language != null) {
+          setLanguage(language);
+        } else {
+          setLanguage(Localization.locale == "ru-RU" ? "ru" : "us");
+        }
+      }
+      setHolidays(await loadHolidays(language));
+      setNotifications(holidays, language);
+    })();
   });
-  
+
   return (
     <LanguageContext.Provider value={languageContext}>
       <HolidaysContext.Provider value={holidaysContext}>
@@ -334,6 +300,7 @@ function App() {
               activeTintColor: "#f7941d",
               tabStyle: { justifyContent: "center" },
               showLabel: false,
+              animationEnabled: true,
             }}
           >
             <Tab.Screen

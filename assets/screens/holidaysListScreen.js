@@ -10,13 +10,14 @@ import {
 
 import { Icon } from "react-native-elements";
 
-import LanguageContext from ".../App.js";
-import HolidaysContext from ".../App.js";
+import { useScrollToTop } from "@react-navigation/native";
+
+import { LanguageContext, HolidaysContext } from "../../App";
 
 function sortByDateAndCategory(holidaysList) {
   const date = new Date();
   var categoriesList = [];
-  for (let category in dictinory.en.categories) {
+  for (let category in require("../dictinories/us.json").categories) {
     categoriesList.push(category);
   }
 
@@ -69,7 +70,7 @@ function sortByDateAndCategory(holidaysList) {
   return holidaysListLocal;
 }
 
-const styles = StyleSheet({
+const styles = StyleSheet.create({
   date: {
     fontSize: 16,
     top: "50%",
@@ -100,10 +101,15 @@ const styles = StyleSheet({
 });
 
 function holidaysListScreen({ navigation, route }) {
+  var filteredHolidays;
+
   const { dictinory, language } = React.useContext(LanguageContext);
   const { holidays, refreshHolidays } = React.useContext(HolidaysContext);
 
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const flatListRef = React.useRef(null);
+  useScrollToTop(flatListRef);
 
   const getBorderStyles = (item) => {
     var BorderStyles = {};
@@ -113,19 +119,20 @@ function holidaysListScreen({ navigation, route }) {
     ) {
       BorderStyles.borderColor = "#f7941d";
       BorderStyles.borderWidth = 3;
-      if (holidaysList.indexOf(item) != 0) {
+      if (filteredHolidays.indexOf(item) != 0) {
         BorderStyles.borderTopColor = "#d6d7da";
         BorderStyles.borderTopWidth = 1.5;
       }
       if (
-        holidaysList[holidaysList.indexOf(item) + 1].date.day ==
+        filteredHolidays.indexOf(item) != filteredHolidays.length - 1 &&
+        filteredHolidays[filteredHolidays.indexOf(item) + 1].date.day ==
           new Date().getDate() &&
-        holidaysList[holidaysList.indexOf(item) + 1].date.month ==
+        filteredHolidays[filteredHolidays.indexOf(item) + 1].date.month ==
           new Date().getMonth() + 1
       ) {
         BorderStyles.borderBottomWidth = 0;
       }
-    } else if (holidaysList.indexOf(item) != 0) {
+    } else if (filteredHolidays.indexOf(item) != 0) {
       BorderStyles = { borderTopColor: "#d6d7da", borderTopWidth: 1.5 };
     }
     return BorderStyles;
@@ -145,32 +152,41 @@ function holidaysListScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={sortByDateAndCategory(
-          route.params == undefined
-            ? holidays
-            : holidays.filter(
-                (holiday) => holiday.category == route.params.category
-              )
-        )}
-        renderItem={({ item }) => (
-          <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
-            <View
-              style={Object.assign({}, styles.listItem, getBorderStyles(item))}
-            >
-              <Text style={styles.name}>{item[language].name}</Text>
-              <Text style={styles.date}>
-                {item.date.day + " " + dictinory.months[item.date.month - 1]}
-              </Text>
-              <Icon
-                name="angle-right"
-                type="font-awesome"
-                color={"#d6d7da"}
-                size={80}
-                iconStyle={styles.angleRight}
-              />
-            </View>
-          </TouchableNativeFeedback>
-        )}
+        ref={flatListRef}
+        data={
+          (filteredHolidays = sortByDateAndCategory(
+            route.params == undefined
+              ? holidays
+              : holidays.filter(
+                  (holiday) => holiday.category == route.params.category
+                )
+          ))
+        }
+        renderItem={({ item }) => {
+          return (
+            <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
+              <View
+                style={Object.assign(
+                  {},
+                  styles.listItem,
+                  getBorderStyles(item)
+                )}
+              >
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.date}>
+                  {item.date.day + " " + dictinory.months[item.date.month - 1]}
+                </Text>
+                <Icon
+                  name="angle-right"
+                  type="font-awesome"
+                  color={"#d6d7da"}
+                  size={80}
+                  iconStyle={styles.angleRight}
+                />
+              </View>
+            </TouchableNativeFeedback>
+          );
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

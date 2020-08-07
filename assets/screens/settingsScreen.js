@@ -3,7 +3,7 @@ import { Text, View, TouchableNativeFeedback, StyleSheet } from "react-native";
 
 import { Icon } from "react-native-elements";
 
-import LanguageContext from ".../App.js";
+import { LanguageContext } from "../../App";
 
 const styles = StyleSheet.create({
   container: {
