@@ -10,8 +10,14 @@ import {
 } from "react-native";
 
 import * as Notifications from "expo-notifications";
+import * as Permissions from "expo-permissions";
 
-import { LanguageContext, setNotifications } from "../../App";
+import {
+  LanguageContext,
+  HolidaysContext,
+  setNotifications,
+  loadHolidays,
+} from "../../App";
 
 const resurces = {
   unitedStatesFlag: require("../textures/unitedStatesFlag.png"),
@@ -60,19 +66,30 @@ const styles = StyleSheet.create({
 function settingsScreen_Language() {
   var notificationsTimerId;
 
-  const { dictinory, language } = React.useContext(LanguageContext);
+  const { dictinory, language, setLanguage } = React.useContext(
+    LanguageContext
+  );
+  const { setHolidays } = React.useContext(HolidaysContext);
 
-  const changeLanguage = async (language1) => {
-    if (language == language1) return;
+  const changeLanguage = async (newLanguage) => {
+    if (language == newLanguage) return;
 
-    await AsyncStorage.setItem("language", language1);
+    await AsyncStorage.setItem("language", newLanguage);
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    let holidays = await loadHolidays(newLanguage, false);
 
-    clearTimeout(notificationsTimerId);
-    notificationsTimerId = setTimeout(setNotifications, 10000);
+    if (
+      JSON.parse(await AsyncStorage.getItem("allowNotifications")) &&
+      (await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted
+    ) {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      clearTimeout(notificationsTimerId);
+      notificationsTimerId = setTimeout(setNotifications, 2000, holidays);
+    }
 
-    language = language1;
+    setHolidays(holidays);
+
+    setLanguage(newLanguage);
   };
 
   return (

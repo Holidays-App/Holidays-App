@@ -5,10 +5,7 @@
     "description": "«Holidays» - is a simple and convenient event guide for any day. The app provides access to information about any holidays on Russian and English languages. The app contains information about religious holidays, cultural holidays, job's holidays, festivals and many other equally interesting events.",
     "githubUrl": "https://github.com/Holidays-App/Holidays-App",
     "privacy": "public",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "0.1.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,14 +17,13 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.holidaysapp.holidays",
+      "useNextNotificationsApi": true,
+      "package": "com.holidaysapp.holidaysapp",
       "versionCode": 1
     }
   }

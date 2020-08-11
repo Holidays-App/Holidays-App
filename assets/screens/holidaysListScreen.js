@@ -12,7 +12,13 @@ import { Icon } from "react-native-elements";
 
 import { useScrollToTop } from "@react-navigation/native";
 
-import { LanguageContext, HolidaysContext } from "../../App";
+import {
+  LanguageContext,
+  HolidaysContext,
+  loadHolidays,
+  languageAndHolidaysPromise,
+  setNotifications,
+} from "../../App";
 
 function sortByDateAndCategory(holidaysList) {
   const date = new Date();
@@ -70,6 +76,12 @@ function sortByDateAndCategory(holidaysList) {
   return holidaysListLocal;
 }
 
+//create your forceUpdate hook
+function useForceUpdate() {
+  const [value, setValue] = React.useState(0); // integer state
+  return () => setValue((value) => ++value); // update the state to force render
+}
+
 const styles = StyleSheet.create({
   date: {
     fontSize: 16,
@@ -103,10 +115,12 @@ const styles = StyleSheet.create({
 function holidaysListScreen({ navigation, route }) {
   var filteredHolidays;
 
-  const { dictinory, language } = React.useContext(LanguageContext);
-  const { holidays, refreshHolidays } = React.useContext(HolidaysContext);
+  const { dictinory, setLanguage } = React.useContext(LanguageContext);
+  const { holidays, setHolidays } = React.useContext(HolidaysContext);
 
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const forceUpdate = useForceUpdate();
 
   const flatListRef = React.useRef(null);
   useScrollToTop(flatListRef);
@@ -140,7 +154,7 @@ function holidaysListScreen({ navigation, route }) {
 
   const refresh = async () => {
     setRefreshing(true);
-    await refreshHolidays();
+    await forceUpdate();
     setRefreshing(false);
   };
 
@@ -148,6 +162,27 @@ function holidaysListScreen({ navigation, route }) {
     var parameters = { holiday };
     navigation.navigate("holidayScreen", parameters);
   };
+
+  React.useEffect(() => {
+    if (route.params == undefined) {
+      (async () => {
+        setRefreshing(true);
+
+        let [language, holidays] = await languageAndHolidaysPromise;
+        setLanguage(language);
+
+        setHolidays(holidays);
+        setNotifications(holidays);
+
+        setRefreshing(false);
+
+        loadHolidays(language).then((newHolidays) => {
+          if (JSON.stringify(newHolidays) != JSON.stringify(holidays))
+            setHolidays(newHolidays);
+        });
+      })();
+    }
+  }, []);
 
   return (
     <View style={styles.container}>

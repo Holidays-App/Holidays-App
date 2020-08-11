@@ -1,0 +1,51 @@
+{
+  "us": [
+    {
+      "name": "New year!",
+      "description": "There have been celebrations to mark the beginning of a new year for thousands of years. Sometimes these were simply an opportunity for people to eat, drink and have fun, but in some places the festivities were connected to the land or astronomical events. For example, in Egypt the beginning of the year coincided with when the River Nile flooded, and this normally happened when the star Sirius rose. The Persians and Phoenicians started their new year at the spring equinox (this is around 20 March when the Sun shines more or less directly on the equator and the length of the night and the day are almost the same).",
+      "message": "Nights will be dark but days will be light, wish your life to be always bright – Happy New Year.",
+      "date": { "day": 1, "month": 1 },
+      "category": "General holidays",
+      "icon": "",
+      "notify": true
+    },
+    {
+      "name": "International Women's Day",
+      "description": "International Women's Day is observed annually on March 8th. This global day celebrates the cultural, political, social and economic achievements of women. The day also brings international awareness to gender parity. According to the World Economic Forum, global gender equality is estimated to be achieved by 2133.",
+      "message": "Do you know? International Women’s Day is celebrated on March 8 every year. The name provides no clue of the date for english-speaking people but for Chinese people, the date is incorporated into the Chinese name of International Women’s Day, which can be literally translated as “three eight women’s day”.",
+      "date": { "day": 8, "month": 3 },
+      "category": "General holidays",
+      "icon": "",
+      "notify": true
+    }
+  ],
+  "ru": [
+    {
+      "name": "Международный женский день",
+      "description": "Междунаро́дный же́нский день — праздник, отмечаемый ежегодно 8 марта в ряде стран как «женский день». Исторически появился как день солидарности женщин во многих странах в борьбе за равные права и эмансипацию. С марта 1975 года Международный женский день отмечается в ООН.",
+      "message": "123",
+      "date": { "day": 8, "month": 3 },
+      "category": "General holidays",
+      "icon": "",
+      "notify": true
+    },
+    {
+      "name": "Международный день защиты детей",
+      "description": "Решение о проведении Международного дня защиты детей было принято на Всемирной конференции, посвященной вопросам благополучия детей, которая состоялась в Женеве в 1925 году. Почему этот детский праздник было решено отмечать именно 1 июня? По одной из версий, 1 июня 1925 года Генеральный консул Китая в Сан-Франциско собрал группу китайских детей-сирот и устроил для них празднование Дуань-у цзе (Фестиваля лодок-драконов). По счастливой случайности этот день совпал и со временем проведения «детской» конференции в Женеве.\\n\\nПосле Второй мировой войны, когда проблемы сохранения здоровья и благополучия детей были как никогда актуальны, в 1949 году в Париже состоялся конгресс женщин, на котором прозвучала клятва о безустанной борьбе за обеспечение прочного мира, как единственной гарантии счастья детей. Через год, 1 июня 1950-года, был проведен первый Международный день защиты детей, после чего этот праздник проводится ежегодно.",
+      "message": "Международный день защиты детей отмечается ежегодно более чем в 30 странах мира и является одним из наиболее старых международных праздников. Решение о его проведении было принято в 1925 году на Всемирной конференции в Женеве, посвященной вопросам благополучия детей. Впервые день защиты детей был проведен в 1950 году в 51 стране мира. ООН поддержала эту инициативу и объявила защиту прав, жизни и здоровья детей одним из приоритетных направлений своей деятельности.",
+      "date": { "day": 1, "month": 6 },
+      "category": "General holidays",
+      "icon": "",
+      "notify": false
+    },
+    {
+      "name": "Рождество (по Юлианскому календарю)",
+      "description": "Во всем мире Рождество празднуют 25 декабря, только некоторые страны, которые находятся под православным влиянием, продолжают праздновать Рождество по, так званому, старому стилю - 7 Января. Вся эта суета из-за того, что православная церковь использует давно устаревший Юлианский календарь, введённый Юлием Цезарем. Европа отказалась от Юлианского календаря из-за его погрешностей более 500 лет назад, и в 1582 году перешла на более точный Григорианский календарь. По Юлианскому календарю Рождество выпадает на 7 Января, а Новый год - 14. Например, в Украине можно наблюдать такой парадокс: люди празднуют Рождество (когда родился Иисус) по устаревшему Юлианскому календарю, а Новый год (когда Иисусу дали Имя) - по современному Григорианскому. Парадокс заключается в том, что Новый год получился перед Рождеством.",
+      "message": "С Рождеством Христовым! Пусть этот волшебный праздник наполнит вашу жизнь светом, теплом, радостью и благополучием. Желаем вам мира, добра, любви, семейного уюта.",
+      "date": { "day": 7, "month": 1 },
+      "category": "Religious holiday",
+      "icon": "",
+      "notify": true
+    }
+  ]
+}

@@ -4,10 +4,15 @@
   },
   "settingsScreen": {
     "title": "Настройки",
-    "languageButtonText": "Язык"
+    "languageButtonText": "Язык",
+    "notificationsButtonText": "Уведомления"
   },
   "settingsScreen_Language": {
     "title": "Язык"
+  },
+  "settingsScreen_Notifications": {
+    "onButtonText": "Включить уведомления",
+    "description": "Получайте напоминания о важных праздниках и событиях"
   },
   "categoriesScreen": {
     "title": "Категории"

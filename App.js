@@ -24,22 +24,16 @@ const usDictinory = require("./assets/dictinories/us.json");
 const ruDictinory = require("./assets/dictinories/ru.json");
 const defaultDictinory = require("./assets/dictinories/default.json");
 
-function fetchTimeLimit(urls, limit = 1500) {
+function fetchTimeLimit(url, limit = 1500) {
   return new Promise(async (resolve) => {
-    (async () => {
-      var responseList = [];
-      for (let index = 0; index < urls.length; index++) {
-        responseList.push(await fetch(urls[index]));
-      }
-      resolve(responseList);
-    })();
+    fetch(url).then((response) => resolve(response));
     setTimeout(() => {
       resolve(null);
     }, limit);
   });
 }
 
-async function loadHolidays(language) {
+export async function loadHolidays(language, loadFromNet = true) {
   var customHolidays = await AsyncStorage.getItem("customHolidays");
 
   if (customHolidays == null) {
@@ -49,48 +43,50 @@ async function loadHolidays(language) {
     customHolidays = JSON.parse(customHolidays);
   }
 
-  var ruHolidays = await AsyncStorage.getItem("ruHolidays");
-  ruHolidays = ruHolidays ? ruHolidays : require("./assets/holidays/ru.json");
+  var holidays = await AsyncStorage.getItem("holidays");
+  holidays = holidays
+    ? JSON.parse(holidays)
+    : require("./assets/holidays.json");
 
-  var usHolidays = await AsyncStorage.getItem("usHolidays");
-  usHolidays = usHolidays ? usHolidays : require("./assets/holidays/us.json");
+  if (loadFromNet) {
+    var holidaysFromNet = await fetchTimeLimit(
+      "http://holidays-app.github.io/holidays.json"
+    );
+    if (holidaysFromNet != null) {
+      holidaysFromNet = await holidaysFromNet.json();
 
-  var holidaysFromNet = await fetchTimeLimit([
-    "http://holidays-app.github.io/holidays/ru.json",
-    "http://holidays-app.github.io/holidays/us.json",
-  ]);
-
-  if (holidaysFromNet != null) {
-    var ruHolidaysFromNet = await holidaysFromNet[0].json();
-    var usHolidaysFromNet = await holidaysFromNet[1].json();
-
-    if (JSON.stringify(ruHolidaysFromNet) != JSON.stringify(ruHolidays)) {
-      ruHolidays = ruHolidaysFromNet;
-      await AsyncStorage.setItem("ruHolidays", JSON.stringify(ruHolidays));
-    }
-
-    if (JSON.stringify(usHolidaysFromNet) != JSON.stringify(usHolidays)) {
-      usHolidays = usHolidaysFromNet;
-      await AsyncStorage.setItem("usHolidays", JSON.stringify(usHolidays));
+      if (JSON.stringify(holidaysFromNet) != JSON.stringify(holidays)) {
+        holidays = holidaysFromNet;
+        await AsyncStorage.setItem("holidays", JSON.stringify(holidays));
+      }
     }
   }
 
   if (language == "ru") {
-    return [].concat(ruHolidays, customHolidays);
+    return [].concat(holidays.ru, customHolidays);
   } else {
-    return [].concat(usHolidays, customHolidays);
+    return [].concat(holidays.us, customHolidays);
   }
 }
 
-export async function setNotifications(holidaysList, language) {
+export async function setNotifications(holidaysList) {
+  var allowNotifications = await AsyncStorage.getItem("allowNotifications");
+
+  if (allowNotifications == null || JSON.parse(allowNotifications) == true) {
+    if (allowNotifications == null)
+      await AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
+    if (!(await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted)
+      return;
+  } else if (JSON.parse(allowNotifications) == false) {
+    return;
+  }
+
   const date = new Date();
 
   var notificationsList = await Notifications.getAllScheduledNotificationsAsync();
 
-  await Permissions.askAsync(Permissions.NOTIFICATIONS);
-
   holidaysList = holidaysList.filter(
-    (holiday) => holiday[language].message != "" && holiday[language].name != ""
+    (holiday) => holiday.message != "" && holiday.name != ""
   );
 
   for (let index = 0; index < holidaysList.length; index++) {
@@ -119,15 +115,15 @@ export async function setNotifications(holidaysList, language) {
     if (
       !notificationsList.some(
         (element) =>
-          element.content.title == holidaysList[index][language].name &&
-          element.content.body == holidaysList[index][language].message &&
+          element.content.title == holidaysList[index].name &&
+          element.content.body == holidaysList[index].message &&
           element.trigger.value == notificationDate.getTime()
       )
     ) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: holidaysList[index][language].name,
-          body: holidaysList[index][language].message,
+          title: holidaysList[index].name,
+          body: holidaysList[index].message,
         },
         trigger: notificationDate,
       });
@@ -135,14 +131,25 @@ export async function setNotifications(holidaysList, language) {
   }
 }
 
+export const languageAndHolidaysPromise = new Promise(async (resolve) => {
+  let language = await AsyncStorage.getItem("language");
+  if (language == null) {
+    language = Localization.locale == "ru-RU" ? "ru" : "us";
+  }
+  let holidays = await loadHolidays(language, false);
+  resolve([language, holidays]);
+});
+
 import holidaysListScreen from "./assets/screens/holidaysListScreen";
 import holidayScreen from "./assets/screens/holidayScreen";
 import categoriesScreen from "./assets/screens/categoriesScreen";
 import settingsScreen from "./assets/screens/settingsScreen";
 import settingsScreen_Language from "./assets/screens/settingsScreen_Language";
+import settingsScreen_Notifications from "./assets/screens/settingsScreen_Notifications";
 
 function firstScreen() {
   const { dictinory, language } = React.useContext(LanguageContext);
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -238,6 +245,14 @@ function thirdScreen() {
           },
         }}
       />
+      <Stack.Screen
+        name="settingsScreen_Notifications"
+        component={settingsScreen_Notifications}
+        options={{
+          headerBackTitle: !language ? "" : dictinory.backButtonText,
+          title: "",
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -253,10 +268,8 @@ function App() {
           return Object.assign({}, usDictinory, defaultDictinory);
         }
       },
-      get language() {
-        return language;
-      },
-      set language(value) {
+      language,
+      setLanguage(value) {
         setLanguage(value);
       },
     }),
@@ -266,36 +279,20 @@ function App() {
   const [holidays, setHolidays] = React.useState([]);
   const holidaysContext = React.useMemo(
     () => ({
-      get holidays() {
-        return holidays;
-      },
-      async refreshHolidays() {
-        setHolidays(await loadHolidays(language));
+      holidays,
+      setHolidays(value) {
+        setHolidays(value);
       },
     }),
     [holidays]
   );
-
-  React.useEffect(() => {
-    (async () => {
-      {
-        let language = await AsyncStorage.getItem("language");
-        if (language != null) {
-          setLanguage(language);
-        } else {
-          setLanguage(Localization.locale == "ru-RU" ? "ru" : "us");
-        }
-      }
-      setHolidays(await loadHolidays(language));
-      setNotifications(holidays, language);
-    })();
-  });
 
   return (
     <LanguageContext.Provider value={languageContext}>
       <HolidaysContext.Provider value={holidaysContext}>
         <NavigationContainer>
           <Tab.Navigator
+            options={{ animationEnabled: true }}
             tabBarOptions={{
               activeTintColor: "#f7941d",
               tabStyle: { justifyContent: "center" },
