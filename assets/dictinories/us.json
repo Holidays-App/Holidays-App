@@ -11,8 +11,8 @@
     "title": "Language"
   },
   "settingsScreen_Notifications": {
-    "onButtonText": "Enable notifications",
-    "description": "Get reminders of important holidays and events"
+    "onButtonText": "Settings",
+    "description": "Get reminders of important holidays and events. Go to settings to enable notifications"
   },
   "categoriesScreen": {
     "title": "Categories"

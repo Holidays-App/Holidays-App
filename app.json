@@ -23,7 +23,7 @@
     },
     "android": {
       "useNextNotificationsApi": true,
-      "package": "com.holidaysapp.holidaysapp",
+      "package": "com.holidaysapp.holidays",
       "versionCode": 1
     }
   }

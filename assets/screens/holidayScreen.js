@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     paddingLeft: "3%",
     paddingRight: "3%",
     flex: 1,
-    backgroundColor: "#FFFFFF",
+//    backgroundColor: "#FFFFFF",
   },
   ScrollView: {
     paddingBottom: 60,

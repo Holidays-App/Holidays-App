@@ -10,13 +10,12 @@ import {
 } from "react-native";
 
 import * as Notifications from "expo-notifications";
-import * as Permissions from "expo-permissions";
 
 import {
   LanguageContext,
   HolidaysContext,
   setNotifications,
-  loadHolidays,
+  getHolidays,
 } from "../../App";
 
 const resurces = {
@@ -33,7 +32,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+//    backgroundColor: "#FFFFFF",
   },
   russiaFlagButton: {
     left: screenWidth / 5,
@@ -76,16 +75,11 @@ function settingsScreen_Language() {
 
     await AsyncStorage.setItem("language", newLanguage);
 
-    let holidays = await loadHolidays(newLanguage, false);
+    let holidays = await getHolidays(newLanguage);
 
-    if (
-      JSON.parse(await AsyncStorage.getItem("allowNotifications")) &&
-      (await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted
-    ) {
-      await Notifications.cancelAllScheduledNotificationsAsync();
-      clearTimeout(notificationsTimerId);
-      notificationsTimerId = setTimeout(setNotifications, 2000, holidays);
-    }
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    clearTimeout(notificationsTimerId);
+    notificationsTimerId = setTimeout(setNotifications, 2000, holidays);
 
     setHolidays(holidays);
 

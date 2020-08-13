@@ -31,11 +31,11 @@ function settingsScreen_Notifications({ navigation }) {
 
   const openNotificationsSettings = () => {
     if (Platform.OS == "ios") {
-      Linking.openURL("app-settings://notification/expo");
+      Linking.openURL("app-settings://notification/holidays"); // holidays - expo
     } else if (Platform.OS == "android") {
       var action = "android.settings.APP_NOTIFICATION_SETTINGS";
       var extras = [
-        { "android.provider.extra.APP_PACKAGE": "host.exp.exponent" },
+        { "android.provider.extra.APP_PACKAGE": "com.holidaysapp.holidays" }, // com.holidaysapp.holidays - host.exp.exponent
       ];
       Linking.sendIntent(action, extras);
     }
@@ -49,17 +49,18 @@ function settingsScreen_Notifications({ navigation }) {
   }, []);
 
   return (
-    <View
-      style={{
-        height: "100%",
-        position: "relative",
-        alignItems: "center",
-        textAlign: "center",
-        justifyContent: "center",
-      }}
-    >
+    <View>
       <TouchableWithoutFeedback onPress={openNotificationsSettings}>
-        <View style={{ marginTop: "-50%" }}>
+        <View
+          style={{
+            height: "100%",
+            width: "100%",
+            position: "relative",
+            alignItems: "center",
+            textAlign: "center",
+            justifyContent: "center",
+          }}
+        >
           <Icon
             name="bell-slash"
             type="font-awesome"
@@ -71,6 +72,7 @@ function settingsScreen_Notifications({ navigation }) {
               top: 20,
               textAlign: "center",
               fontSize: 19,
+              width: 300,
             }}
           >
             {dictinory.settingsScreen_Notifications.description}
@@ -80,7 +82,7 @@ function settingsScreen_Notifications({ navigation }) {
               top: 40,
               textAlign: "center",
               fontSize: 19,
-              color: "blue",
+              color: "#342dba",
             }}
           >
             {dictinory.settingsScreen_Notifications.onButtonText}

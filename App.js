@@ -1,6 +1,7 @@
 console.disableYellowBox = true;
 
 import * as React from "react";
+
 import { AsyncStorage } from "react-native";
 
 import { Icon } from "react-native-elements";
@@ -24,49 +25,58 @@ const usDictinory = require("./assets/dictinories/us.json");
 const ruDictinory = require("./assets/dictinories/ru.json");
 const defaultDictinory = require("./assets/dictinories/default.json");
 
-function fetchTimeLimit(url, limit = 1500) {
-  return new Promise(async (resolve) => {
-    fetch(url).then((response) => resolve(response));
-    setTimeout(() => {
-      resolve(null);
-    }, limit);
-  });
+export async function updateHolidays() {
+  try {
+    var ruHolidays = await AsyncStorage.getItem("ruHolidays");
+    ruHolidays =
+      ruHolidays != null
+        ? JSON.parse(ruHolidays)
+        : require("./assets/holidays/ru.json");
+
+    var usHolidays = await AsyncStorage.getItem("usHolidays");
+    usHolidays =
+      usHolidays != null
+        ? JSON.parse(usHolidays)
+        : require("./assets/holidays/us.json");
+
+    var ruHolidaysFromNet = await (
+      await fetch("http://holidays-app.github.io/holidays/ru.json")
+    ).json();
+
+    var usHolidaysFromNet = await (
+      await fetch("http://holidays-app.github.io/holidays/us.json")
+    ).json();
+
+    if (JSON.stringify(ruHolidaysFromNet) != JSON.stringify(ruHolidays))
+      await AsyncStorage.setItem(
+        "ruHolidays",
+        JSON.stringify(ruHolidaysFromNet)
+      );
+
+    if (JSON.stringify(usHolidaysFromNet) != JSON.stringify(usHolidays))
+      await AsyncStorage.setItem(
+        "usHolidays",
+        JSON.stringify(usHolidaysFromNet)
+      );
+  } finally {
+    return;
+  }
 }
 
-export async function loadHolidays(language, loadFromNet = true) {
-  var customHolidays = await AsyncStorage.getItem("customHolidays");
+export async function getHolidays(language) {
+  var ruHolidays = await AsyncStorage.getItem("ruHolidays");
+  ruHolidays =
+    ruHolidays != null
+      ? JSON.parse(ruHolidays)
+      : require("./assets/holidays/ru.json");
 
-  if (customHolidays == null) {
-    customHolidays = [];
-    await AsyncStorage.setItem("customHolidays", JSON.stringify([]));
-  } else {
-    customHolidays = JSON.parse(customHolidays);
-  }
+  var usHolidays = await AsyncStorage.getItem("usHolidays");
+  usHolidays =
+    usHolidays != null
+      ? JSON.parse(usHolidays)
+      : require("./assets/holidays/us.json");
 
-  var holidays = await AsyncStorage.getItem("holidays");
-  holidays = holidays
-    ? JSON.parse(holidays)
-    : require("./assets/holidays.json");
-
-  if (loadFromNet) {
-    var holidaysFromNet = await fetchTimeLimit(
-      "http://holidays-app.github.io/holidays.json"
-    );
-    if (holidaysFromNet != null) {
-      holidaysFromNet = await holidaysFromNet.json();
-
-      if (JSON.stringify(holidaysFromNet) != JSON.stringify(holidays)) {
-        holidays = holidaysFromNet;
-        await AsyncStorage.setItem("holidays", JSON.stringify(holidays));
-      }
-    }
-  }
-
-  if (language == "ru") {
-    return [].concat(holidays.ru, customHolidays);
-  } else {
-    return [].concat(holidays.us, customHolidays);
-  }
+  return language == "ru" ? ruHolidays : usHolidays;
 }
 
 export async function setNotifications(holidaysList) {
@@ -136,7 +146,7 @@ export const languageAndHolidaysPromise = new Promise(async (resolve) => {
   if (language == null) {
     language = Localization.locale == "ru-RU" ? "ru" : "us";
   }
-  let holidays = await loadHolidays(language, false);
+  let holidays = await getHolidays(language);
   resolve([language, holidays]);
 });
 
@@ -292,7 +302,6 @@ function App() {
       <HolidaysContext.Provider value={holidaysContext}>
         <NavigationContainer>
           <Tab.Navigator
-            options={{ animationEnabled: true }}
             tabBarOptions={{
               activeTintColor: "#f7941d",
               tabStyle: { justifyContent: "center" },

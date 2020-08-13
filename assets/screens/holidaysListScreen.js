@@ -15,9 +15,10 @@ import { useScrollToTop } from "@react-navigation/native";
 import {
   LanguageContext,
   HolidaysContext,
-  loadHolidays,
-  languageAndHolidaysPromise,
+  getHolidays,
+  updateHolidays,
   setNotifications,
+  languageAndHolidaysPromise,
 } from "../../App";
 
 function sortByDateAndCategory(holidaysList) {
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+//    backgroundColor: "#FFFFFF",
   },
   listItem: {
     flex: 1,
@@ -169,6 +170,7 @@ function holidaysListScreen({ navigation, route }) {
         setRefreshing(true);
 
         let [language, holidays] = await languageAndHolidaysPromise;
+
         setLanguage(language);
 
         setHolidays(holidays);
@@ -176,9 +178,12 @@ function holidaysListScreen({ navigation, route }) {
 
         setRefreshing(false);
 
-        loadHolidays(language).then((newHolidays) => {
-          if (JSON.stringify(newHolidays) != JSON.stringify(holidays))
-            setHolidays(newHolidays);
+        updateHolidays().then(async () => {
+          let updatedHolidays = await getHolidays(language);
+          if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
+            setHolidays(updatedHolidays);
+            setNotifications(updatedHolidays);
+          }
         });
       })();
     }
