@@ -20,12 +20,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     position: "relative",
-    /*
-    
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    position: "absolute"
-    */
   },
   languageButton: {
     position: "absolute",
@@ -77,11 +71,11 @@ function settingsScreen({ navigation }) {
 
     if ((await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted) {
       if (newValue) {
-        await AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
+        AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
         clearTimeout(notificationsTimerId);
         notificationsTimerId = setTimeout(setNotifications, 2000, holidays);
       } else {
-        await AsyncStorage.setItem("allowNotifications", JSON.stringify(false));
+        AsyncStorage.setItem("allowNotifications", JSON.stringify(false));
         clearTimeout(notificationsTimerId);
         notificationsTimerId = setTimeout(
           Notifications.cancelAllScheduledNotificationsAsync,
@@ -90,21 +84,25 @@ function settingsScreen({ navigation }) {
       }
     } else {
       setAllowNotifications(false);
+      let notificationsPrem = await Permissions.askAsync(
+        Permissions.NOTIFICATIONS
+      );
       if (
-        (await Permissions.getAsync(Permissions.NOTIFICATIONS)).canAskAgain &&
-        Platform.OS == "android"
+        Platform.OS == "ios"
+          ? notificationsPrem.permissions.notifications.ios.status == 0
+          : notificationsPrem.canAskAgain
       ) {
         if ((await Permissions.askAsync(Permissions.NOTIFICATIONS)).granted) {
-          await AsyncStorage.setItem(
-            "allowNotifications",
-            JSON.stringify(true)
-          );
+          AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
           clearTimeout(notificationsTimerId);
           notificationsTimerId = setTimeout(setNotifications, 2000, holidays);
           setAllowNotifications(true);
         }
       } else {
-        await navigation.navigate("settingsScreen_Notifications");
+        navigation
+          .dangerouslyGetParent()
+          .dangerouslyGetParent()
+          .navigate("settingsScreen_Notifications");
       }
     }
   };
@@ -137,16 +135,16 @@ function settingsScreen({ navigation }) {
             <Text style={styles.sectionName}>
               {dictinory.settingsScreen.notificationsButtonText}
             </Text>
-            {allowNotifications == null ? null : (
+            {allowNotifications != null ? (
               <Switch
                 trackColor={{ false: "#dddddd", true: "#6edc5f" }}
-                thumbColor={"#FFFFFF"}
+                thumbColor={"#ffffff"}
                 ios_backgroundColor="#dddddd"
                 onValueChange={toggleAllowNotifications}
                 value={allowNotifications}
                 style={styles.notificationsSwitch}
               />
-            )}
+            ) : null}
           </View>
         </TouchableWithoutFeedback>
       </View>

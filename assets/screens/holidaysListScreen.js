@@ -17,8 +17,7 @@ import {
   HolidaysContext,
   getHolidays,
   updateHolidays,
-  setNotifications,
-  languageAndHolidaysPromise,
+  setNotifications
 } from "../../App";
 
 function sortByDateAndCategory(holidaysList) {
@@ -77,10 +76,9 @@ function sortByDateAndCategory(holidaysList) {
   return holidaysListLocal;
 }
 
-//create your forceUpdate hook
 function useForceUpdate() {
-  const [value, setValue] = React.useState(0); // integer state
-  return () => setValue((value) => ++value); // update the state to force render
+  const [value, setValue] = React.useState(0);
+  return () => setValue((value) => ++value);
 }
 
 const styles = StyleSheet.create({
@@ -101,7 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-//    backgroundColor: "#FFFFFF",
+    //    backgroundColor: "#ffffff",
   },
   listItem: {
     flex: 1,
@@ -116,7 +114,7 @@ const styles = StyleSheet.create({
 function holidaysListScreen({ navigation, route }) {
   var filteredHolidays;
 
-  const { dictinory, setLanguage } = React.useContext(LanguageContext);
+  const { dictinory, language } = React.useContext(LanguageContext);
   const { holidays, setHolidays } = React.useContext(HolidaysContext);
 
   const [refreshing, setRefreshing] = React.useState(false);
@@ -167,16 +165,7 @@ function holidaysListScreen({ navigation, route }) {
   React.useEffect(() => {
     if (route.params == undefined) {
       (async () => {
-        setRefreshing(true);
-
-        let [language, holidays] = await languageAndHolidaysPromise;
-
-        setLanguage(language);
-
-        setHolidays(holidays);
         setNotifications(holidays);
-
-        setRefreshing(false);
 
         updateHolidays().then(async () => {
           let updatedHolidays = await getHolidays(language);

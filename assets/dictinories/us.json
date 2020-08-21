@@ -1,4 +1,13 @@
 {
+  "firstLaunchScreen": {
+    "nextTabButtonText": "Next",
+    "startButtonText": "Begin!",
+    "allowNotificationsButtonText": "Enable notifications",
+    "firstTabText": "Your holiday guide for every day",
+    "languageTabText": "Choose language:",
+    "notificationsTabText": "Notifications",
+    "finallyTabText": "Discover the wonderful world of holidays!"
+  },
   "upcomingHolidaysScreen": {
     "title": "Upcoming holidays"
   },
@@ -11,7 +20,7 @@
     "title": "Language"
   },
   "settingsScreen_Notifications": {
-    "onButtonText": "Settings",
+    "settingsButtonText": "Settings",
     "description": "Get reminders of important holidays and events. Go to settings to enable notifications"
   },
   "categoriesScreen": {

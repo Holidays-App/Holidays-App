@@ -1,4 +1,14 @@
 {
+  "firstLaunchScreen": {
+    "nextTabButtonText": "Далее",
+    "startButtonText": "Начать!",
+    "allowNotificationsButtonText": "Включить уведомления",
+    "notificationsTabTitle": "Уведомления",
+    "firstTabText": "Твой путеводитель по праздникам на каждый день",
+    "languageTabText": "Выберите язык:",
+    "notificationsTabText": "Уведомления",
+    "finallyTabText": "Откройте для себя чудесный мир праздников!"
+  },
   "upcomingHolidaysScreen": {
     "title": "Предстоящие праздники"
   },
@@ -11,7 +21,7 @@
     "title": "Язык"
   },
   "settingsScreen_Notifications": {
-    "onButtonText": "Настройки",
+    "settingsButtonText": "Настройки",
     "description": "Получайте напоминания о важных праздниках и событиях. Перейдите в настройки чтобы включить уведомления"
   },
   "categoriesScreen": {

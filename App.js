@@ -1,5 +1,27 @@
 console.disableYellowBox = true;
 
+function isObject(item) {
+  return item && typeof item === "object" && !Array.isArray(item);
+}
+
+function mergeDeep(target, ...sources) {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+
+  return mergeDeep(target, ...sources);
+}
+
 import * as React from "react";
 
 import { AsyncStorage } from "react-native";
@@ -7,6 +29,7 @@ import { AsyncStorage } from "react-native";
 import { Icon } from "react-native-elements";
 
 import * as Notifications from "expo-notifications";
+import * as SplashScreen from "expo-splash-screen";
 import * as Permissions from "expo-permissions";
 import * as Localization from "expo-localization";
 //import * as Font from "expo-font";
@@ -18,32 +41,35 @@ import { createStackNavigator } from "@react-navigation/stack";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-export const LanguageContext = React.createContext();
-export const HolidaysContext = React.createContext();
-
 const usDictinory = require("./assets/dictinories/us.json");
 const ruDictinory = require("./assets/dictinories/ru.json");
 const defaultDictinory = require("./assets/dictinories/default.json");
 
+export const LanguageContext = React.createContext();
+export const HolidaysContext = React.createContext();
+
 export async function updateHolidays() {
   try {
-    var ruHolidays = await AsyncStorage.getItem("ruHolidays");
+    let [[, ruHolidays], [, usHolidays]] = await AsyncStorage.multiGet([
+      "ruHolidays",
+      "usHolidays",
+    ]);
+
     ruHolidays =
       ruHolidays != null
         ? JSON.parse(ruHolidays)
         : require("./assets/holidays/ru.json");
 
-    var usHolidays = await AsyncStorage.getItem("usHolidays");
     usHolidays =
       usHolidays != null
         ? JSON.parse(usHolidays)
         : require("./assets/holidays/us.json");
 
-    var ruHolidaysFromNet = await (
+    let ruHolidaysFromNet = await (
       await fetch("http://holidays-app.github.io/holidays/ru.json")
     ).json();
 
-    var usHolidaysFromNet = await (
+    let usHolidaysFromNet = await (
       await fetch("http://holidays-app.github.io/holidays/us.json")
     ).json();
 
@@ -64,13 +90,16 @@ export async function updateHolidays() {
 }
 
 export async function getHolidays(language) {
-  var ruHolidays = await AsyncStorage.getItem("ruHolidays");
+  let [[, ruHolidays], [, usHolidays]] = await AsyncStorage.multiGet([
+    "ruHolidays",
+    "usHolidays",
+  ]);
+
   ruHolidays =
     ruHolidays != null
       ? JSON.parse(ruHolidays)
       : require("./assets/holidays/ru.json");
 
-  var usHolidays = await AsyncStorage.getItem("usHolidays");
   usHolidays =
     usHolidays != null
       ? JSON.parse(usHolidays)
@@ -84,7 +113,7 @@ export async function setNotifications(holidaysList) {
 
   if (allowNotifications == null || JSON.parse(allowNotifications) == true) {
     if (allowNotifications == null)
-      await AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
+      AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
     if (!(await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted)
       return;
   } else if (JSON.parse(allowNotifications) == false) {
@@ -130,7 +159,7 @@ export async function setNotifications(holidaysList) {
           element.trigger.value == notificationDate.getTime()
       )
     ) {
-      await Notifications.scheduleNotificationAsync({
+      Notifications.scheduleNotificationAsync({
         content: {
           title: holidaysList[index].name,
           body: holidaysList[index].message,
@@ -141,141 +170,164 @@ export async function setNotifications(holidaysList) {
   }
 }
 
-export const languageAndHolidaysPromise = new Promise(async (resolve) => {
-  let language = await AsyncStorage.getItem("language");
-  if (language == null) {
-    language = Localization.locale == "ru-RU" ? "ru" : "us";
-  }
-  let holidays = await getHolidays(language);
-  resolve([language, holidays]);
-});
-
 import holidaysListScreen from "./assets/screens/holidaysListScreen";
 import holidayScreen from "./assets/screens/holidayScreen";
 import categoriesScreen from "./assets/screens/categoriesScreen";
 import settingsScreen from "./assets/screens/settingsScreen";
 import settingsScreen_Language from "./assets/screens/settingsScreen_Language";
 import settingsScreen_Notifications from "./assets/screens/settingsScreen_Notifications";
+import firstLaunchScreen from "./assets/screens/firstLaunchScreen";
 
-function firstScreen() {
-  const { dictinory, language } = React.useContext(LanguageContext);
+function firstTabScreen() {
+  const { dictinory } = React.useContext(LanguageContext);
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerBackTitle: dictinory.backButtonText,
+        headerTitleStyle: {
+          fontSize: 21,
+        },
+      }}
+    >
       <Stack.Screen
         name="upcomingHolidaysScreen"
         component={holidaysListScreen}
         options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.upcomingHolidaysScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
+          title: dictinory.upcomingHolidaysScreen.title,
         }}
       />
       <Stack.Screen
         name="holidayScreen"
         component={holidayScreen}
         options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.holidayScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
+          title: dictinory.holidayScreen.title,
         }}
       />
     </Stack.Navigator>
   );
 }
 
-function secondScreen() {
-  const { dictinory, language } = React.useContext(LanguageContext);
+function secondTabScreen() {
+  const { dictinory } = React.useContext(LanguageContext);
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerBackTitle: dictinory.backButtonText,
+        headerTitleStyle: {
+          fontSize: 21,
+        },
+      }}
+    >
       <Stack.Screen
         name="categoriesScreen"
         component={categoriesScreen}
         options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.categoriesScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
+          title: dictinory.categoriesScreen.title,
         }}
       />
       <Stack.Screen
         name="categoryScreen"
         component={holidaysListScreen}
         options={({ route }) => ({
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.categories[route.params.category],
-          headerTitleStyle: {
-            fontSize: 21,
-          },
+          title: dictinory.categories[route.params.category],
         })}
       />
       <Stack.Screen
         name="holidayScreen"
         component={holidayScreen}
         options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.holidayScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
+          title: dictinory.holidayScreen.title,
         }}
       />
     </Stack.Navigator>
   );
 }
 
-function thirdScreen() {
-  const { dictinory, language } = React.useContext(LanguageContext);
+function thirdTabScreen() {
+  const { dictinory } = React.useContext(LanguageContext);
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerBackTitle: dictinory.backButtonText,
+        headerTitleStyle: {
+          fontSize: 21,
+        },
+      }}
+    >
       <Stack.Screen
         name="settingsScreen"
         component={settingsScreen}
         options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.settingsScreen.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
+          title: dictinory.settingsScreen.title,
         }}
       />
       <Stack.Screen
         name="settingsScreen_Language"
         component={settingsScreen_Language}
         options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: !language ? "" : dictinory.settingsScreen_Language.title,
-          headerTitleStyle: {
-            fontSize: 21,
-          },
-        }}
-      />
-      <Stack.Screen
-        name="settingsScreen_Notifications"
-        component={settingsScreen_Notifications}
-        options={{
-          headerBackTitle: !language ? "" : dictinory.backButtonText,
-          title: "",
+          title: dictinory.settingsScreen_Language.title,
         }}
       />
     </Stack.Navigator>
   );
 }
 
+function mainScreen() {
+  return (
+    <Tab.Navigator
+      tabBarOptions={{
+        activeTintColor: "#f7941d",
+        tabStyle: { justifyContent: "center" },
+        showLabel: false,
+        animationEnabled: true,
+      }}
+    >
+      <Tab.Screen
+        name="firstTabScreen"
+        component={firstTabScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Icon name="calendar" type="foundation" color={color} size={38} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="secondTabScreen"
+        component={secondTabScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Icon
+              name="align-justify"
+              type="foundation"
+              color={color}
+              size={32}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="thirdTabScreen"
+        component={thirdTabScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Icon name="cog" type="font-awesome" color={color} size={29} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 function App() {
-  const [language, setLanguage] = React.useState();
+  const [language, setLanguage] = React.useState(null);
   const languageContext = React.useMemo(
     () => ({
       get dictinory() {
         if (language == "ru") {
-          return Object.assign({}, ruDictinory, defaultDictinory);
+          return mergeDeep({}, ruDictinory, defaultDictinory);
         } else {
-          return Object.assign({}, usDictinory, defaultDictinory);
+          return mergeDeep({}, usDictinory, defaultDictinory);
         }
       },
       language,
@@ -286,7 +338,7 @@ function App() {
     [language]
   );
 
-  const [holidays, setHolidays] = React.useState([]);
+  const [holidays, setHolidays] = React.useState(null);
   const holidaysContext = React.useMemo(
     () => ({
       holidays,
@@ -297,62 +349,72 @@ function App() {
     [holidays]
   );
 
+  const [alreadyLaunched, setAlreadyLaunched] = React.useState(null);
+
+  React.useEffect(() => {
+    (async () => {
+      await SplashScreen.preventAutoHideAsync();
+
+      //await AsyncStorage.clear();
+
+      let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
+        "language",
+        "alreadyLaunched",
+      ]);
+
+      if (language == null) {
+        language =
+          Localization.locale == "ru-RU" || Localization.locale == "ru"
+            ? "ru"
+            : "us";
+      }
+      setLanguage(language);
+
+      if (alreadyLaunched == null) {
+        setAlreadyLaunched(false);
+        await SplashScreen.hideAsync();
+      } else {
+        setAlreadyLaunched(true);
+        let holidays = await getHolidays(language);
+        setHolidays(holidays);
+        await SplashScreen.hideAsync();
+      }
+    })();
+  }, []);
+
   return (
     <LanguageContext.Provider value={languageContext}>
       <HolidaysContext.Provider value={holidaysContext}>
-        <NavigationContainer>
-          <Tab.Navigator
-            tabBarOptions={{
-              activeTintColor: "#f7941d",
-              tabStyle: { justifyContent: "center" },
-              showLabel: false,
-              animationEnabled: true,
-            }}
-          >
-            <Tab.Screen
-              name="firstScreen"
-              component={firstScreen}
-              options={{
-                tabBarIcon: ({ color }) => (
-                  <Icon
-                    name="calendar"
-                    type="foundation"
-                    color={color}
-                    size={38}
-                  />
-                ),
+        {language == null ||
+        (alreadyLaunched === false ? false : holidays == null) ? null : (
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName={
+                alreadyLaunched ? "mainScreen" : "firstLaunchScreen"
+              }
+              screenOptions={{
+                headerShown: false,
+                animationEnabled: false,
               }}
-            />
-            <Tab.Screen
-              name="secondScreen"
-              component={secondScreen}
-              options={{
-                tabBarIcon: ({ color }) => (
-                  <Icon
-                    name="align-justify"
-                    type="foundation"
-                    color={color}
-                    size={32}
-                  />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="thirdScreen"
-              component={thirdScreen}
-              options={{
-                tabBarIcon: ({ color }) => (
-                  <Icon
-                    name="cog"
-                    type="font-awesome"
-                    color={color}
-                    size={29}
-                  />
-                ),
-              }}
-            />
-          </Tab.Navigator>
-        </NavigationContainer>
+            >
+              <Stack.Screen
+                name="firstLaunchScreen"
+                component={firstLaunchScreen}
+              />
+              <Stack.Screen name="mainScreen" component={mainScreen} />
+              <Stack.Screen
+                name="settingsScreen_Notifications"
+                component={settingsScreen_Notifications}
+                options={{
+                  headerShown: true,
+                  animationEnabled: true,
+                  title: "",
+                  headerBackTitle: languageContext.dictinory.backButtonText,
+                }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        )}
       </HolidaysContext.Provider>
     </LanguageContext.Provider>
   );

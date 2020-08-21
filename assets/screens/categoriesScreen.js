@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-//    backgroundColor: "#FFFFFF",
+//    backgroundColor: "#ffffff",
   },
   listItem: {
     flex: 1,

@@ -7,6 +7,7 @@ import {
   Linking,
   AsyncStorage,
   Platform,
+  StyleSheet,
 } from "react-native";
 
 import * as Permissions from "expo-permissions";
@@ -15,16 +16,39 @@ import { Icon } from "react-native-elements";
 
 import { LanguageContext, HolidaysContext, setNotifications } from "../../App";
 
+const styles = StyleSheet.create({
+  container: {
+    height: "100%",
+    width: "100%",
+    position: "relative",
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  text: {
+    top: 20,
+    textAlign: "center",
+    fontSize: 19,
+    width: 300,
+  },
+  settingsButton: {
+    top: 40,
+    textAlign: "center",
+    fontSize: 19,
+    color: "#342dba",
+  },
+});
+
 function settingsScreen_Notifications({ navigation }) {
   const { holidays } = React.useContext(HolidaysContext);
   const { dictinory } = React.useContext(LanguageContext);
 
-  const checkChanges = async (appState) => {
+  const checkNotificationsPermission = async (appState) => {
     if (appState == "active") {
       if ((await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted) {
         navigation.goBack();
-        await AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
-        setNotifications(holidays);
+        AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
+        if (Array.isArray(holidays)) setNotifications(holidays);
       }
     }
   };
@@ -42,50 +66,27 @@ function settingsScreen_Notifications({ navigation }) {
   };
 
   React.useEffect(() => {
-    AppState.addEventListener("change", checkChanges);
+    AppState.addEventListener("change", checkNotificationsPermission);
     return () => {
-      AppState.removeEventListener("change", checkChanges);
+      AppState.removeEventListener("change", checkNotificationsPermission);
     };
   }, []);
 
   return (
     <View>
       <TouchableWithoutFeedback onPress={openNotificationsSettings}>
-        <View
-          style={{
-            height: "100%",
-            width: "100%",
-            position: "relative",
-            alignItems: "center",
-            textAlign: "center",
-            justifyContent: "center",
-          }}
-        >
+        <View style={styles.container}>
           <Icon
             name="bell-slash"
             type="font-awesome"
             color={"#d6d7da"}
             size={120}
           />
-          <Text
-            style={{
-              top: 20,
-              textAlign: "center",
-              fontSize: 19,
-              width: 300,
-            }}
-          >
+          <Text style={styles.text}>
             {dictinory.settingsScreen_Notifications.description}
           </Text>
-          <Text
-            style={{
-              top: 40,
-              textAlign: "center",
-              fontSize: 19,
-              color: "#342dba",
-            }}
-          >
-            {dictinory.settingsScreen_Notifications.onButtonText}
+          <Text style={styles.settingsButton}>
+            {dictinory.settingsScreen_Notifications.settingsButtonText}
           </Text>
         </View>
       </TouchableWithoutFeedback>

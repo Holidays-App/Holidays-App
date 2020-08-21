@@ -19,10 +19,10 @@ import {
 } from "../../App";
 
 const resurces = {
-  unitedStatesFlag: require("../textures/unitedStatesFlag.png"),
-  unitedStatesFlagSelect: require("../textures/unitedStatesFlagSelect.png"),
-  russiaFlag: require("../textures/russiaFlag.png"),
-  russiaFlagSelect: require("../textures/russiaFlagSelect.png"),
+  usFlag: require("../textures/usFlag.png"),
+  usFlagSelect: require("../textures/usFlagSelect.png"),
+  ruFlag: require("../textures/ruFlag.png"),
+  ruFlagSelect: require("../textures/ruFlagSelect.png"),
 };
 
 const screenWidth = Dimensions.get("window").width;
@@ -32,33 +32,22 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-//    backgroundColor: "#FFFFFF",
-  },
-  russiaFlagButton: {
-    left: screenWidth / 5,
     top: screenWidth / 5,
-    position: "absolute",
   },
-  unitedStatesFlagButton: {
-    left: (screenWidth / 5) * 3,
-    top: screenWidth / 5,
-    position: "absolute",
+  ruFlagButton: {
+    marginLeft: screenWidth / 5,
+  },
+  usFlagButton: {
+    marginRight: screenWidth / 5,
   },
   flagImage: {
     width: screenWidth / 5,
     height: screenWidth / 5,
   },
-  ruLanguageName: {
+  languageName: {
     fontSize: 21,
-    left: screenWidth / 5,
-    top: (screenWidth / 5) * 2.2,
-    position: "absolute",
-  },
-  enLanguageName: {
-    fontSize: 21,
-    left: (screenWidth / 5) * 3,
-    top: (screenWidth / 5) * 2.2,
-    position: "absolute",
+    textAlign: "center",
+    top: 15,
   },
 });
 
@@ -73,7 +62,7 @@ function settingsScreen_Language() {
   const changeLanguage = async (newLanguage) => {
     if (language == newLanguage) return;
 
-    await AsyncStorage.setItem("language", newLanguage);
+    AsyncStorage.setItem("language", newLanguage);
 
     let holidays = await getHolidays(newLanguage);
 
@@ -90,30 +79,24 @@ function settingsScreen_Language() {
     <View style={styles.container}>
       <TouchableOpacity
         onPress={() => changeLanguage("ru")}
-        style={styles.russiaFlagButton}
+        style={styles.ruFlagButton}
       >
         <Image
           style={styles.flagImage}
-          source={
-            language == "ru" ? resurces.russiaFlagSelect : resurces.russiaFlag
-          }
+          source={language == "ru" ? resurces.ruFlagSelect : resurces.ruFlag}
         />
+        <Text style={styles.languageName}>{dictinory.languages.ru}</Text>
       </TouchableOpacity>
-      <Text style={styles.ruLanguageName}>{dictinory.languages.ru}</Text>
       <TouchableOpacity
         onPress={() => changeLanguage("us")}
-        style={styles.unitedStatesFlagButton}
+        style={styles.usFlagButton}
       >
         <Image
           style={styles.flagImage}
-          source={
-            language == "us"
-              ? resurces.unitedStatesFlagSelect
-              : resurces.unitedStatesFlag
-          }
+          source={language == "us" ? resurces.usFlagSelect : resurces.usFlag}
         />
+        <Text style={styles.languageName}>{dictinory.languages.us}</Text>
       </TouchableOpacity>
-      <Text style={styles.enLanguageName}>{dictinory.languages.us}</Text>
     </View>
   );
 }
