@@ -1,33 +1,7 @@
-/* eslint-disable global-require */
-/* eslint-disable import/no-cycle */
-import * as React from 'react';
-
-import { AsyncStorage, YellowBox } from 'react-native';
-
-import { Icon } from 'react-native-elements';
-
-import * as Notifications from 'expo-notifications';
-import * as SplashScreen from 'expo-splash-screen';
-import * as Permissions from 'expo-permissions';
-import * as Localization from 'expo-localization';
-// import * as Font from "expo-font";
-
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-
-import holidaysListScreen from './assets/screens/holidaysListScreen';
-import holidayScreen from './assets/screens/holidayScreen';
-import categoriesScreen from './assets/screens/categoriesScreen';
-import settingsScreen from './assets/screens/settingsScreen';
-import settingsScreen_Language from './assets/screens/settingsScreen_Language';
-import settingsScreen_Notifications from './assets/screens/settingsScreen_Notifications';
-import firstLaunchScreen from './assets/screens/firstLaunchScreen';
-
-YellowBox.ignoreWarnings(['']);
+console.disableYellowBox = true;
 
 function isObject(item) {
-  return item && typeof item === 'object' && !Array.isArray(item);
+  return item && typeof item === "object" && !Array.isArray(item);
 }
 
 function mergeDeep(target, ...sources) {
@@ -48,12 +22,28 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
+import * as React from "react";
+
+import { AsyncStorage } from "react-native";
+
+import { Icon } from "react-native-elements";
+
+import * as Notifications from "expo-notifications";
+import * as SplashScreen from "expo-splash-screen";
+import * as Permissions from "expo-permissions";
+import * as Localization from "expo-localization";
+//import * as Font from "expo-font";
+
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const usDictinory = require('./assets/dictinories/us.json');
-const ruDictinory = require('./assets/dictinories/ru.json');
-const defaultDictinory = require('./assets/dictinories/default.json');
+const usDictinory = require("./assets/dictinories/us.json");
+const ruDictinory = require("./assets/dictinories/ru.json");
+const defaultDictinory = require("./assets/dictinories/default.json");
 
 export const LanguageContext = React.createContext();
 export const HolidaysContext = React.createContext();
@@ -61,39 +51,39 @@ export const HolidaysContext = React.createContext();
 export async function updateHolidays() {
   try {
     let [[, ruHolidays], [, usHolidays]] = await AsyncStorage.multiGet([
-      'ruHolidays',
-      'usHolidays',
+      "ruHolidays",
+      "usHolidays",
     ]);
 
-    ruHolidays = ruHolidays != null
-      ? JSON.parse(ruHolidays)
-      : require('./assets/holidays/ru.json');
+    ruHolidays =
+      ruHolidays != null
+        ? JSON.parse(ruHolidays)
+        : require("./assets/holidays/ru.json");
 
-    usHolidays = usHolidays != null
-      ? JSON.parse(usHolidays)
-      : require('./assets/holidays/us.json');
+    usHolidays =
+      usHolidays != null
+        ? JSON.parse(usHolidays)
+        : require("./assets/holidays/us.json");
 
-    const ruHolidaysFromNet = await (
-      await fetch('http://holidays-app.github.io/holidays/ru.json')
+    let ruHolidaysFromNet = await (
+      await fetch("http://holidays-app.github.io/holidays/ru.json")
     ).json();
 
-    const usHolidaysFromNet = await (
-      await fetch('http://holidays-app.github.io/holidays/us.json')
+    let usHolidaysFromNet = await (
+      await fetch("http://holidays-app.github.io/holidays/us.json")
     ).json();
 
-    if (JSON.stringify(ruHolidaysFromNet) !== JSON.stringify(ruHolidays)) {
+    if (JSON.stringify(ruHolidaysFromNet) != JSON.stringify(ruHolidays))
       await AsyncStorage.setItem(
-        'ruHolidays',
-        JSON.stringify(ruHolidaysFromNet),
+        "ruHolidays",
+        JSON.stringify(ruHolidaysFromNet)
       );
-    }
 
-    if (JSON.stringify(usHolidaysFromNet) !== JSON.stringify(usHolidays)) {
+    if (JSON.stringify(usHolidaysFromNet) != JSON.stringify(usHolidays))
       await AsyncStorage.setItem(
-        'usHolidays',
-        JSON.stringify(usHolidaysFromNet),
+        "usHolidays",
+        JSON.stringify(usHolidaysFromNet)
       );
-    }
   } finally {
     return;
   }
@@ -101,51 +91,55 @@ export async function updateHolidays() {
 
 export async function getHolidays(language) {
   let [[, ruHolidays], [, usHolidays]] = await AsyncStorage.multiGet([
-    'ruHolidays',
-    'usHolidays',
+    "ruHolidays",
+    "usHolidays",
   ]);
 
-  ruHolidays = ruHolidays != null
-    ? JSON.parse(ruHolidays)
-    : require('./assets/holidays/ru.json');
+  ruHolidays =
+    ruHolidays != null
+      ? JSON.parse(ruHolidays)
+      : require("./assets/holidays/ru.json");
 
-  usHolidays = usHolidays != null
-    ? JSON.parse(usHolidays)
-    : require('./assets/holidays/us.json');
+  usHolidays =
+    usHolidays != null
+      ? JSON.parse(usHolidays)
+      : require("./assets/holidays/us.json");
 
-  return language == 'ru' ? ruHolidays : usHolidays;
+  return language == "ru" ? ruHolidays : usHolidays;
 }
 
 export async function setNotifications(holidaysList) {
-  const allowNotifications = await AsyncStorage.getItem('allowNotifications');
+  var allowNotifications = await AsyncStorage.getItem("allowNotifications");
 
   if (allowNotifications == null || JSON.parse(allowNotifications) == true) {
-    if (allowNotifications == null) AsyncStorage.setItem('allowNotifications', JSON.stringify(true));
-    if (!(await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted) return;
+    if (allowNotifications == null)
+      AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
+    if (!(await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted)
+      return;
   } else if (JSON.parse(allowNotifications) == false) {
     return;
   }
 
   const date = new Date();
 
-  const notificationsList = await Notifications.getAllScheduledNotificationsAsync();
+  var notificationsList = await Notifications.getAllScheduledNotificationsAsync();
 
   holidaysList = holidaysList.filter(
-    (holiday) => holiday.message != '' && holiday.name != '',
+    (holiday) => holiday.message != "" && holiday.name != ""
   );
 
   for (let index = 0; index < holidaysList.length; index++) {
     var notificationDate;
     if (
-      holidaysList[index].date.day / 100 + holidaysList[index].date.month
-      > date.getMonth() + 1 + date.getDate() / 100
+      holidaysList[index].date.day / 100 + holidaysList[index].date.month >
+      date.getMonth() + 1 + date.getDate() / 100
     ) {
       notificationDate = new Date(
         date.getFullYear(),
         holidaysList[index].date.month - 1,
         holidaysList[index].date.day,
         9,
-        2,
+        2
       );
     } else {
       notificationDate = new Date(
@@ -153,15 +147,16 @@ export async function setNotifications(holidaysList) {
         holidaysList[index].date.month - 1,
         holidaysList[index].date.day,
         9,
-        2,
+        2
       );
     }
 
     if (
       !notificationsList.some(
-        (element) => element.content.title == holidaysList[index].name
-          && element.content.body == holidaysList[index].message
-          && element.trigger.value == notificationDate.getTime(),
+        (element) =>
+          element.content.title == holidaysList[index].name &&
+          element.content.body == holidaysList[index].message &&
+          element.trigger.value == notificationDate.getTime()
       )
     ) {
       Notifications.scheduleNotificationAsync({
@@ -174,6 +169,14 @@ export async function setNotifications(holidaysList) {
     }
   }
 }
+
+import holidaysListScreen from "./assets/screens/holidaysListScreen";
+import holidayScreen from "./assets/screens/holidayScreen";
+import categoriesScreen from "./assets/screens/categoriesScreen";
+import settingsScreen from "./assets/screens/settingsScreen";
+import settingsScreen_Language from "./assets/screens/settingsScreen_Language";
+import settingsScreen_Notifications from "./assets/screens/settingsScreen_Notifications";
+import firstLaunchScreen from "./assets/screens/firstLaunchScreen";
 
 function firstTabScreen() {
   const { dictinory } = React.useContext(LanguageContext);
@@ -274,8 +277,8 @@ function mainScreen() {
   return (
     <Tab.Navigator
       tabBarOptions={{
-        activeTintColor: '#f7941d',
-        tabStyle: { justifyContent: 'center' },
+        activeTintColor: "#f7941d",
+        tabStyle: { justifyContent: "center" },
         showLabel: false,
         animationEnabled: true,
       }}
@@ -321,17 +324,18 @@ function App() {
   const languageContext = React.useMemo(
     () => ({
       get dictinory() {
-        if (language == 'ru') {
+        if (language == "ru") {
           return mergeDeep({}, ruDictinory, defaultDictinory);
+        } else {
+          return mergeDeep({}, usDictinory, defaultDictinory);
         }
-        return mergeDeep({}, usDictinory, defaultDictinory);
       },
       language,
       setLanguage(value) {
         setLanguage(value);
       },
     }),
-    [language],
+    [language]
   );
 
   const [holidays, setHolidays] = React.useState(null);
@@ -342,7 +346,7 @@ function App() {
         setHolidays(value);
       },
     }),
-    [holidays],
+    [holidays]
   );
 
   const [alreadyLaunched, setAlreadyLaunched] = React.useState(null);
@@ -351,17 +355,18 @@ function App() {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
 
-      // await AsyncStorage.clear();
+      //await AsyncStorage.clear();
 
       let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
-        'language',
-        'alreadyLaunched',
+        "language",
+        "alreadyLaunched",
       ]);
 
       if (language == null) {
-        language = Localization.locale === 'ru-RU' || Localization.locale == 'ru'
-          ? 'ru'
-          : 'us';
+        language =
+          Localization.locale == "ru-RU" || Localization.locale == "ru"
+            ? "ru"
+            : "us";
       }
       setLanguage(language);
 
@@ -370,7 +375,7 @@ function App() {
         await SplashScreen.hideAsync();
       } else {
         setAlreadyLaunched(true);
-        const holidays = await getHolidays(language);
+        let holidays = await getHolidays(language);
         setHolidays(holidays);
         await SplashScreen.hideAsync();
       }
@@ -380,36 +385,36 @@ function App() {
   return (
     <LanguageContext.Provider value={languageContext}>
       <HolidaysContext.Provider value={holidaysContext}>
-        {language == null
-          || (alreadyLaunched === false ? false : holidays == null) ? null : (
-            <NavigationContainer>
-              <Stack.Navigator
-                initialRouteName={
-                  alreadyLaunched ? 'mainScreen' : 'firstLaunchScreen'
-                }
-                screenOptions={{
-                  headerShown: false,
-                  animationEnabled: false,
+        {language == null ||
+        (alreadyLaunched === false ? false : holidays == null) ? null : (
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName={
+                alreadyLaunched ? "mainScreen" : "firstLaunchScreen"
+              }
+              screenOptions={{
+                headerShown: false,
+                animationEnabled: false,
+              }}
+            >
+              <Stack.Screen
+                name="firstLaunchScreen"
+                component={firstLaunchScreen}
+              />
+              <Stack.Screen name="mainScreen" component={mainScreen} />
+              <Stack.Screen
+                name="settingsScreen_Notifications"
+                component={settingsScreen_Notifications}
+                options={{
+                  headerShown: true,
+                  animationEnabled: true,
+                  title: "",
+                  headerBackTitle: languageContext.dictinory.backButtonText,
                 }}
-              >
-                <Stack.Screen
-                  name="firstLaunchScreen"
-                  component={firstLaunchScreen}
-                />
-                <Stack.Screen name="mainScreen" component={mainScreen} />
-                <Stack.Screen
-                  name="settingsScreen_Notifications"
-                  component={settingsScreen_Notifications}
-                  options={{
-                    headerShown: true,
-                    animationEnabled: true,
-                    title: '',
-                    headerBackTitle: languageContext.dictinory.backButtonText,
-                  }}
-                />
-              </Stack.Navigator>
-            </NavigationContainer>
-          )}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        )}
       </HolidaysContext.Provider>
     </LanguageContext.Provider>
   );

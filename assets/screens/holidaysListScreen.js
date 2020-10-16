@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Text,
   View,
@@ -6,23 +6,19 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-} from 'react-native';
+} from "react-native";
 
-import { Icon } from 'react-native-elements';
+import { Icon } from "react-native-elements";
 
-import { useScrollToTop } from '@react-navigation/native';
+import { useScrollToTop } from "@react-navigation/native";
 
 import {
   LanguageContext,
   HolidaysContext,
   getHolidays,
   updateHolidays,
-  setNotifications,
-} from '../../App';
-
-function wait(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+  setNotifications
+} from "../../App";
 
 function wait(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -170,8 +166,8 @@ function holidaysListScreen({ navigation, route }) {
   };
 
   const openHolidayScreen = (holiday) => {
-    const parameters = { holiday };
-    navigation.navigate('holidayScreen', parameters);
+    var parameters = { holiday };
+    navigation.navigate("holidayScreen", parameters);
   };
 
   React.useEffect(() => {
@@ -180,7 +176,7 @@ function holidaysListScreen({ navigation, route }) {
         setNotifications(holidays);
 
         updateHolidays().then(async () => {
-          const updatedHolidays = await getHolidays(language);
+          let updatedHolidays = await getHolidays(language);
           if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
             setHolidays(updatedHolidays);
             setNotifications(updatedHolidays);
@@ -199,40 +195,42 @@ function holidaysListScreen({ navigation, route }) {
             route.params == undefined
               ? holidays
               : holidays.filter(
-                (holiday) => holiday.category == route.params.category,
-              ),
+                  (holiday) => holiday.category == route.params.category
+                )
           ))
         }
-        renderItem={({ item }) => (
-          <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
-            <View
-              style={({
-
-                ...styles.listItem,
-                ...getBorderStyles(item),
-              })}
-            >
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.date}>
-                {`${item.date.day} ${dictinory.months[item.date.month - 1]}`}
-              </Text>
-              <Icon
-                name="angle-right"
-                type="font-awesome"
-                color="#d6d7da"
-                size={80}
-                iconStyle={styles.angleRight}
-              />
-            </View>
-          </TouchableNativeFeedback>
-        )}
-        refreshControl={(
+        renderItem={({ item }) => {
+          return (
+            <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
+              <View
+                style={Object.assign(
+                  {},
+                  styles.listItem,
+                  getBorderStyles(item)
+                )}
+              >
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.date}>
+                  {item.date.day + " " + dictinory.months[item.date.month - 1]}
+                </Text>
+                <Icon
+                  name="angle-right"
+                  type="font-awesome"
+                  color={"#d6d7da"}
+                  size={80}
+                  iconStyle={styles.angleRight}
+                />
+              </View>
+            </TouchableNativeFeedback>
+          );
+        }}
+        refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            colors={['#f7941d']}
+            colors={["#f7941d"]}
           />
-        )}
+        }
       />
     </View>
   );
