@@ -21,7 +21,7 @@
     "expo-localization": "~8.2.1",
     "expo-notifications": "~0.3.3",
     "expo-permissions": "~9.0.1",
-    "expo-splash-screen": "^0.3.1",
+    "expo-splash-screen": "^0.5.0",
     "react": "16.11.0",
     "react-dom": "16.11.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.0.tar.gz",
