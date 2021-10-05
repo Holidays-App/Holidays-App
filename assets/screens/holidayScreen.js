@@ -10,22 +10,20 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 22,
-    top: 20,
-    left: "4%",
+    top: 30,
     color: "#666666",
   },
   description: {
     fontSize: 19,
-    top: 35,
+    top: 70,
   },
   View: {
-    paddingLeft: "3%",
-    paddingRight: "3%",
-    flex: 1,
-//    backgroundColor: "#ffffff",
+    paddingLeft: "4%",
+    paddingRight: "4%",
+    backgroundColor: "#ffffff",
   },
   ScrollView: {
-    paddingBottom: 60,
+//    marginBottom: 60,
   },
 });
 

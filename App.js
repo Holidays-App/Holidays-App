@@ -1,4 +1,17 @@
-console.disableYellowBox = true;
+import * as React from "react";
+
+import { AsyncStorage } from "react-native";
+
+import { Icon } from "react-native-elements";
+
+import * as Notifications from "expo-notifications";
+import * as SplashScreen from "expo-splash-screen";
+import * as Permissions from "expo-permissions";
+import * as Localization from "expo-localization";
+
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
 
 function isObject(item) {
   return item && typeof item === "object" && !Array.isArray(item);
@@ -21,22 +34,6 @@ function mergeDeep(target, ...sources) {
 
   return mergeDeep(target, ...sources);
 }
-
-import * as React from "react";
-
-import { AsyncStorage } from "react-native";
-
-import { Icon } from "react-native-elements";
-
-import * as Notifications from "expo-notifications";
-import * as SplashScreen from "expo-splash-screen";
-import * as Permissions from "expo-permissions";
-import * as Localization from "expo-localization";
-//import * as Font from "expo-font";
-
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -122,7 +119,8 @@ export async function setNotifications(holidaysList) {
 
   const date = new Date();
 
-  var notificationsList = await Notifications.getAllScheduledNotificationsAsync();
+  var notificationsList =
+    await Notifications.getAllScheduledNotificationsAsync();
 
   holidaysList = holidaysList.filter(
     (holiday) => holiday.message != "" && holiday.name != ""
@@ -175,7 +173,6 @@ import holidayScreen from "./assets/screens/holidayScreen";
 import categoriesScreen from "./assets/screens/categoriesScreen";
 import settingsScreen from "./assets/screens/settingsScreen";
 import settingsScreen_Language from "./assets/screens/settingsScreen_Language";
-import settingsScreen_Notifications from "./assets/screens/settingsScreen_Notifications";
 import firstLaunchScreen from "./assets/screens/firstLaunchScreen";
 
 function firstTabScreen() {
@@ -185,9 +182,8 @@ function firstTabScreen() {
     <Stack.Navigator
       screenOptions={{
         headerBackTitle: dictinory.backButtonText,
-        headerTitleStyle: {
-          fontSize: 21,
-        },
+        headerTitleAlign: "center",
+        animationEnabled: false,
       }}
     >
       <Stack.Screen
@@ -214,9 +210,8 @@ function secondTabScreen() {
     <Stack.Navigator
       screenOptions={{
         headerBackTitle: dictinory.backButtonText,
-        headerTitleStyle: {
-          fontSize: 21,
-        },
+        headerTitleAlign: "center",
+        animationEnabled: false,
       }}
     >
       <Stack.Screen
@@ -250,9 +245,8 @@ function thirdTabScreen() {
     <Stack.Navigator
       screenOptions={{
         headerBackTitle: dictinory.backButtonText,
-        headerTitleStyle: {
-          fontSize: 21,
-        },
+        headerTitleAlign: "center",
+        animationEnabled: false,
       }}
     >
       <Stack.Screen
@@ -277,10 +271,9 @@ function mainScreen() {
   return (
     <Tab.Navigator
       tabBarOptions={{
-        activeTintColor: "#f7941d",
+        activeTintColor: "#AC0735",
         tabStyle: { justifyContent: "center" },
         showLabel: false,
-        animationEnabled: true,
       }}
     >
       <Tab.Screen
@@ -355,7 +348,7 @@ function App() {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
 
-      //await AsyncStorage.clear();
+      //  await AsyncStorage.clear();
 
       let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
         "language",
@@ -372,13 +365,12 @@ function App() {
 
       if (alreadyLaunched == null) {
         setAlreadyLaunched(false);
-        await SplashScreen.hideAsync();
       } else {
         setAlreadyLaunched(true);
         let holidays = await getHolidays(language);
         setHolidays(holidays);
-        await SplashScreen.hideAsync();
       }
+      await SplashScreen.hideAsync();
     })();
   }, []);
 
@@ -402,16 +394,6 @@ function App() {
                 component={firstLaunchScreen}
               />
               <Stack.Screen name="mainScreen" component={mainScreen} />
-              <Stack.Screen
-                name="settingsScreen_Notifications"
-                component={settingsScreen_Notifications}
-                options={{
-                  headerShown: true,
-                  animationEnabled: true,
-                  title: "",
-                  headerBackTitle: languageContext.dictinory.backButtonText,
-                }}
-              />
             </Stack.Navigator>
           </NavigationContainer>
         )}

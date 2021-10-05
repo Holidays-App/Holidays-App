@@ -3,6 +3,7 @@
     "nextTabButtonText": "Далее",
     "startButtonText": "Начать!",
     "allowNotificationsButtonText": "Включить уведомления",
+    "allowNotificationsButtonTextNotificationsOn": "Уведомления включены",
     "notificationsTabTitle": "Уведомления",
     "firstTabText": "Твой путеводитель по праздникам на каждый день",
     "languageTabText": "Выберите язык:",
@@ -22,7 +23,7 @@
   },
   "settingsScreen_Notifications": {
     "settingsButtonText": "Настройки",
-    "description": "Получайте напоминания о важных праздниках и событиях. Перейдите в настройки чтобы включить уведомления"
+    "description": "Похоже, что вы отключили уведомления для приложения. Перейдите в настройки чтобы включить уведомления"
   },
   "categoriesScreen": {
     "title": "Категории"

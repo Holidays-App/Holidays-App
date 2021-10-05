@@ -3,6 +3,7 @@
     "nextTabButtonText": "Next",
     "startButtonText": "Begin!",
     "allowNotificationsButtonText": "Enable notifications",
+    "allowNotificationsButtonTextNotificationsOn": "Notifications enabled",
     "firstTabText": "Your holiday guide for every day",
     "languageTabText": "Choose language:",
     "notificationsTabText": "Notifications",
@@ -21,7 +22,7 @@
   },
   "settingsScreen_Notifications": {
     "settingsButtonText": "Settings",
-    "description": "Get reminders of important holidays and events. Go to settings to enable notifications"
+    "description": "It looks like you have disabled notifications for the app. Go to settings to enable notifications"
   },
   "categoriesScreen": {
     "title": "Categories"

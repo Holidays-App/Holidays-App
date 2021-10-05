@@ -9,6 +9,7 @@ import {
   Image,
   Platform,
   StyleSheet,
+  Alert,
 } from "react-native";
 
 import * as Permissions from "expo-permissions";
@@ -29,7 +30,7 @@ const resurces = {
   usFlagSelect: require("../textures/usFlagSelect.png"),
   ruFlag: require("../textures/ruFlag.png"),
   ruFlagSelect: require("../textures/ruFlagSelect.png"),
-  icon: require("../icon.png"),
+  icon: require("../transparent-icon.png"),
 };
 
 const styles = StyleSheet.create({
@@ -38,9 +39,10 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     alignItems: "center",
+    backgroundColor: "#ffffff",
   },
-  mainIcon: { top: "15%", marginBottom: "20%" },
-  mainText: { fontSize: 24 },
+  mainIcon: { top: 90, marginBottom: 90 },
+  mainText: { fontSize: 24, top: "5%" },
 });
 
 function NextTabButton({ nextTab, navigation }) {
@@ -54,7 +56,7 @@ function NextTabButton({ nextTab, navigation }) {
       bottom: 20,
       right: 5,
     },
-    text: { color: "#f7941d", fontSize: 22, textAlign: "right", right: 50 },
+    text: { color: "#AC0735", fontSize: 22, textAlign: "right", right: 50 },
     angle: { top: -39 },
   });
 
@@ -66,13 +68,6 @@ function NextTabButton({ nextTab, navigation }) {
       <Text style={nextTabButtonStyles.text}>
         {dictinory.firstLaunchScreen.nextTabButtonText}
       </Text>
-      <Icon
-        name="angle-right"
-        type="font-awesome"
-        color={"#f7941d"}
-        size={50}
-        iconStyle={nextTabButtonStyles.angle}
-      />
     </TouchableOpacity>
   );
 }
@@ -82,32 +77,21 @@ function firstTabScreen({ navigation }) {
 
   const firstTabStyles = StyleSheet.create({
     logoImage: {
-      top: 30,
-      marginBottom: 40,
-      height:
-        (screenHeight / 18) * 9 <= screenWidth
-          ? (screenHeight / 18) * 9
-          : screenWidth,
-      width:
-        (screenHeight / 18) * 9 <= screenWidth
-          ? (screenHeight / 18) * 9
-          : screenWidth,
-    },
-    appNameContainer: {
-      backgroundColor: "#f7941d",
-      width: "90%",
-      borderRadius: 10,
-      paddingVertical: "1%",
+      top: 90,
+      marginBottom: 90,
+      height: screenHeight / 3,
+      width: screenHeight / 3 / 1.842,
     },
     appName: {
-      color: "#ffffff",
+      color: "#000000",
       fontSize: (screenHeight / 100) * 5.74,
       textAlign: "center",
+      top: "5%",
     },
     text: {
       fontSize: (screenHeight / 100) * 3.45,
       textAlign: "center",
-      top: "5%",
+      top: "8%",
       marginHorizontal: "10%",
     },
   });
@@ -115,11 +99,9 @@ function firstTabScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Image source={resurces.icon} style={firstTabStyles.logoImage} />
-      <View style={firstTabStyles.appNameContainer}>
-        <Text style={firstTabStyles.appName}>
-          {dictinory.firstLaunchScreen.appName}
-        </Text>
-      </View>
+      <Text style={firstTabStyles.appName}>
+        {dictinory.firstLaunchScreen.appName}
+      </Text>
       <Text style={firstTabStyles.text}>
         {dictinory.firstLaunchScreen.firstTabText}
       </Text>
@@ -129,16 +111,14 @@ function firstTabScreen({ navigation }) {
 }
 
 function secondTabScreen({ navigation }) {
-  const { dictinory, language, setLanguage } = React.useContext(
-    LanguageContext
-  );
+  const { dictinory, language, setLanguage } =
+    React.useContext(LanguageContext);
 
   const secondTabStyles = StyleSheet.create({
     languageButtonsContainer: {
-      flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
-      top: 30,
+      top: "20%",
     },
     flagImage: {
       width: screenWidth / 5,
@@ -164,8 +144,8 @@ function secondTabScreen({ navigation }) {
       <Icon
         name="language"
         type="font-awesome"
-        color={"#34a853"}
-        size={(screenHeight / 20) * 9}
+        color={"#F5C684"}
+        size={(screenHeight / 20) * 7}
         iconStyle={styles.mainIcon}
       />
       <Text style={styles.mainText}>
@@ -210,11 +190,11 @@ function thirdTabScreen({ navigation }) {
   const thirdTabStyles = StyleSheet.create({
     turnonNotificationsButton: {
       borderRadius: 10,
-      backgroundColor: allowNotifications ? "#34a853" : "#f7941d",
+      backgroundColor: allowNotifications ? "#34a853" : "#AC0735",
       paddingHorizontal: 15,
       paddingVertical: 10,
       marginHorizontal: "5%",
-      top: 30,
+      top: "10%",
     },
     turnonNotificationsButtonText: {
       textAlign: "center",
@@ -236,9 +216,7 @@ function thirdTabScreen({ navigation }) {
         AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
       }
     } else {
-      navigation
-        .dangerouslyGetParent()
-        .navigate("settingsScreen_Notifications");
+      Alert.alert("", dictinory.settingsScreen_Notifications.description);
     }
   };
 
@@ -265,8 +243,8 @@ function thirdTabScreen({ navigation }) {
       <Icon
         name="bell"
         type="font-awesome"
-        color={"#34a853"}
-        size={(screenHeight / 20) * 9}
+        color={"#F5C684"}
+        size={(screenHeight / 20) * 7}
         iconStyle={styles.mainIcon}
       />
       <Text style={styles.mainText}>
@@ -279,7 +257,10 @@ function thirdTabScreen({ navigation }) {
           style={thirdTabStyles.turnonNotificationsButton}
         >
           <Text style={thirdTabStyles.turnonNotificationsButtonText}>
-            {dictinory.firstLaunchScreen.allowNotificationsButtonText}
+            {allowNotifications
+              ? dictinory.firstLaunchScreen
+                  .allowNotificationsButtonTextNotificationsOn
+              : dictinory.firstLaunchScreen.allowNotificationsButtonText}
           </Text>
         </TouchableOpacity>
       ) : null}
@@ -300,9 +281,10 @@ function fourthTabScreen({ navigation }) {
       alignItems: "center",
       textAlign: "center",
       justifyContent: "center",
+      backgroundColor: "#ffffff",
     },
     text: {
-      color: "#f7941d",
+      color: "#AC0735",
       fontSize: 24,
       textAlign: "center",
       marginHorizontal: "5%",

@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-//    backgroundColor: "#ffffff",
+    backgroundColor: "#ffffff",
   },
   listItem: {
     flex: 1,
@@ -28,13 +28,8 @@ const styles = StyleSheet.create({
     paddingRight: "4%",
     paddingLeft: "3%",
   },
-  angleRight: {
-    right: "-45%",
-    top: "-20%",
-  },
   name: {
     fontSize: 19,
-    top: "50%",
   },
 });
 
@@ -69,27 +64,8 @@ function categoriesScreen({ navigation }) {
           <TouchableNativeFeedback
             onPress={() => openСategoryHolidayScreen(item)}
           >
-            <View
-              style={Object.assign(
-                {},
-                styles.listItem,
-                categories.indexOf(item) == 0
-                  ? {}
-                  : {
-                      borderTopColor: "#d6d7da",
-                      borderTopWidth: 1.5,
-                      lineHeight: 10,
-                    }
-              )}
-            >
+            <View style={styles.listItem}>
               <Text style={styles.name}>{dictinory.categories[item]}</Text>
-              <Icon
-                name="angle-right"
-                type="font-awesome"
-                color={"#d6d7da"}
-                size={80}
-                iconStyle={styles.angleRight}
-              />
             </View>
           </TouchableNativeFeedback>
         )}

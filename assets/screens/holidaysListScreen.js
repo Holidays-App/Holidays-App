@@ -8,8 +8,6 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { Icon } from "react-native-elements";
-
 import { useScrollToTop } from "@react-navigation/native";
 
 import {
@@ -17,7 +15,7 @@ import {
   HolidaysContext,
   getHolidays,
   updateHolidays,
-  setNotifications
+  setNotifications,
 } from "../../App";
 
 function wait(ms) {
@@ -27,47 +25,53 @@ function wait(ms) {
 function sortByDateAndCategory(holidaysList) {
   const date = new Date();
   const categoriesList = [];
-  for (const category in require('../dictinories/us.json').categories) {
+  for (const category in require("../dictinories/us.json").categories) {
     categoriesList.push(category);
   }
 
   const holidaysListLocal = holidaysList;
 
   holidaysListLocal.sort((a, b) => {
-    const aDate = a.date.month < date.getMonth() + 1
-      || (a.date.month == date.getMonth() + 1 && a.date.day < date.getDate())
-      ? a.date.month
-          - (date.getMonth() + 1)
-          + (a.date.day - date.getDate()) / 100
-          + 12.5
-      : a.date.month
-          - (date.getMonth() + 1)
-          + (a.date.day - date.getDate()) / 100;
+    const aDate =
+      a.date.month < date.getMonth() + 1 ||
+      (a.date.month == date.getMonth() + 1 && a.date.day < date.getDate())
+        ? a.date.month -
+          (date.getMonth() + 1) +
+          (a.date.day - date.getDate()) / 100 +
+          12.5
+        : a.date.month -
+          (date.getMonth() + 1) +
+          (a.date.day - date.getDate()) / 100;
 
-    const bDate = b.date.month < date.getMonth() + 1
-      || (b.date.month == date.getMonth() + 1 && b.date.day < date.getDate())
-      ? b.date.month
-          - (date.getMonth() + 1)
-          + (b.date.day - date.getDate()) / 100
-          + 12.5
-      : b.date.month
-          - (date.getMonth() + 1)
-          + (b.date.day - date.getDate()) / 100;
+    const bDate =
+      b.date.month < date.getMonth() + 1 ||
+      (b.date.month == date.getMonth() + 1 && b.date.day < date.getDate())
+        ? b.date.month -
+          (date.getMonth() + 1) +
+          (b.date.day - date.getDate()) / 100 +
+          12.5
+        : b.date.month -
+          (date.getMonth() + 1) +
+          (b.date.day - date.getDate()) / 100;
 
     if (aDate < bDate) {
       return -1;
-    } if (aDate > bDate) {
+    }
+    if (aDate > bDate) {
       return 1;
-    } if (aDate == bDate) {
+    }
+    if (aDate == bDate) {
       if (
         categoriesList.indexOf(a.category) < categoriesList.indexOf(b.category)
       ) {
         return -1;
-      } if (
+      }
+      if (
         categoriesList.indexOf(a.category) > categoriesList.indexOf(b.category)
       ) {
         return 1;
-      } if (
+      }
+      if (
         categoriesList.indexOf(a.category) == categoriesList.indexOf(b.category)
       ) {
         return 0;
@@ -91,36 +95,28 @@ function useForceUpdate() {
 const styles = StyleSheet.create({
   date: {
     fontSize: 16,
-    top: '50%',
-    color: '#666666',
+    color: "#666666",
   },
   name: {
     fontSize: 19,
-    top: '50%',
-  },
-  angleRight: {
-    right: '-45%',
-    top: '-35%',
   },
   container: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    //    backgroundColor: "#ffffff",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
   },
   listItem: {
     flex: 1,
-    width: '100%',
+    width: "100%",
     height: 80,
-    justifyContent: 'center',
-    paddingRight: '4%',
-    paddingLeft: '3%',
+    justifyContent: "center",
+    paddingRight: "4%",
+    paddingLeft: "3%",
   },
 });
 
 function holidaysListScreen({ navigation, route }) {
-  let filteredHolidays;
-
   const { dictinory, language } = React.useContext(LanguageContext);
   const { holidays, setHolidays } = React.useContext(HolidaysContext);
 
@@ -130,33 +126,6 @@ function holidaysListScreen({ navigation, route }) {
 
   const flatListRef = React.useRef(null);
   useScrollToTop(flatListRef);
-
-  const getBorderStyles = (item) => {
-    let BorderStyles = {};
-    if (
-      item.date.day == new Date().getDate()
-      && item.date.month == new Date().getMonth() + 1
-    ) {
-      BorderStyles.borderColor = '#f7941d';
-      BorderStyles.borderWidth = 3;
-      if (filteredHolidays.indexOf(item) != 0) {
-        BorderStyles.borderTopColor = '#d6d7da';
-        BorderStyles.borderTopWidth = 1.5;
-      }
-      if (
-        filteredHolidays.indexOf(item) != filteredHolidays.length - 1
-        && filteredHolidays[filteredHolidays.indexOf(item) + 1].date.day
-          == new Date().getDate()
-        && filteredHolidays[filteredHolidays.indexOf(item) + 1].date.month
-          == new Date().getMonth() + 1
-      ) {
-        BorderStyles.borderBottomWidth = 0;
-      }
-    } else if (filteredHolidays.indexOf(item) != 0) {
-      BorderStyles = { borderTopColor: '#d6d7da', borderTopWidth: 1.5 };
-    }
-    return BorderStyles;
-  };
 
   const refresh = async () => {
     setRefreshing(true);
@@ -202,24 +171,11 @@ function holidaysListScreen({ navigation, route }) {
         renderItem={({ item }) => {
           return (
             <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
-              <View
-                style={Object.assign(
-                  {},
-                  styles.listItem,
-                  getBorderStyles(item)
-                )}
-              >
+              <View style={Object.assign({}, styles.listItem)}>
                 <Text style={styles.name}>{item.name}</Text>
                 <Text style={styles.date}>
                   {item.date.day + " " + dictinory.months[item.date.month - 1]}
                 </Text>
-                <Icon
-                  name="angle-right"
-                  type="font-awesome"
-                  color={"#d6d7da"}
-                  size={80}
-                  iconStyle={styles.angleRight}
-                />
               </View>
             </TouchableNativeFeedback>
           );
@@ -228,7 +184,7 @@ function holidaysListScreen({ navigation, route }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            colors={["#f7941d"]}
+            colors={["#AC0735"]}
           />
         }
       />
