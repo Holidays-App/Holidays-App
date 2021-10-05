@@ -139,6 +139,32 @@ function holidaysListScreen({ navigation, route }) {
     navigation.navigate("holidayScreen", parameters);
   };
 
+  const getBorderStyles = (holiday) => {
+    let BorderStyles = {};
+    if (
+      holiday.date.day == new Date().getDate() &&
+      holiday.date.month == new Date().getMonth() + 1
+    ) {
+      BorderStyles.borderColor = "#AC0735";
+      BorderStyles.borderWidth = 4;
+
+      if (filteredHolidays.indexOf(holiday) != 0) {
+        BorderStyles.borderTopWidth = 0;
+      }
+
+      if (
+        filteredHolidays.indexOf(holiday) != filteredHolidays.length - 1 &&
+        filteredHolidays[filteredHolidays.indexOf(holiday) + 1].date.day ==
+          new Date().getDate() &&
+        filteredHolidays[filteredHolidays.indexOf(holiday) + 1].date.month ==
+          new Date().getMonth() + 1
+      ) {
+        BorderStyles.borderBottomWidth = 0;
+      }
+    }
+    return BorderStyles;
+  };
+
   React.useEffect(() => {
     if (route.params == undefined) {
       (async () => {
@@ -171,7 +197,12 @@ function holidaysListScreen({ navigation, route }) {
         renderItem={({ item }) => {
           return (
             <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
-              <View style={Object.assign({}, styles.listItem)}>
+              <View
+                style={{
+                  ...styles.listItem,
+                  ...getBorderStyles(item),
+                }}
+              >
                 <Text style={styles.name}>{item.name}</Text>
                 <Text style={styles.date}>
                   {item.date.day + " " + dictinory.months[item.date.month - 1]}

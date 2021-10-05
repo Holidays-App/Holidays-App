@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-
+import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 
 import { LanguageContext } from "../../App";
 

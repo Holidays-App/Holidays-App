@@ -53,11 +53,10 @@ function NextTabButton({ nextTab, navigation }) {
       position: "absolute",
       height: 40,
       width: 80,
-      bottom: 20,
-      right: 5,
+      bottom: 40,
+      right: 40,
     },
-    text: { color: "#AC0735", fontSize: 22, textAlign: "right", right: 50 },
-    angle: { top: -39 },
+    text: { color: "#AC0735", fontSize: 22, textAlign: "right" },
   });
 
   return (
