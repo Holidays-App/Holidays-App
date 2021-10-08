@@ -67,6 +67,7 @@ function categoriesScreen({ navigation }) {
             </View>
           </TouchableNativeFeedback>
         )}
+        keyExtractor={(_item, index) => index.toString()}
       />
     </View>
   );

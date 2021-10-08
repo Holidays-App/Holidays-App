@@ -51,20 +51,48 @@ function ArticleImage({ uri, maxSize, style = {} }) {
     width: screenWidth,
   });
 
-  Image.getSize(uri, (width, height) => {
-    let resizedWidth, resizedHeight;
-    if (width > height) {
-      resizedWidth = maxSize;
-      resizedHeight = (height / width) * maxSize;
-    } else {
-      resizedHeight = maxSize;
-      resizedWidth = (width / height) * maxSize;
-    }
+  const getSizePromise = new Promise((resolve, reject) => {
+    Image.getSize(
+      uri,
+      (width, height) => {
+        resolve({ width, height });
+      },
+      (error) => {
+        reject(error);
+      }
+    );
+  });
 
-    setSize({
-      height: resizedHeight,
-      width: resizedWidth,
-    });
+  React.useEffect(() => {
+    let stop = false;
+    const sideEffect = async () => {
+      try {
+        const { width, height } = await getSizePromise;
+
+        let resizedWidth, resizedHeight;
+
+        if (width > height) {
+          resizedWidth = maxSize;
+          resizedHeight = (height / width) * maxSize;
+        } else {
+          resizedHeight = maxSize;
+          resizedWidth = (width / height) * maxSize;
+        }
+
+        if (!stop) {
+          setSize({
+            height: resizedHeight,
+            width: resizedWidth,
+          });
+        }
+      } catch (error) {
+        if (__DEV__) console.warn(error);
+      }
+    };
+    sideEffect();
+    return () => {
+      stop = true;
+    };
   });
 
   return <Image style={{ ...style, ...size }} source={{ uri }} />;
@@ -85,7 +113,7 @@ function Article({
 
     if (paragraph) {
       renderElements.push(
-        <Text key={i} style={paragraphsStyle}>
+        <Text key={i.toString()} style={paragraphsStyle}>
           {paragraph.trim()}
         </Text>
       );
@@ -96,7 +124,7 @@ function Article({
         <ArticleImage
           style={imagesStyle}
           key={i + "i"}
-          uri={"https://holidays-app.github.io/holidays/images/"+images[i]}
+          uri={"http://holidays-app.github.io/holidays/images/" + images[i]}
           maxSize={screenWidth * 0.92}
         />
       );

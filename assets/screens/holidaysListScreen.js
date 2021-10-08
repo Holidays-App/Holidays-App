@@ -211,6 +211,7 @@ function holidaysListScreen({ navigation, route }) {
             </TouchableNativeFeedback>
           );
         }}
+        keyExtractor={(_item, index) => index.toString()}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
