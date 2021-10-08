@@ -3,18 +3,22 @@
     "name": "New year!",
     "description": "There have been celebrations to mark the beginning of a new year for thousands of years. Sometimes these were simply an opportunity for people to eat, drink and have fun, but in some places the festivities were connected to the land or astronomical events. For example, in Egypt the beginning of the year coincided with when the River Nile flooded, and this normally happened when the star Sirius rose. The Persians and Phoenicians started their new year at the spring equinox (this is around 20 March when the Sun shines more or less directly on the equator and the length of the night and the day are almost the same).",
     "message": "Nights will be dark but days will be light, wish your life to be always bright – Happy New Year.",
-    "date": { "day": 1, "month": 1 },
+    "date": {
+      "day": 1,
+      "month": 1
+    },
     "category": "General holidays",
-    "icon": "",
     "notify": true
   },
   {
     "name": "International Women's Day",
     "description": "International Women's Day is observed annually on March 8th. This global day celebrates the cultural, political, social and economic achievements of women. The day also brings international awareness to gender parity. According to the World Economic Forum, global gender equality is estimated to be achieved by 2133.",
     "message": "Do you know? International Women’s Day is celebrated on March 8 every year. The name provides no clue of the date for english-speaking people but for Chinese people, the date is incorporated into the Chinese name of International Women’s Day, which can be literally translated as “three eight women’s day”.",
-    "date": { "day": 8, "month": 3 },
+    "date": {
+      "day": 8,
+      "month": 3
+    },
     "category": "General holidays",
-    "icon": "",
     "notify": true
   }
 ]
