@@ -29,7 +29,8 @@
     "title": "Категории"
   },
   "holidayScreen": {
-    "title": "Праздник"
+    "title": "Праздник",
+    "forNotes": "Для заметок"
   },
   "months": [
     "Января",

@@ -28,7 +28,8 @@
     "title": "Categories"
   },
   "holidayScreen": {
-    "title": "Holiday"
+    "title": "Holiday",
+    "forNotes": "For notes"
   },
   "months": [
     "January",

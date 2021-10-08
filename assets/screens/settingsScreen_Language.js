@@ -5,11 +5,12 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  AsyncStorage,
   Dimensions,
 } from "react-native";
 
 import * as Notifications from "expo-notifications";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   LanguageContext,

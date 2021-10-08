@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  AsyncStorage,
   View,
   TouchableOpacity,
   Text,
@@ -15,6 +14,7 @@ import {
 import * as Permissions from "expo-permissions";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Icon } from "react-native-elements";
 
