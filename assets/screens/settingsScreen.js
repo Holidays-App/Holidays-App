@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableNativeFeedback } from "react-native";
 
 import { LanguageContext } from "../../App";
 
@@ -36,7 +36,7 @@ function settingsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      <TouchableNativeFeedback
         onPress={() => navigation.navigate("settingsScreen_Language")}
         style={styles.touchableOpasity}
       >
@@ -45,7 +45,7 @@ function settingsScreen({ navigation }) {
             {dictinory.settingsScreen.languageButtonText}
           </Text>
         </View>
-      </TouchableOpacity>
+      </TouchableNativeFeedback>
     </View>
   );
 }

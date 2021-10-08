@@ -30,7 +30,7 @@ const resurces = {
   usFlagSelect: require("../textures/usFlagSelect.png"),
   ruFlag: require("../textures/ruFlag.png"),
   ruFlagSelect: require("../textures/ruFlagSelect.png"),
-  icon: require("../transparent-icon.png"),
+  icon: require("../textures/transparent-icon.png"),
 };
 
 const styles = StyleSheet.create({

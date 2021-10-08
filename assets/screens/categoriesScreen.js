@@ -7,8 +7,6 @@ import {
   FlatList,
 } from "react-native";
 
-import { Icon } from "react-native-elements";
-
 import { useScrollToTop } from "@react-navigation/native";
 
 import { LanguageContext, HolidaysContext } from "../../App";
