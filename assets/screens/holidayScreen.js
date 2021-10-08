@@ -96,7 +96,7 @@ function Article({
         <ArticleImage
           style={imagesStyle}
           key={i + "i"}
-          uri={images[i]}
+          uri={"https://holidays-app.github.io/holidays/images/"+images[i]}
           maxSize={screenWidth * 0.92}
         />
       );
