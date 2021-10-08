@@ -16,7 +16,7 @@ import {
   getHolidays,
   updateHolidays,
   setNotifications,
-} from "../../App";
+} from "../utils";
 
 function wait(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -25,7 +25,7 @@ function wait(ms) {
 function sortByDateAndCategory(holidaysList) {
   const date = new Date();
   const categoriesList = [];
-  for (const category in require("../dictinories/us.json").categories) {
+  for (const category in require("../../dictinories/us.json").categories) {
     categoriesList.push(category);
   }
 

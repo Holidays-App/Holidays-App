@@ -14,11 +14,11 @@ import {
 import * as Permissions from "expo-permissions";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Icon } from "react-native-elements";
 
-import { LanguageContext, HolidaysContext, getHolidays } from "../../App";
+import { LanguageContext, HolidaysContext, getHolidays } from "../utils";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -26,11 +26,11 @@ const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
 
 const resurces = {
-  usFlag: require("../textures/usFlag.png"),
-  usFlagSelect: require("../textures/usFlagSelect.png"),
-  ruFlag: require("../textures/ruFlag.png"),
-  ruFlagSelect: require("../textures/ruFlagSelect.png"),
-  icon: require("../textures/transparent-icon.png"),
+  usFlag: require("../../textures/usFlag.png"),
+  usFlagSelect: require("../../textures/usFlagSelect.png"),
+  ruFlag: require("../../textures/ruFlag.png"),
+  ruFlagSelect: require("../../textures/ruFlagSelect.png"),
+  icon: require("../../textures/transparent-icon.png"),
 };
 
 const styles = StyleSheet.create({

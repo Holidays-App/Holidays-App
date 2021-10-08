@@ -9,7 +9,7 @@ import {
 
 import { useScrollToTop } from "@react-navigation/native";
 
-import { LanguageContext, HolidaysContext } from "../../App";
+import { LanguageContext, HolidaysContext } from "../utils";
 
 const styles = StyleSheet.create({
   container: {
@@ -51,7 +51,8 @@ function categoriesScreen({ navigation }) {
         ref={flatListRef}
         data={(() => {
           categories = [];
-          for (let category in require("../dictinories/us.json").categories) {
+          for (let category in require("../../dictinories/us.json")
+            .categories) {
             if (holidays.some((holiday) => holiday.category == category)) {
               categories.push(category);
             }

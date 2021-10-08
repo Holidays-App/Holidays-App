@@ -12,7 +12,7 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { LanguageContext } from "../../App";
+import { LanguageContext } from "../utils";
 
 const styles = StyleSheet.create({
   name: {

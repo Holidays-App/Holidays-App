@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Text, View, StyleSheet, TouchableNativeFeedback } from "react-native";
 
-import { LanguageContext } from "../../App";
+import { LanguageContext } from "../utils";
 
 const styles = StyleSheet.create({
   container: {

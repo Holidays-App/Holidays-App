@@ -17,13 +17,13 @@ import {
   HolidaysContext,
   setNotifications,
   getHolidays,
-} from "../../App";
+} from "../utils";
 
 const resurces = {
-  usFlag: require("../textures/usFlag.png"),
-  usFlagSelect: require("../textures/usFlagSelect.png"),
-  ruFlag: require("../textures/ruFlag.png"),
-  ruFlagSelect: require("../textures/ruFlagSelect.png"),
+  usFlag: require("../../textures/usFlag.png"),
+  usFlagSelect: require("../../textures/usFlagSelect.png"),
+  ruFlag: require("../../textures/ruFlag.png"),
+  ruFlagSelect: require("../../textures/ruFlagSelect.png"),
 };
 
 const screenWidth = Dimensions.get("window").width;
