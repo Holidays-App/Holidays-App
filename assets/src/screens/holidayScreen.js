@@ -12,7 +12,7 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { LanguageContext } from "../utils";
+import { LanguageContext, setHolidayNotificationAsync } from "../utils";
 
 const styles = StyleSheet.create({
   name: {
@@ -170,7 +170,11 @@ function holidayScreen({ route }) {
             setNoteText("");
           } else {
             let savedNotes = JSON.parse(savedNotesJSON);
-            if (Object.keys(savedNotes).includes(route.params.holiday.id)) {
+            if (
+              Object.keys(savedNotes).includes(
+                route.params.holiday.id.toString()
+              )
+            ) {
               let savedNoteText = savedNotes[route.params.holiday.id];
               setNoteText(savedNoteText);
             } else {
@@ -190,7 +194,7 @@ function holidayScreen({ route }) {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.scrollViewContainer}>
-          <Text style={styles.name}>{route.params.holiday.id}</Text>
+          <Text style={styles.name}>{route.params.holiday.name}</Text>
           <Text style={styles.date}>
             {route.params.holiday.date.day +
               " " +
@@ -228,6 +232,7 @@ function holidayScreen({ route }) {
                     "notes",
                     JSON.stringify(savedNotes)
                   );
+                  await setHolidayNotificationAsync(route.params.holiday);
                 }, 1000);
               }}
             />

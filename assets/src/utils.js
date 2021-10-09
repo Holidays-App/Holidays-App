@@ -34,17 +34,19 @@ export async function updateHolidaysAsync() {
       await fetch("http://holidays-app.github.io/holidays/us.json")
     ).json();
 
-    if (JSON.stringify(ruHolidaysFromNet) != JSON.stringify(ruHolidays))
+    if (JSON.stringify(ruHolidaysFromNet) != JSON.stringify(ruHolidays)) {
       await AsyncStorage.setItem(
         "ruHolidays",
         JSON.stringify(ruHolidaysFromNet)
       );
+    }
 
-    if (JSON.stringify(usHolidaysFromNet) != JSON.stringify(usHolidays))
+    if (JSON.stringify(usHolidaysFromNet) != JSON.stringify(usHolidays)) {
       await AsyncStorage.setItem(
         "usHolidays",
         JSON.stringify(usHolidaysFromNet)
       );
+    }
   } finally {
     return;
   }
@@ -79,8 +81,8 @@ function getHolidayNotificationDate({ month, day }) {
 
   let notificationDate = new Date(
     date.getFullYear() + nextYear ? 1 : 0,
-    holiday.date.month - 1,
-    holiday.date.day,
+    month - 1,
+    day,
     9
   );
 
@@ -95,13 +97,15 @@ function getHolidayNotificationText(message, note = "") {
 }
 
 async function cancelNotificationByTitleIfExist(title) {
-  let oldHolidayNotificationIndex = notificationsList.find(
+  let scheduledNotifications =
+    await Notifications.getAllScheduledNotificationsAsync();
+
+  let oldHolidayNotification = scheduledNotifications.find(
     (e) => e.content.title == title
   );
 
-  if (oldHolidayNotificationIndex !== undefined) {
-    let oldNotificationId =
-      notificationsList[oldHolidayNotificationIndex].identifier;
+  if (oldHolidayNotification !== undefined) {
+    let oldNotificationId = oldHolidayNotification.identifier;
     await Notifications.cancelScheduledNotificationAsync(oldNotificationId);
   }
 }
@@ -133,8 +137,14 @@ export async function setHolidayNotificationAsync(holiday) {
   let allowNotifications = await allowsNotificationsAsync();
   if (!allowNotifications) return;
 
-  let notes = JSON.parse(await AsyncStorage.getItem("notes"));
-  let holidaysWithNotesIds = Object.keys(notes);
+  let notesJSON = await AsyncStorage.getItem("notes");
+  let notes = JSON.parse(notesJSON);
+  let holidaysWithNotesIds;
+  if (notes == null) {
+    holidaysWithNotesIds = [];
+  } else {
+    holidaysWithNotesIds = Object.keys(notes);
+  }
 
   if (holiday.message == "" && !holidaysWithNotesIds.includes(holiday.id)) {
     return;
@@ -150,7 +160,10 @@ export async function setHolidayNotificationAsync(holiday) {
   Notifications.scheduleNotificationAsync({
     content: {
       title: holiday.name,
-      body: getHolidayNotificationText(holiday.message, notes[holiday.id]),
+      body: getHolidayNotificationText(
+        holiday.message,
+        notes != null ? notes[holiday.id] : null
+      ),
     },
     trigger: notificationDate,
   });
@@ -167,8 +180,14 @@ export async function setHolidaysNotificationsAsync(holidaysList) {
     (holiday) => holiday.message != ""
   );
 
-  let notes = JSON.parse(await AsyncStorage.getItem("notes"));
-  let holidaysWithNotesIds = Object.keys(notes);
+  let notesJSON = await AsyncStorage.getItem("notes");
+  let notes = JSON.parse(notesJSON);
+  let holidaysWithNotesIds;
+  if (notes == null) {
+    holidaysWithNotesIds = [];
+  } else {
+    holidaysWithNotesIds = Object.keys(notes);
+  }
 
   let holidaysWithNotes = holidaysList.filter((holiday) =>
     holidaysWithNotesIds.includes(holiday.id)
@@ -182,7 +201,6 @@ export async function setHolidaysNotificationsAsync(holidaysList) {
     holidayIndex++
   ) {
     let holiday = holidaysList[holidayIndex];
-
     let notificationDate = getHolidayNotificationDate({
       month: holiday.date.month,
       day: holiday.date.day,
@@ -193,7 +211,10 @@ export async function setHolidaysNotificationsAsync(holidaysList) {
         (e) =>
           e.content.title == holiday.name &&
           e.content.body ==
-            getHolidayNotificationText(holiday.message, notes[holiday.id])
+            getHolidayNotificationText(
+              holiday.message,
+              notes != null ? notes[holiday.id] : null
+            )
       )
     ) {
       await cancelNotificationByTitleIfExist(holiday.name);
@@ -201,7 +222,10 @@ export async function setHolidaysNotificationsAsync(holidaysList) {
       Notifications.scheduleNotificationAsync({
         content: {
           title: holiday.name,
-          body: getHolidayNotificationText(holiday.message, notes[holiday.id]),
+          body: getHolidayNotificationText(
+            holiday.message,
+            notes != null ? notes[holiday.id] : null
+          ),
         },
         trigger: notificationDate,
       });

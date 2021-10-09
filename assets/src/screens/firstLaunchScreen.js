@@ -222,19 +222,14 @@ function thirdTabScreen({ navigation }) {
     const navigationListenerUnsubscribe = navigation.addListener(
       "focus",
       (_e) => {
-        console.log(1);
         if (!allowNotifications) requestPermissionsAsync();
       }
     );
 
-    const switchingBackToAppEvent = AppState.addEventListener("change", () => {
-      console.log(123);
-    });
+    AppState.addEventListener("change", onSwitchingBackToApp);
 
-    console.log(switchingBackToAppEvent);
     return () => {
-      console.log(switchingBackToAppEvent);
-      switchingBackToAppEvent.remove();
+      AppState.removeEventListener("change", onSwitchingBackToApp);
       navigationListenerUnsubscribe();
     };
   }, []);

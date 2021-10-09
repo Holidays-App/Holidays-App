@@ -227,7 +227,7 @@ function App() {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
 
-      await AsyncStorage.clear();
+      //await AsyncStorage.clear();
 
       let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
         "language",

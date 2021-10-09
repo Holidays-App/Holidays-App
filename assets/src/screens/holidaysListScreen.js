@@ -166,19 +166,13 @@ function holidaysListScreen({ navigation, route }) {
   };
 
   React.useEffect(() => {
-    if (route.params == undefined) {
-      (async () => {
-        setHolidaysNotificationsAsync(holidays);
-
-        updateHolidaysAsync().then(async () => {
-          let updatedHolidays = await getHolidaysAsync(language);
-          if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
-            setHolidays(updatedHolidays);
-            setHolidaysNotificationsAsync(updatedHolidays);
-          }
-        });
-      })();
-    }
+    updateHolidaysAsync().then(async () => {
+      let updatedHolidays = await getHolidaysAsync(language);
+      if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
+        setHolidays(updatedHolidays);
+      }
+      setHolidaysNotificationsAsync(updatedHolidays);
+    });
   }, []);
 
   return (
