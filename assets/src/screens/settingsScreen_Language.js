@@ -8,15 +8,14 @@ import {
   Dimensions,
 } from "react-native";
 
-import * as Notifications from "expo-notifications";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   LanguageContext,
   HolidaysContext,
-  setNotifications,
-  getHolidays,
+  setHolidaysNotificationsAsync,
+  canselAllNotificationsAsync,
+  getHolidaysAsync,
 } from "../utils";
 
 const resurces = {
@@ -70,11 +69,11 @@ function settingsScreen_Language() {
 
     AsyncStorage.setItem("language", newLanguage);
 
-    let holidays = await getHolidays(newLanguage);
+    let holidays = await getHolidaysAsync(newLanguage);
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await canselAllNotificationsAsync();
     clearTimeout(notificationsTimerId);
-    notificationsTimerId = setTimeout(setNotifications, 2000, holidays);
+    notificationsTimerId = setTimeout(setHolidaysNotificationsAsync, 2000, holidays);
 
     setHolidays(holidays);
 

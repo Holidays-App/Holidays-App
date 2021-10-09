@@ -13,9 +13,9 @@ import { useScrollToTop } from "@react-navigation/native";
 import {
   LanguageContext,
   HolidaysContext,
-  getHolidays,
-  updateHolidays,
-  setNotifications,
+  getHolidaysAsync,
+  updateHolidaysAsync,
+  setHolidaysNotificationsAsync,
 } from "../utils";
 
 function wait(ms) {
@@ -168,13 +168,13 @@ function holidaysListScreen({ navigation, route }) {
   React.useEffect(() => {
     if (route.params == undefined) {
       (async () => {
-        setNotifications(holidays);
+        setHolidaysNotificationsAsync(holidays);
 
-        updateHolidays().then(async () => {
-          let updatedHolidays = await getHolidays(language);
+        updateHolidaysAsync().then(async () => {
+          let updatedHolidays = await getHolidaysAsync(language);
           if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
             setHolidays(updatedHolidays);
-            setNotifications(updatedHolidays);
+            setHolidaysNotificationsAsync(updatedHolidays);
           }
         });
       })();

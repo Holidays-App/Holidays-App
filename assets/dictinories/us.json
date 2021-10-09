@@ -2,8 +2,8 @@
   "firstLaunchScreen": {
     "nextTabButtonText": "Next",
     "startButtonText": "Begin!",
-    "allowNotificationsButtonText": "Enable notifications",
-    "allowNotificationsButtonTextNotificationsOn": "Notifications enabled",
+    "notificationsGoodStatus": "Notifications enabled",
+    "notificationsBadStatus": "It looks like you have disabled notifications for the app. Go to settings to enable notifications :)",
     "firstTabText": "Your holiday guide for every day",
     "languageTabText": "Choose language:",
     "notificationsTabText": "Notifications",
@@ -19,10 +19,6 @@
   },
   "settingsScreen_Language": {
     "title": "Language"
-  },
-  "settingsScreen_Notifications": {
-    "settingsButtonText": "Settings",
-    "description": "It looks like you have disabled notifications for the app. Go to settings to enable notifications"
   },
   "categoriesScreen": {
     "title": "Categories"

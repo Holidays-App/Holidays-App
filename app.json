@@ -9,7 +9,6 @@
       "ios",
       "android"
     ],
-    "userInterfaceStyle": "light",
     "version": "0.1.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -32,6 +31,16 @@
       "useNextNotificationsApi": true,
       "package": "com.holidaysapp.holidays",
       "versionCode": 1
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/textures/transparent-icon.png",
+          "color": "#ffffff",
+          "mode": "production"
+        }
+      ]
+    ]
   }
 }

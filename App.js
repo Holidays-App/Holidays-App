@@ -14,7 +14,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import {
   LanguageContext,
   HolidaysContext,
-  getHolidays,
+  getHolidaysAsync,
 } from "./assets/src/utils";
 
 function isObject(item) {
@@ -152,6 +152,7 @@ function mainScreen() {
         activeTintColor: "#AC0735",
         tabStyle: { justifyContent: "center" },
         showLabel: false,
+        keyboardHidesTabBar: true,
       }}
     >
       <Tab.Screen
@@ -226,7 +227,7 @@ function App() {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
 
-      //  await AsyncStorage.clear();
+      await AsyncStorage.clear();
 
       let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
         "language",
@@ -245,7 +246,7 @@ function App() {
         setAlreadyLaunched(false);
       } else {
         setAlreadyLaunched(true);
-        let holidays = await getHolidays(language);
+        let holidays = await getHolidaysAsync(language);
         setHolidays(holidays);
       }
       await SplashScreen.hideAsync();

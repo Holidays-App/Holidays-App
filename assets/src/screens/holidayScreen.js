@@ -155,18 +155,28 @@ function Article({
 function holidayScreen({ route }) {
   const { dictinory } = React.useContext(LanguageContext);
 
-  const [notesText, setNotesText] = React.useState("");
+  const [noteText, setNoteText] = React.useState(null);
+
+  let saveNoteTimer = null;
 
   React.useEffect(() => {
     let stop = false;
     (async () => {
-      if (notesText == "") {
-        let savedNotesText = await AsyncStorage.getItem(
-          "notes:" + route.params.holiday.name
-        );
+      if (noteText === null) {
+        let savedNotesJSON = await AsyncStorage.getItem("notes");
 
-        if (!stop && savedNotesText != null) {
-          setNotesText(savedNotesText);
+        if (!stop) {
+          if (savedNotesJSON == null) {
+            setNoteText("");
+          } else {
+            let savedNotes = JSON.parse(savedNotesJSON);
+            if (Object.keys(savedNotes).includes(route.params.holiday.id)) {
+              let savedNoteText = savedNotes[route.params.holiday.id];
+              setNoteText(savedNoteText);
+            } else {
+              setNoteText("");
+            }
+          }
         }
       }
     })();
@@ -176,13 +186,11 @@ function holidayScreen({ route }) {
     };
   });
 
-  let saveNoteTimer = null;
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.scrollViewContainer}>
-          <Text style={styles.name}>{route.params.holiday.name}</Text>
+          <Text style={styles.name}>{route.params.holiday.id}</Text>
           <Text style={styles.date}>
             {route.params.holiday.date.day +
               " " +
@@ -202,15 +210,23 @@ function holidayScreen({ route }) {
             <TextInput
               style={styles.notesInput}
               multiline={true}
-              value={notesText}
+              value={noteText}
               onChangeText={(text) => {
                 if (saveNoteTimer !== null) clearTimeout(saveNoteTimer);
-                setNotesText(text);
+                setNoteText(text);
 
                 saveNoteTimer = setTimeout(async () => {
+                  let savedNotes = await AsyncStorage.getItem("notes");
+                  if (savedNotes == null) {
+                    savedNotes = {};
+                  } else {
+                    savedNotes = JSON.parse(savedNotes);
+                  }
+
+                  savedNotes[route.params.holiday.id] = text;
                   await AsyncStorage.setItem(
-                    "notes:" + route.params.holiday.name,
-                    text
+                    "notes",
+                    JSON.stringify(savedNotes)
                   );
                 }, 1000);
               }}

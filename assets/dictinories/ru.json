@@ -2,8 +2,8 @@
   "firstLaunchScreen": {
     "nextTabButtonText": "Далее",
     "startButtonText": "Начать!",
-    "allowNotificationsButtonText": "Включить уведомления",
-    "allowNotificationsButtonTextNotificationsOn": "Уведомления включены",
+    "notificationsGoodStatus": "Уведомления включены",
+    "notificationsBadStatus": "Похоже, что вы отключили уведомления для приложения. Перейдите в настройки чтобы включить уведомления :)",
     "notificationsTabTitle": "Уведомления",
     "firstTabText": "Твой путеводитель по праздникам на каждый день",
     "languageTabText": "Выберите язык:",
@@ -20,10 +20,6 @@
   },
   "settingsScreen_Language": {
     "title": "Язык"
-  },
-  "settingsScreen_Notifications": {
-    "settingsButtonText": "Настройки",
-    "description": "Похоже, что вы отключили уведомления для приложения. Перейдите в настройки чтобы включить уведомления"
   },
   "categoriesScreen": {
     "title": "Категории"

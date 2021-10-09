@@ -6,7 +6,6 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "update-holidays": "wget -O ./assets/holidays/ru.json http://holidays-app.github.io/holidays/ru.json && wget -O ./assets/holidays/us.json http://holidays-app.github.io/holidays/us.json",
     "build-android": "expo build:android",
     "build-ios": "expo build:ios"
   },

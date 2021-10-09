@@ -6,19 +6,21 @@ import {
   Dimensions,
   AppState,
   Image,
-  Platform,
   StyleSheet,
-  Alert,
 } from "react-native";
-
-import * as Permissions from "expo-permissions";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Icon } from "react-native-elements";
 
-import { LanguageContext, HolidaysContext, getHolidays } from "../utils";
+import {
+  LanguageContext,
+  HolidaysContext,
+  getHolidaysAsync,
+  allowsNotificationsAsync,
+  requestPermissionsAsync,
+} from "../utils";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -187,7 +189,7 @@ function thirdTabScreen({ navigation }) {
   const [allowNotifications, setAllowNotifications] = React.useState(null);
 
   const thirdTabStyles = StyleSheet.create({
-    turnonNotificationsButton: {
+    notificationsGoodStatusContainer: {
       borderRadius: 10,
       backgroundColor: allowNotifications ? "#34a853" : "#AC0735",
       paddingHorizontal: 15,
@@ -195,45 +197,45 @@ function thirdTabScreen({ navigation }) {
       marginHorizontal: "5%",
       top: "10%",
     },
-    turnonNotificationsButtonText: {
+    notificationsGoodStatusText: {
       textAlign: "center",
       fontSize: 21,
       color: "#ffffff",
     },
+    notificationsBadStatusText: {
+      top: "10%",
+      textAlign: "center",
+      fontSize: 21,
+      color: "#AC0735",
+    },
   });
 
-  const turnonNotifications = async () => {
-    let notificationsPrem = await Permissions.askAsync(
-      Permissions.NOTIFICATIONS
-    );
-    if (
-      Platform.OS == "ios"
-        ? notificationsPrem.permissions.notifications.ios.status == 0
-        : notificationsPrem.canAskAgain
-    ) {
-      if ((await Permissions.askAsync(Permissions.NOTIFICATIONS)).granted) {
-        AsyncStorage.setItem("allowNotifications", JSON.stringify(true));
-      }
-    } else {
-      Alert.alert("", dictinory.settingsScreen_Notifications.description);
-    }
-  };
-
-  const checkNotificationsPermission = async (appState) => {
-    if (appState == "active" || appState == undefined) {
-      if ((await Permissions.getAsync(Permissions.NOTIFICATIONS)).granted) {
-        setAllowNotifications(true);
-      } else {
-        setAllowNotifications(false);
-      }
+  const onSwitchingBackToApp = async (nextAppState) => {
+    if (nextAppState == "active" || nextAppState == undefined) {
+      setAllowNotifications(await allowsNotificationsAsync());
     }
   };
 
   React.useEffect(() => {
-    checkNotificationsPermission();
-    AppState.addEventListener("change", checkNotificationsPermission);
+    onSwitchingBackToApp();
+
+    const navigationListenerUnsubscribe = navigation.addListener(
+      "focus",
+      (_e) => {
+        console.log(1);
+        if (!allowNotifications) requestPermissionsAsync();
+      }
+    );
+
+    const switchingBackToAppEvent = AppState.addEventListener("change", () => {
+      console.log(123);
+    });
+
+    console.log(switchingBackToAppEvent);
     return () => {
-      AppState.removeEventListener("change", checkNotificationsPermission);
+      console.log(switchingBackToAppEvent);
+      switchingBackToAppEvent.remove();
+      navigationListenerUnsubscribe();
     };
   }, []);
 
@@ -250,18 +252,17 @@ function thirdTabScreen({ navigation }) {
         {dictinory.firstLaunchScreen.notificationsTabText}
       </Text>
       {allowNotifications != null ? (
-        <TouchableOpacity
-          onPress={turnonNotifications}
-          disabled={allowNotifications}
-          style={thirdTabStyles.turnonNotificationsButton}
-        >
-          <Text style={thirdTabStyles.turnonNotificationsButtonText}>
-            {allowNotifications
-              ? dictinory.firstLaunchScreen
-                  .allowNotificationsButtonTextNotificationsOn
-              : dictinory.firstLaunchScreen.allowNotificationsButtonText}
+        allowNotifications ? (
+          <View style={thirdTabStyles.notificationsGoodStatusContainer}>
+            <Text style={thirdTabStyles.notificationsGoodStatusText}>
+              {dictinory.firstLaunchScreen.notificationsGoodStatus}
+            </Text>
+          </View>
+        ) : (
+          <Text style={thirdTabStyles.notificationsBadStatusText}>
+            {dictinory.firstLaunchScreen.notificationsBadStatus}
           </Text>
-        </TouchableOpacity>
+        )
       ) : null}
       <NextTabButton nextTab="fourthTabScreen" navigation={navigation} />
     </View>
@@ -297,7 +298,7 @@ function fourthTabScreen({ navigation }) {
   };
 
   navigation.addListener("focus", async () => {
-    let holidays = await getHolidays(language);
+    let holidays = await getHolidaysAsync(language);
     setHolidays(holidays);
   });
 
