@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CheckBox from "react-native-check-box";
 
 import {
   LanguageContext,
@@ -63,9 +64,59 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
     fontSize: 19,
   },
+  strokesWithCheckBoxContainer: {
+    marginTop: 30,
+  },
 });
 
 const screenWidth = Dimensions.get("window").width;
+
+function StrokeWithCheckBox({
+  text,
+  onChange = (_value) => {},
+  initDataPromise,
+}) {
+  const styles = StyleSheet.create({
+    checkboxContainer: {
+      flexDirection: "row",
+      marginVertical: 5,
+      justifyContent: "space-between",
+    },
+    text: {
+      fontSize: 21,
+    },
+  });
+
+  const [isChecked, setChecked] = React.useState(null);
+
+  const onClick = (value) => {
+    setChecked(!isChecked);
+    onChange(value);
+  };
+
+  React.useEffect(() => {
+    (async () => {
+      let newValue = await initDataPromise;
+      if (isChecked == null) {
+        setChecked(newValue);
+      }
+    })();
+  }, []);
+
+  return (
+    <View style={styles.checkboxContainer}>
+      <Text style={styles.text}>{text}</Text>
+      {isChecked == null ? null : (
+        <CheckBox
+          checkedCheckBoxColor={ColorSheet.primaryColor}
+          uncheckedCheckBoxColor={"#666666"}
+          isChecked={isChecked}
+          onClick={onClick}
+        />
+      )}
+    </View>
+  );
+}
 
 function ArticleImage({ uri, maxSize, style = {} }) {
   /*
@@ -118,7 +169,7 @@ function ArticleImage({ uri, maxSize, style = {} }) {
     return () => {
       stop = true;
     };
-  });
+  }, []);
 
   return <Image style={{ ...style, ...size }} source={{ uri }} />;
 }
@@ -195,7 +246,7 @@ function holidayScreen({ route }) {
     return () => {
       stop = true;
     };
-  });
+  }, []);
 
   return (
     /* 
@@ -245,6 +296,24 @@ function holidayScreen({ route }) {
                   await setHolidayNotificationAsync(route.params.holiday);
                 }, 1000);
               }}
+            />
+          </View>
+          <View style={styles.strokesWithCheckBoxContainer}>
+            <StrokeWithCheckBox
+              text={"text1"}
+              initDataPromise={
+                new Promise(async (resolve, _reject) => {
+                  resolve(true);
+                })
+              }
+            />
+            <StrokeWithCheckBox
+              text={"text2"}
+              initDataPromise={
+                new Promise(async (resolve, _reject) => {
+                  resolve(true);
+                })
+              }
             />
           </View>
         </View>
