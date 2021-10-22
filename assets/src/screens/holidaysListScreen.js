@@ -16,6 +16,7 @@ import {
   getHolidaysAsync,
   updateHolidaysAsync,
   setHolidaysNotificationsAsync,
+  ColorSheet,
 } from "../utils";
 
 function wait(ms) {
@@ -95,7 +96,7 @@ function useForceUpdate() {
 const styles = StyleSheet.create({
   date: {
     fontSize: 16,
-    color: "#666666",
+    color: ColorSheet.text.subtitle,
   },
   name: {
     fontSize: 19,
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: ColorSheet.backgroundColor,
   },
   listItem: {
     flex: 1,
@@ -145,7 +146,7 @@ function holidaysListScreen({ navigation, route }) {
       holiday.date.day == new Date().getDate() &&
       holiday.date.month == new Date().getMonth() + 1
     ) {
-      BorderStyles.borderColor = "#AC0735";
+      BorderStyles.borderColor = ColorSheet.primaryColor;
       BorderStyles.borderWidth = 4;
 
       if (filteredHolidays.indexOf(holiday) != 0) {
@@ -210,7 +211,7 @@ function holidaysListScreen({ navigation, route }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            colors={["#AC0735"]}
+            colors={[ColorSheet.primaryColor]}
           />
         }
       />

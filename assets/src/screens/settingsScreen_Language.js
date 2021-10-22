@@ -16,6 +16,7 @@ import {
   setHolidaysNotificationsAsync,
   canselAllNotificationsAsync,
   getHolidaysAsync,
+  ColorSheet,
 } from "../utils";
 
 const resurces = {
@@ -31,13 +32,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
-    backgroundColor: "#ffffff",
+    backgroundColor: ColorSheet.backgroundColor,
   },
   languageButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     top: screenWidth / 5,
-    backgroundColor: "#ffffff",
+    backgroundColor: ColorSheet.backgroundColor,
     height: screenWidth / 5 + 40,
   },
   ruFlagButton: {
@@ -73,7 +74,11 @@ function settingsScreen_Language() {
 
     await canselAllNotificationsAsync();
     clearTimeout(notificationsTimerId);
-    notificationsTimerId = setTimeout(setHolidaysNotificationsAsync, 2000, holidays);
+    notificationsTimerId = setTimeout(
+      setHolidaysNotificationsAsync,
+      2000,
+      holidays
+    );
 
     setHolidays(holidays);
 

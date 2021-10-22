@@ -9,14 +9,14 @@ import {
 
 import { useScrollToTop } from "@react-navigation/native";
 
-import { LanguageContext, HolidaysContext } from "../utils";
+import { LanguageContext, HolidaysContext, ColorSheet } from "../utils";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: ColorSheet.backgroundColor,
   },
   listItem: {
     flex: 1,

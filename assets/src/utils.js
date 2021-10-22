@@ -232,3 +232,14 @@ export async function setHolidaysNotificationsAsync(holidaysList) {
     }
   }
 }
+
+export const ColorSheet = {
+  primaryColor: "#ac0735",
+  alternativeColor: "#F5C684",
+  okColor: "#34a853",
+  backgroundColor: "#ffffff",
+  text: {
+    main: "#000000",
+    subtitle: "#666666",
+  },
+};

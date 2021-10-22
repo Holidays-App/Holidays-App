@@ -20,6 +20,7 @@ import {
   getHolidaysAsync,
   allowsNotificationsAsync,
   requestPermissionsAsync,
+  ColorSheet,
 } from "../utils";
 
 const Tab = createMaterialTopTabNavigator();
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: ColorSheet.backgroundColor,
   },
   mainIcon: { top: 90, marginBottom: 90 },
   mainText: { fontSize: 24, top: "5%" },
@@ -58,7 +59,7 @@ function NextTabButton({ nextTab, navigation }) {
       bottom: 40,
       right: 40,
     },
-    text: { color: "#AC0735", fontSize: 22, textAlign: "right" },
+    text: { color: ColorSheet.primaryColor, fontSize: 22, textAlign: "right" },
   });
 
   return (
@@ -84,7 +85,6 @@ function firstTabScreen({ navigation }) {
       width: screenHeight / 3 / 1.842,
     },
     appName: {
-      color: "#000000",
       fontSize: (screenHeight / 100) * 5.74,
       textAlign: "center",
       top: "5%",
@@ -145,7 +145,7 @@ function secondTabScreen({ navigation }) {
       <Icon
         name="language"
         type="font-awesome"
-        color={"#F5C684"}
+        color={ColorSheet.alternativeColor}
         size={(screenHeight / 20) * 7}
         iconStyle={styles.mainIcon}
       />
@@ -191,7 +191,9 @@ function thirdTabScreen({ navigation }) {
   const thirdTabStyles = StyleSheet.create({
     notificationsGoodStatusContainer: {
       borderRadius: 10,
-      backgroundColor: allowNotifications ? "#34a853" : "#AC0735",
+      backgroundColor: allowNotifications
+        ? ColorSheet.okColor
+        : ColorSheet.primaryColor,
       paddingHorizontal: 15,
       paddingVertical: 10,
       marginHorizontal: "5%",
@@ -206,7 +208,8 @@ function thirdTabScreen({ navigation }) {
       top: "10%",
       textAlign: "center",
       fontSize: 21,
-      color: "#AC0735",
+      color: ColorSheet.primaryColor,
+      marginHorizontal: 20,
     },
   });
 
@@ -239,7 +242,7 @@ function thirdTabScreen({ navigation }) {
       <Icon
         name="bell"
         type="font-awesome"
-        color={"#F5C684"}
+        color={ColorSheet.alternativeColor}
         size={(screenHeight / 20) * 7}
         iconStyle={styles.mainIcon}
       />
@@ -276,10 +279,10 @@ function fourthTabScreen({ navigation }) {
       alignItems: "center",
       textAlign: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: ColorSheet.backgroundColor,
     },
     text: {
-      color: "#AC0735",
+      color: ColorSheet.primaryColor,
       fontSize: 24,
       textAlign: "center",
       marginHorizontal: "5%",

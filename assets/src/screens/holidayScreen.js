@@ -12,7 +12,11 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { LanguageContext, setHolidayNotificationAsync } from "../utils";
+import {
+  LanguageContext,
+  setHolidayNotificationAsync,
+  ColorSheet,
+} from "../utils";
 
 const styles = StyleSheet.create({
   name: {
@@ -21,7 +25,7 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 22,
-    color: "#666666",
+    color: ColorSheet.text.subtitle,
     top: 30,
   },
   paragraph: {
@@ -41,7 +45,7 @@ const styles = StyleSheet.create({
   },
   container: {
     height: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: ColorSheet.backgroundColor,
   },
   forNotesText: { fontSize: 21, textAlign: "center", marginVertical: 6 },
   notesContainer: {
@@ -64,6 +68,9 @@ const styles = StyleSheet.create({
 const screenWidth = Dimensions.get("window").width;
 
 function ArticleImage({ uri, maxSize, style = {} }) {
+  /*
+  Image loading for resizing, can take too much time on IOS
+  */
   const [size, setSize] = React.useState({
     height: screenWidth,
     width: screenWidth,
@@ -191,6 +198,9 @@ function holidayScreen({ route }) {
   });
 
   return (
+    /* 
+    IOS bug: TextInput doesn't move up when keyboard shows
+    */
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.scrollViewContainer}>

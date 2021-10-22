@@ -15,6 +15,7 @@ import {
   LanguageContext,
   HolidaysContext,
   getHolidaysAsync,
+  ColorSheet,
 } from "./assets/src/utils";
 
 function isObject(item) {
@@ -149,7 +150,7 @@ function mainScreen() {
   return (
     <Tab.Navigator
       tabBarOptions={{
-        activeTintColor: "#AC0735",
+        activeTintColor: ColorSheet.primaryColor,
         tabStyle: { justifyContent: "center" },
         showLabel: false,
         keyboardHidesTabBar: true,

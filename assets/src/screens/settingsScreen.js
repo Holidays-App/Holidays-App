@@ -1,14 +1,14 @@
 import * as React from "react";
 import { Text, View, StyleSheet, TouchableNativeFeedback } from "react-native";
 
-import { LanguageContext } from "../utils";
+import { LanguageContext, ColorSheet } from "../utils";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
     position: "relative",
-    backgroundColor: "#ffffff",
+    backgroundColor: ColorSheet.backgroundColor,
   },
   touchableOpasity: {
     width: "100%",
@@ -19,12 +19,11 @@ const styles = StyleSheet.create({
     marginHorizontal: "10%",
     justifyContent: "center",
     borderRadius: 10,
-    height: 60,
-    paddingVertical: 20,
     top: "25%",
-    backgroundColor: "#AC0735",
+    backgroundColor: ColorSheet.primaryColor,
   },
   sectionName: {
+    marginVertical: 20,
     textAlign: "center",
     fontSize: 21,
     color: "#FFFFFF",
