@@ -71,6 +71,59 @@ const styles = StyleSheet.create({
 
 const screenWidth = Dimensions.get("window").width;
 
+objectFormatASDW = {
+  _sessions: {},
+  getData: async (dataName, key, defaultResult = null) => {
+    let dataJSON = await AsyncStorage.getItem(dataName);
+
+    if (dataJSON == null) {
+      return defaultResult;
+    } else {
+      let data = JSON.parse(dataJSON);
+      if (Object.keys(data).includes(key.toString())) {
+        return data[key];
+      } else {
+        return defaultResult;
+      }
+    }
+  },
+  setData: async (
+    dataName,
+    key,
+    dataForSave,
+    sessionId = "",
+    delay = 1000,
+    onSuccess = () => {}
+  ) => {
+    if (
+      sessionId != "" &&
+      Object.keys(objectFormatASDW._sessions).includes(sessionId)
+    ) {
+      clearTimeout(objectFormatASDW._sessions[sessionId]);
+    }
+
+    objectFormatASDW._sessions[sessionId] = setTimeout(async () => {
+      let dataJSON = await AsyncStorage.getItem(dataName);
+
+      let data;
+
+      if (dataJSON == null) {
+        data = {};
+      } else {
+        data = JSON.parse(dataJSON);
+      }
+
+      if (data[key] != dataForSave) {
+        data[key] = dataForSave;
+      }
+
+      await AsyncStorage.setItem(dataName, JSON.stringify(data));
+
+      onSuccess();
+    }, delay);
+  },
+};
+
 function StrokeWithCheckBox({
   text,
   onChange = (_value) => {},
@@ -89,18 +142,24 @@ function StrokeWithCheckBox({
 
   const [isChecked, setChecked] = React.useState(null);
 
-  const onClick = (value) => {
+  const onClick = () => {
+    setTimeout(() => onChange(!isChecked), 3000);
     setChecked(!isChecked);
-    onChange(value);
   };
 
   React.useEffect(() => {
-    (async () => {
-      let newValue = await initDataPromise;
-      if (isChecked == null) {
-        setChecked(newValue);
-      }
-    })();
+    let stop = false;
+    if (!stop) {
+      (async () => {
+        let newValue = await initDataPromise;
+        if (isChecked == null) {
+          setChecked(newValue);
+        }
+      })();
+    }
+    return () => {
+      stop = true;
+    };
   }, []);
 
   return (
@@ -215,34 +274,15 @@ function holidayScreen({ route }) {
 
   const [noteText, setNoteText] = React.useState(null);
 
-  let saveNoteTimer = null;
-
   React.useEffect(() => {
     let stop = false;
-    (async () => {
-      if (noteText === null) {
-        let savedNotesJSON = await AsyncStorage.getItem("notes");
-
-        if (!stop) {
-          if (savedNotesJSON == null) {
-            setNoteText("");
-          } else {
-            let savedNotes = JSON.parse(savedNotesJSON);
-            if (
-              Object.keys(savedNotes).includes(
-                route.params.holiday.id.toString()
-              )
-            ) {
-              let savedNoteText = savedNotes[route.params.holiday.id];
-              setNoteText(savedNoteText);
-            } else {
-              setNoteText("");
-            }
-          }
-        }
-      }
-    })();
-
+    if (!stop && noteText === null) {
+      (async () => {
+        setNoteText(
+          await objectFormatASDW.getData("notes", route.params.holiday.id, "")
+        );
+      })();
+    }
     return () => {
       stop = true;
     };
@@ -277,41 +317,62 @@ function holidayScreen({ route }) {
               multiline={true}
               value={noteText}
               onChangeText={(text) => {
-                if (saveNoteTimer !== null) clearTimeout(saveNoteTimer);
                 setNoteText(text);
 
-                saveNoteTimer = setTimeout(async () => {
-                  let savedNotes = await AsyncStorage.getItem("notes");
-                  if (savedNotes == null) {
-                    savedNotes = {};
-                  } else {
-                    savedNotes = JSON.parse(savedNotes);
+                objectFormatASDW.setData(
+                  "notes",
+                  route.params.holiday.id,
+                  text,
+                  "saveNotes",
+                  () => {
+                    setHolidayNotificationAsync(route.params.holiday);
                   }
-
-                  savedNotes[route.params.holiday.id] = text;
-                  await AsyncStorage.setItem(
-                    "notes",
-                    JSON.stringify(savedNotes)
-                  );
-                  await setHolidayNotificationAsync(route.params.holiday);
-                }, 1000);
+                );
               }}
             />
           </View>
           <View style={styles.strokesWithCheckBoxContainer}>
             <StrokeWithCheckBox
-              text={"text1"}
+              text={dictinory.holidayScreen.holidayImportanceCheckBox}
+              onChange={(isHolidayImportant) => {
+                objectFormatASDW.setData(
+                  "holidaysImportance",
+                  route.params.holiday.id,
+                  isHolidayImportant,
+                  "saveHolidaysImportance"
+                );
+              }}
               initDataPromise={
                 new Promise(async (resolve, _reject) => {
-                  resolve(true);
+                  resolve(
+                    await objectFormatASDW.getData(
+                      "holidaysImportance",
+                      route.params.holiday.id,
+                      false
+                    )
+                  );
                 })
               }
             />
             <StrokeWithCheckBox
-              text={"text2"}
+              text={dictinory.holidayScreen.notificationCheckBox}
+              onChange={(holidayNotificationRule) => {
+                objectFormatASDW.setData(
+                  "holidaysNotificationsRules",
+                  route.params.holiday.id,
+                  holidayNotificationRule,
+                  "saveHolidaysNotificationsRules"
+                );
+              }}
               initDataPromise={
                 new Promise(async (resolve, _reject) => {
-                  resolve(true);
+                  resolve(
+                    await objectFormatASDW.getData(
+                      "holidaysNotificationsRules",
+                      route.params.holiday.id,
+                      true
+                    )
+                  );
                 })
               }
             />

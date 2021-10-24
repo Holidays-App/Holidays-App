@@ -25,7 +25,9 @@
   },
   "holidayScreen": {
     "title": "Holiday",
-    "forNotes": "For notes"
+    "forNotes": "For notes",
+    "notificationCheckBox": "Notify about the holiday",
+    "holidayImportanceCheckBox": "Important holiday"
   },
   "months": [
     "January",
