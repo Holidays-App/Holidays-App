@@ -6,6 +6,7 @@ import { Icon } from "react-native-elements";
 
 import * as SplashScreen from "expo-splash-screen";
 import * as Localization from "expo-localization";
+import * as Font from "expo-font";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -16,6 +17,7 @@ import {
   HolidaysContext,
   getHolidaysAsync,
   ColorSheet,
+  CustomFonts,
 } from "./assets/src/utils";
 
 function isObject(item) {
@@ -250,6 +252,9 @@ function App() {
         let holidays = await getHolidaysAsync(language);
         setHolidays(holidays);
       }
+
+      await Font.loadAsync(CustomFonts);
+
       await SplashScreen.hideAsync();
     })();
   }, []);

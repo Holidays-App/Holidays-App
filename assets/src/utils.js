@@ -243,3 +243,7 @@ export const ColorSheet = {
     subtitle: "#666666",
   },
 };
+
+export const CustomFonts = {
+  RedHatDisplay_Bold: require("../fonts/RedHatDisplay-Bold.ttf"),
+};

@@ -23,10 +23,20 @@ const styles = StyleSheet.create({
     backgroundColor: ColorSheet.primaryColor,
   },
   sectionName: {
-    marginVertical: 20,
+    marginVertical: 15,
     textAlign: "center",
     fontSize: 21,
     color: "#FFFFFF",
+  },
+  creatorName: {
+    position: "absolute",
+    width: "100%",
+    textAlign: "center",
+    bottom: 50,
+
+    color: "#b0b0b0",
+    fontFamily: "RedHatDisplay_Bold",
+    fontSize: 21,
   },
 });
 
@@ -45,6 +55,7 @@ function settingsScreen({ navigation }) {
           </Text>
         </View>
       </TouchableNativeFeedback>
+      <Text style={styles.creatorName}>{dictinory.creatorName}</Text>
     </View>
   );
 }
