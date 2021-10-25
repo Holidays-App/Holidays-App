@@ -63,6 +63,7 @@ function settingsScreen_Language() {
 
   const { dictinory, language, setLanguage } =
     React.useContext(LanguageContext);
+
   const { setHolidays } = React.useContext(HolidaysContext);
 
   const changeLanguage = async (newLanguage) => {
@@ -77,7 +78,8 @@ function settingsScreen_Language() {
     notificationsTimerId = setTimeout(
       setHolidaysNotificationsAsync,
       2000,
-      holidays
+      holidays,
+      language
     );
 
     setHolidays(holidays);

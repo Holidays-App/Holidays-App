@@ -172,7 +172,7 @@ function holidaysListScreen({ navigation, route }) {
       if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
         setHolidays(updatedHolidays);
       }
-      setHolidaysNotificationsAsync(updatedHolidays);
+      setHolidaysNotificationsAsync(updatedHolidays, language);
     });
   }, []);
 

@@ -10,13 +10,14 @@ import {
   TextInput,
 } from "react-native";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import CheckBox from "react-native-check-box";
 
 import {
   LanguageContext,
   setHolidayNotificationAsync,
+  cancelNotificationByTitleIfExist,
   ColorSheet,
+  ObjectFormatASDW,
 } from "../utils";
 
 const styles = StyleSheet.create({
@@ -71,59 +72,6 @@ const styles = StyleSheet.create({
 
 const screenWidth = Dimensions.get("window").width;
 
-var ObjectFormatASDW = {
-  _sessions: {},
-  getData: async ({ dataName, key, defaultResult = null }) => {
-    let dataJSON = await AsyncStorage.getItem(dataName);
-
-    if (dataJSON == null) {
-      return defaultResult;
-    } else {
-      let data = JSON.parse(dataJSON);
-      if (Object.keys(data).includes(key.toString())) {
-        return data[key];
-      } else {
-        return defaultResult;
-      }
-    }
-  },
-  setData: async ({
-    dataName,
-    key,
-    dataForSave,
-    sessionId = "",
-    delay = 1000,
-    onSuccess = () => {},
-  }) => {
-    if (
-      sessionId != "" &&
-      Object.keys(ObjectFormatASDW._sessions).includes(sessionId)
-    ) {
-      clearTimeout(ObjectFormatASDW._sessions[sessionId]);
-    }
-
-    ObjectFormatASDW._sessions[sessionId] = setTimeout(async () => {
-      let dataJSON = await AsyncStorage.getItem(dataName);
-
-      let data;
-
-      if (dataJSON == null) {
-        data = {};
-      } else {
-        data = JSON.parse(dataJSON);
-      }
-
-      if (data[key] != dataForSave) {
-        data[key] = dataForSave;
-      }
-      
-      await AsyncStorage.setItem(dataName, JSON.stringify(data));
-
-      onSuccess();
-    }, delay);
-  },
-};
-
 function StrokeWithCheckBox({
   text,
   onChange = (_value) => {},
@@ -152,9 +100,7 @@ function StrokeWithCheckBox({
     if (!stop) {
       (async () => {
         let newValue = await initDataPromise;
-        console.log(newValue);
         if (isChecked == null) {
-          console.log(`we ${newValue} we`);
           setChecked(newValue);
         }
       })();
@@ -216,17 +162,19 @@ function ArticleImage({ uri, maxSize, style = {} }) {
           resizedWidth = (width / height) * maxSize;
         }
 
-        if (!stop) {
-          setSize({
-            height: resizedHeight,
-            width: resizedWidth,
-          });
-        }
+        setSize({
+          height: resizedHeight,
+          width: resizedWidth,
+        });
       } catch (error) {
         if (__DEV__) console.warn(error);
       }
     };
-    sideEffect();
+
+    if (!stop) {
+      sideEffect();
+    }
+
     return () => {
       stop = true;
     };
@@ -272,7 +220,7 @@ function Article({
 }
 
 function holidayScreen({ route }) {
-  const { dictinory } = React.useContext(LanguageContext);
+  const { dictinory, language } = React.useContext(LanguageContext);
 
   const [noteText, setNoteText] = React.useState(null);
 
@@ -330,8 +278,8 @@ function holidayScreen({ route }) {
                   key: route.params.holiday.id,
                   dataForSave: text,
                   sessionId: "saveNotes",
-                  onSuccess: () => {
-                    setHolidayNotificationAsync(route.params.holiday);
+                  onSuccess: (_isValueChanged) => {
+                    setHolidayNotificationAsync(route.params.holiday, language);
                   },
                 });
               }}
@@ -362,12 +310,23 @@ function holidayScreen({ route }) {
             />
             <StrokeWithCheckBox
               text={dictinory.holidayScreen.notificationCheckBox}
-              onChange={(holidayNotificationRule) => {
+              onChange={(isNotify) => {
                 ObjectFormatASDW.setData({
                   dataName: "holidaysNotificationsRules",
                   key: route.params.holiday.id,
-                  dataForSave: holidayNotificationRule,
+                  dataForSave: isNotify,
                   sessionId: "saveHolidaysNotificationsRules",
+                  onSuccess: (isValueChanged) => {
+                    if (isValueChanged) {
+                      if (isNotify) {
+                        setHolidayNotificationAsync(route.params.holiday);
+                      } else {
+                        cancelNotificationByTitleIfExist(
+                          route.params.holiday.name
+                        );
+                      }
+                    }
+                  },
                 });
               }}
               initDataPromise={

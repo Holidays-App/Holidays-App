@@ -18,36 +18,11 @@ import {
   getHolidaysAsync,
   ColorSheet,
   CustomFonts,
+  getDictinoryByLanguage,
 } from "./assets/src/utils";
-
-function isObject(item) {
-  return item && typeof item === "object" && !Array.isArray(item);
-}
-
-function mergeDeep(target, ...sources) {
-  if (!sources.length) return target;
-  const source = sources.shift();
-
-  if (isObject(target) && isObject(source)) {
-    for (const key in source) {
-      if (isObject(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
-        mergeDeep(target[key], source[key]);
-      } else {
-        Object.assign(target, { [key]: source[key] });
-      }
-    }
-  }
-
-  return mergeDeep(target, ...sources);
-}
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
-const usDictinory = require("./assets/dictinories/us.json");
-const ruDictinory = require("./assets/dictinories/ru.json");
-const defaultDictinory = require("./assets/dictinories/default.json");
 
 import holidaysListScreen from "./assets/src/screens/holidaysListScreen";
 import holidayScreen from "./assets/src/screens/holidayScreen";
@@ -199,11 +174,7 @@ function App() {
   const languageContext = React.useMemo(
     () => ({
       get dictinory() {
-        if (language == "ru") {
-          return mergeDeep({}, ruDictinory, defaultDictinory);
-        } else {
-          return mergeDeep({}, usDictinory, defaultDictinory);
-        }
+        return getDictinoryByLanguage(language);
       },
       language,
       setLanguage(value) {

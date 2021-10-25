@@ -7,6 +7,30 @@ import * as Notifications from "expo-notifications";
 export const LanguageContext = React.createContext();
 export const HolidaysContext = React.createContext();
 
+// Functional block
+
+function isObject(item) {
+  return item && typeof item === "object" && !Array.isArray(item);
+}
+
+function mergeDeep(target, ...sources) {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+
+  return mergeDeep(target, ...sources);
+}
+
 //Holidays block
 
 export async function updateHolidaysAsync() {
@@ -80,7 +104,7 @@ function getHolidayNotificationDate({ month, day }) {
   let nextYear = holidayDate.getTime() < date.getTime();
 
   let notificationDate = new Date(
-    date.getFullYear() + nextYear ? 1 : 0,
+    date.getFullYear() + (nextYear ? 1 : 0),
     month - 1,
     day,
     9
@@ -89,14 +113,37 @@ function getHolidayNotificationDate({ month, day }) {
   return notificationDate;
 }
 
-function getHolidayNotificationText(message, note = "") {
+function getHolidayNotificationText({ message, note, language }) {
+  let finalNoteText = !note
+    ? ""
+    : getDictinoryByLanguage(language).reminderText + " " + note;
+
+  let finalMessage;
+  {
+    if (message == "") {
+      finalMessage = "";
+    } else {
+      let s = message.substr(0, 128);
+      let matches = s.match(/[?!.]/g);
+
+      if (matches == null) {
+        s = "";
+      } else {
+        s = s.substr(0, s.lastIndexOf(matches[matches.length - 1]) + 1);
+      }
+
+      finalMessage = s;
+    }
+  }
+
   return (
-    (message != "" ? message + "\n" : "") +
-    (note != "" && note != null ? "Напоминание: " + note : "")
+    finalMessage +
+    (finalNoteText != "" && finalMessage != "" ? "\n" : "") +
+    finalNoteText
   );
 }
 
-async function cancelNotificationByTitleIfExist(title) {
+export async function cancelNotificationByTitleIfExist(title) {
   let scheduledNotifications =
     await Notifications.getAllScheduledNotificationsAsync();
 
@@ -133,20 +180,31 @@ export async function canselAllNotificationsAsync() {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
-export async function setHolidayNotificationAsync(holiday) {
-  let allowNotifications = await allowsNotificationsAsync();
-  if (!allowNotifications) return;
+export async function setHolidayNotificationAsync(holiday, language) {
+  if (!(await allowsNotificationsAsync())) return;
 
-  let notesJSON = await AsyncStorage.getItem("notes");
-  let notes = JSON.parse(notesJSON);
-  let holidaysWithNotesIds;
-  if (notes == null) {
-    holidaysWithNotesIds = [];
-  } else {
-    holidaysWithNotesIds = Object.keys(notes);
+  await cancelNotificationByTitleIfExist(holiday.name);
+
+  if (
+    !ObjectFormatASDW.getData({
+      dataName: "holidaysNotificationsRules",
+      key: holiday.id,
+      defaultResult: true,
+    })
+  ) {
+    return;
   }
 
-  if (holiday.message == "" && !holidaysWithNotesIds.includes(holiday.id)) {
+  let notesJSON = await AsyncStorage.getItem("notes");
+  let notes = notesJSON == null ? {} : JSON.parse(notesJSON);
+
+  let notificationText = getHolidayNotificationText({
+    message: holiday.message,
+    note: notes[holiday.id],
+    language,
+  });
+
+  if (notificationText == "") {
     return;
   }
 
@@ -155,83 +213,151 @@ export async function setHolidayNotificationAsync(holiday) {
     day: holiday.date.day,
   });
 
-  await cancelNotificationByTitleIfExist(holiday.name);
-
   Notifications.scheduleNotificationAsync({
     content: {
       title: holiday.name,
-      body: getHolidayNotificationText(
-        holiday.message,
-        notes != null ? notes[holiday.id] : null
-      ),
+      body: notificationText,
     },
-    trigger: notificationDate,
+    trigger: { seconds: 10 }, //notificationDate,
   });
 }
 
-export async function setHolidaysNotificationsAsync(holidaysList) {
-  let allowNotifications = await allowsNotificationsAsync();
-  if (!allowNotifications) return;
+export async function setHolidaysNotificationsAsync(holidaysList, language) {
+  if (!(await allowsNotificationsAsync())) return;
 
   let scheduledNotifications =
     await Notifications.getAllScheduledNotificationsAsync();
 
-  let holidaysWithMessages = holidaysList.filter(
-    (holiday) => holiday.message != ""
-  );
-
   let notesJSON = await AsyncStorage.getItem("notes");
-  let notes = JSON.parse(notesJSON);
-  let holidaysWithNotesIds;
-  if (notes == null) {
-    holidaysWithNotesIds = [];
-  } else {
-    holidaysWithNotesIds = Object.keys(notes);
-  }
+  let notes = notesJSON == null ? {} : JSON.parse(notesJSON);
 
-  let holidaysWithNotes = holidaysList.filter((holiday) =>
-    holidaysWithNotesIds.includes(holiday.id)
+  let holidaysNotificationsRulesJSON = await AsyncStorage.getItem(
+    "holidaysNotificationsRules"
   );
+  let holidaysNotificationsRules =
+    holidaysNotificationsRulesJSON == null
+      ? {}
+      : JSON.parse(holidaysNotificationsRulesJSON);
 
-  holidaysList = [...new Set([...holidaysWithMessages, ...holidaysWithNotes])];
+  for (let index = 0; index < holidaysList.length; index++) {
+    let holiday = holidaysList[index];
 
-  for (
-    let holidayIndex = 0;
-    holidayIndex < holidaysList.length;
-    holidayIndex++
-  ) {
-    let holiday = holidaysList[holidayIndex];
-    let notificationDate = getHolidayNotificationDate({
-      month: holiday.date.month,
-      day: holiday.date.day,
+    let notificationText = getHolidayNotificationText({
+      message: holiday.message,
+      note: notes[holiday.id],
+      language,
     });
 
+    let holidaysNotificationsRulesJSON = await AsyncStorage.getItem(
+      "holidaysNotificationsRules"
+    );
+    let holidaysNotificationsRules =
+      holidaysNotificationsRulesJSON == null
+        ? {}
+        : JSON.parse(holidaysNotificationsRulesJSON);
+
     if (
+      notificationText != "" &&
+      holidaysNotificationsRules[holiday.id] != false &&
       !scheduledNotifications.some(
-        (e) =>
-          e.content.title == holiday.name &&
-          e.content.body ==
-            getHolidayNotificationText(
-              holiday.message,
-              notes != null ? notes[holiday.id] : null
-            )
+        (notificationRequest) =>
+          notificationRequest.content.title == holiday.name &&
+          notificationRequest.content.body == notificationText
       )
     ) {
       await cancelNotificationByTitleIfExist(holiday.name);
 
+      let notificationDate = getHolidayNotificationDate({
+        month: holiday.date.month,
+        day: holiday.date.day,
+      });
+
       Notifications.scheduleNotificationAsync({
         content: {
           title: holiday.name,
-          body: getHolidayNotificationText(
-            holiday.message,
-            notes != null ? notes[holiday.id] : null
-          ),
+          body: notificationText,
         },
-        trigger: notificationDate,
+        trigger: { seconds: 10 }, //notificationDate,
       });
     }
   }
 }
+
+// Object Format Async Storage Data Worker
+
+export var ObjectFormatASDW = {
+  _sessions: {},
+  getData: async ({ dataName, key, defaultResult = null }) => {
+    let dataJSON = await AsyncStorage.getItem(dataName);
+
+    if (dataJSON == null) {
+      return defaultResult;
+    } else {
+      let data = JSON.parse(dataJSON);
+      if (Object.keys(data).includes(key.toString())) {
+        return data[key];
+      } else {
+        return defaultResult;
+      }
+    }
+  },
+  setData: async ({
+    dataName,
+    key,
+    dataForSave,
+    sessionId = "",
+    delay = 1000,
+    onSuccess = (_isValueChanged) => {},
+  }) => {
+    if (
+      sessionId != "" &&
+      Object.keys(ObjectFormatASDW._sessions).includes(sessionId)
+    ) {
+      clearTimeout(ObjectFormatASDW._sessions[sessionId]);
+    }
+
+    ObjectFormatASDW._sessions[sessionId] = setTimeout(async () => {
+      let dataJSON = await AsyncStorage.getItem(dataName);
+
+      let data;
+
+      if (dataJSON == null) {
+        data = {};
+      } else {
+        data = JSON.parse(dataJSON);
+      }
+
+      let isValueChanged = false;
+
+      if (data[key] != dataForSave) {
+        data[key] = dataForSave;
+        isValueChanged = true;
+      }
+
+      await AsyncStorage.setItem(dataName, JSON.stringify(data));
+
+      onSuccess(isValueChanged);
+    }, delay);
+  },
+};
+
+// Dictionaries
+
+export const Dictionaries = {
+  usDictinory: require("../dictinories/us.json"),
+  ruDictinory: require("../dictinories/ru.json"),
+  defaultDictinory: require("../dictinories/default.json"),
+};
+
+export function getDictinoryByLanguage(language) {
+  return mergeDeep(
+    {},
+    language == "ru" ? Dictionaries.ruDictinory : Dictionaries.usDictinory,
+    Dictionaries.defaultDictinory
+  );
+}
+
+// Global styles
 
 export const ColorSheet = {
   primaryColor: "#ac0735",
