@@ -71,9 +71,9 @@ const styles = StyleSheet.create({
 
 const screenWidth = Dimensions.get("window").width;
 
-objectFormatASDW = {
+var ObjectFormatASDW = {
   _sessions: {},
-  getData: async (dataName, key, defaultResult = null) => {
+  getData: async ({ dataName, key, defaultResult = null }) => {
     let dataJSON = await AsyncStorage.getItem(dataName);
 
     if (dataJSON == null) {
@@ -87,22 +87,22 @@ objectFormatASDW = {
       }
     }
   },
-  setData: async (
+  setData: async ({
     dataName,
     key,
     dataForSave,
     sessionId = "",
     delay = 1000,
-    onSuccess = () => {}
-  ) => {
+    onSuccess = () => {},
+  }) => {
     if (
       sessionId != "" &&
-      Object.keys(objectFormatASDW._sessions).includes(sessionId)
+      Object.keys(ObjectFormatASDW._sessions).includes(sessionId)
     ) {
-      clearTimeout(objectFormatASDW._sessions[sessionId]);
+      clearTimeout(ObjectFormatASDW._sessions[sessionId]);
     }
 
-    objectFormatASDW._sessions[sessionId] = setTimeout(async () => {
+    ObjectFormatASDW._sessions[sessionId] = setTimeout(async () => {
       let dataJSON = await AsyncStorage.getItem(dataName);
 
       let data;
@@ -116,7 +116,7 @@ objectFormatASDW = {
       if (data[key] != dataForSave) {
         data[key] = dataForSave;
       }
-
+      
       await AsyncStorage.setItem(dataName, JSON.stringify(data));
 
       onSuccess();
@@ -143,7 +143,7 @@ function StrokeWithCheckBox({
   const [isChecked, setChecked] = React.useState(null);
 
   const onClick = () => {
-    setTimeout(() => onChange(!isChecked), 3000);
+    onChange(!isChecked);
     setChecked(!isChecked);
   };
 
@@ -152,7 +152,9 @@ function StrokeWithCheckBox({
     if (!stop) {
       (async () => {
         let newValue = await initDataPromise;
+        console.log(newValue);
         if (isChecked == null) {
+          console.log(`we ${newValue} we`);
           setChecked(newValue);
         }
       })();
@@ -279,7 +281,11 @@ function holidayScreen({ route }) {
     if (!stop && noteText === null) {
       (async () => {
         setNoteText(
-          await objectFormatASDW.getData("notes", route.params.holiday.id, "")
+          await ObjectFormatASDW.getData({
+            dataName: "notes",
+            key: route.params.holiday.id,
+            defaultResult: "",
+          })
         );
       })();
     }
@@ -319,15 +325,15 @@ function holidayScreen({ route }) {
               onChangeText={(text) => {
                 setNoteText(text);
 
-                objectFormatASDW.setData(
-                  "notes",
-                  route.params.holiday.id,
-                  text,
-                  "saveNotes",
-                  () => {
+                ObjectFormatASDW.setData({
+                  dataName: "notes",
+                  key: route.params.holiday.id,
+                  dataForSave: text,
+                  sessionId: "saveNotes",
+                  onSuccess: () => {
                     setHolidayNotificationAsync(route.params.holiday);
-                  }
-                );
+                  },
+                });
               }}
             />
           </View>
@@ -335,21 +341,21 @@ function holidayScreen({ route }) {
             <StrokeWithCheckBox
               text={dictinory.holidayScreen.holidayImportanceCheckBox}
               onChange={(isHolidayImportant) => {
-                objectFormatASDW.setData(
-                  "holidaysImportance",
-                  route.params.holiday.id,
-                  isHolidayImportant,
-                  "saveHolidaysImportance"
-                );
+                ObjectFormatASDW.setData({
+                  dataName: "holidaysImportance",
+                  key: route.params.holiday.id,
+                  dataForSave: isHolidayImportant,
+                  sessionId: "saveHolidaysImportance",
+                });
               }}
               initDataPromise={
                 new Promise(async (resolve, _reject) => {
                   resolve(
-                    await objectFormatASDW.getData(
-                      "holidaysImportance",
-                      route.params.holiday.id,
-                      false
-                    )
+                    await ObjectFormatASDW.getData({
+                      dataName: "holidaysImportance",
+                      key: route.params.holiday.id,
+                      defaultResult: false,
+                    })
                   );
                 })
               }
@@ -357,21 +363,21 @@ function holidayScreen({ route }) {
             <StrokeWithCheckBox
               text={dictinory.holidayScreen.notificationCheckBox}
               onChange={(holidayNotificationRule) => {
-                objectFormatASDW.setData(
-                  "holidaysNotificationsRules",
-                  route.params.holiday.id,
-                  holidayNotificationRule,
-                  "saveHolidaysNotificationsRules"
-                );
+                ObjectFormatASDW.setData({
+                  dataName: "holidaysNotificationsRules",
+                  key: route.params.holiday.id,
+                  dataForSave: holidayNotificationRule,
+                  sessionId: "saveHolidaysNotificationsRules",
+                });
               }}
               initDataPromise={
                 new Promise(async (resolve, _reject) => {
                   resolve(
-                    await objectFormatASDW.getData(
-                      "holidaysNotificationsRules",
-                      route.params.holiday.id,
-                      true
-                    )
+                    await ObjectFormatASDW.getData({
+                      dataName: "holidaysNotificationsRules",
+                      key: route.params.holiday.id,
+                      defaultResult: true,
+                    })
                   );
                 })
               }
