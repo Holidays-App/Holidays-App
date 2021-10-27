@@ -19,6 +19,7 @@ import {
   updateHolidaysAsync,
   setHolidaysNotificationsAsync,
   ColorSheet,
+  Callbacks,
 } from "../utils";
 
 function wait(ms) {
@@ -173,6 +174,12 @@ function holidaysListScreen({ navigation, route }) {
   React.useEffect(() => {
     let stop = false;
 
+    if (!!route?.params?.useCallback) {
+      Callbacks.setOnlyImportantHolidays = () => {
+        
+      };
+    }
+
     updateHolidaysAsync().then(async () => {
       let updatedHolidays = await getHolidaysAsync(language);
       if (
@@ -217,8 +224,6 @@ function holidaysListScreen({ navigation, route }) {
       unsubscribeFromImportanceHolidaysUpdate();
     };
   }, []);
-
-  
 
   React.useEffect(() => {
     if (
