@@ -62,6 +62,7 @@ function firstTabScreen() {
 
 function secondTabScreen() {
   const { dictinory } = React.useContext(LanguageContext);
+
   return (
     <Stack.Navigator
       screenOptions={{

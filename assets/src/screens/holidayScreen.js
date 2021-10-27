@@ -72,7 +72,12 @@ const styles = StyleSheet.create({
 
 const screenWidth = Dimensions.get("window").width;
 
-function StrokeWithCheckBox({ text, onChange = (_value) => {}, initState }) {
+function StrokeWithCheckBox({
+  text,
+  onChange = (_value) => {},
+  isChecked,
+  setChecked,
+}) {
   const styles = StyleSheet.create({
     checkboxContainer: {
       flexDirection: "row",
@@ -84,16 +89,10 @@ function StrokeWithCheckBox({ text, onChange = (_value) => {}, initState }) {
     },
   });
 
-  const [isChecked, setChecked] = React.useState(initState);
-
   const onClick = () => {
     onChange(!isChecked);
     setChecked(!isChecked);
   };
-
-  React.useEffect(() => {
-    setChecked(initState);
-  }, [initState]);
 
   return (
     <View style={styles.checkboxContainer}>
@@ -237,7 +236,6 @@ function holidayScreen({ navigation, route }) {
         });
         if (value != holidayImportance) {
           setHolidayImportance(value);
-          console.log(value);
         }
       }
     };
@@ -260,17 +258,21 @@ function holidayScreen({ navigation, route }) {
       await updateHolidayNoatificationRule();
     };
 
-    updateAll();
+    let unsubscribe = () => {};
+
+    updateAll().then(() => {
+      unsubscribe = navigation.addListener("focus", updateAll);
+    });
 
     return () => {
       stop = true;
+      unsubscribe();
     };
   }, []);
 
   React.useEffect(() => {
     if (route.params.holidayLanguage != language) {
-      navigation.goBack();
-      navigation.dispatch(CommonActions.goBack());
+      navigation.popToTop();
     }
   }, [language]);
 
@@ -328,7 +330,8 @@ function holidayScreen({ navigation, route }) {
                   sessionId: "saveHolidaysImportance",
                 });
               }}
-              initState={holidayImportance}
+              isChecked={holidayImportance}
+              setChecked={setHolidayImportance}
             />
             <StrokeWithCheckBox
               text={dictinory.holidayScreen.notificationCheckBox}
@@ -338,21 +341,23 @@ function holidayScreen({ navigation, route }) {
                   key: route.params.holiday.id,
                   dataForSave: isNotify,
                   sessionId: "saveHolidaysNotificationsRules",
-                  delay: 1000,
                   onSuccess: (isValueChanged) => {
                     if (isValueChanged) {
-                      if (isNotify) {
-                        setHolidayNotificationAsync(route.params.holiday);
-                      } else {
-                        cancelNotificationByTitleIfExist(
-                          route.params.holiday.name
-                        );
-                      }
+                      setTimeout(() => {
+                        if (isNotify) {
+                          setHolidayNotificationAsync(route.params.holiday);
+                        } else {
+                          cancelNotificationByTitleIfExist(
+                            route.params.holiday.name
+                          );
+                        }
+                      }, 1000);
                     }
                   },
                 });
               }}
-              initState={holidayNoatificationRule}
+              isChecked={holidayNoatificationRule}
+              setChecked={setHolidayNoatificationRule}
             />
           </View>
         </View>

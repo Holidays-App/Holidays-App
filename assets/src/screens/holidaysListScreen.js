@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { useScrollToTop, useNavigation } from "@react-navigation/native";
+import { useScrollToTop } from "@react-navigation/native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -123,8 +123,6 @@ function holidaysListScreen({ navigation, route }) {
   const { dictinory, language } = React.useContext(LanguageContext);
   const { holidays, setHolidays } = React.useContext(HolidaysContext);
 
-  //const navigation = useNavigation();
-
   const [refreshing, setRefreshing] = React.useState(false);
 
   const [holidaysImportance, setHolidaysImportance] = React.useState({});
@@ -220,20 +218,16 @@ function holidaysListScreen({ navigation, route }) {
     };
   }, []);
 
-  // React.useEffect(() => {
-  //   console.log(
-  //     route?.params?.category != undefined,
-  //     !holidays.some((holiday) => holiday.category == route?.params?.category)
-  //   );
-  //   if (
-  //     route?.params?.category != undefined &&
-  //     !holidays.some((holiday) => holiday.category == route?.params?.category)
-  //   ) {
-  //     navigation.dispatch({
-  //       ...CommonActions.goBack(),
-  //     });
-  //   }
-  // }, [holidays]);
+  
+
+  React.useEffect(() => {
+    if (
+      route?.params?.category != undefined &&
+      !holidays.some((holiday) => holiday.category == route?.params?.category)
+    ) {
+      navigation.popToTop();
+    }
+  }, [holidays]);
 
   return (
     <View style={styles.container}>
