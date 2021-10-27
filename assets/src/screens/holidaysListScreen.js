@@ -8,7 +8,9 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { useScrollToTop } from "@react-navigation/native";
+import { useScrollToTop, useNavigation } from "@react-navigation/native";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   LanguageContext,
@@ -121,7 +123,11 @@ function holidaysListScreen({ navigation, route }) {
   const { dictinory, language } = React.useContext(LanguageContext);
   const { holidays, setHolidays } = React.useContext(HolidaysContext);
 
+  //const navigation = useNavigation();
+
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const [holidaysImportance, setHolidaysImportance] = React.useState({});
 
   const forceUpdate = useForceUpdate();
 
@@ -136,7 +142,7 @@ function holidaysListScreen({ navigation, route }) {
   };
 
   const openHolidayScreen = (holiday) => {
-    var parameters = { holiday };
+    var parameters = { holiday, holidayLanguage: language };
     navigation.navigate("holidayScreen", parameters);
   };
 
@@ -167,14 +173,67 @@ function holidaysListScreen({ navigation, route }) {
   };
 
   React.useEffect(() => {
+    let stop = false;
+
     updateHolidaysAsync().then(async () => {
       let updatedHolidays = await getHolidaysAsync(language);
-      if (JSON.stringify(updatedHolidays) != JSON.stringify(holidays)) {
+      if (
+        JSON.stringify(updatedHolidays) != JSON.stringify(holidays) &&
+        !stop
+      ) {
         setHolidays(updatedHolidays);
       }
       setHolidaysNotificationsAsync(updatedHolidays, language);
     });
+
+    const updateHolidaysImportance = async (holidaysImportanceJSON) => {
+      if (
+        holidaysImportanceJSON != JSON.stringify(holidaysImportance) &&
+        !stop
+      ) {
+        setHolidaysImportance(JSON.parse(holidaysImportanceJSON));
+      }
+    };
+
+    let unsubscribeFromImportanceHolidaysUpdate = () => {};
+
+    AsyncStorage.getItem("holidaysImportance").then(
+      async (holidaysImportanceJSON) => {
+        if (!stop) {
+          updateHolidaysImportance(holidaysImportanceJSON);
+
+          unsubscribeFromImportanceHolidaysUpdate = navigation.addListener(
+            "focus",
+            async () => {
+              updateHolidaysImportance(
+                await AsyncStorage.getItem("holidaysImportance")
+              );
+            }
+          );
+        }
+      }
+    );
+
+    return () => {
+      stop = true;
+      unsubscribeFromImportanceHolidaysUpdate();
+    };
   }, []);
+
+  // React.useEffect(() => {
+  //   console.log(
+  //     route?.params?.category != undefined,
+  //     !holidays.some((holiday) => holiday.category == route?.params?.category)
+  //   );
+  //   if (
+  //     route?.params?.category != undefined &&
+  //     !holidays.some((holiday) => holiday.category == route?.params?.category)
+  //   ) {
+  //     navigation.dispatch({
+  //       ...CommonActions.goBack(),
+  //     });
+  //   }
+  // }, [holidays]);
 
   return (
     <View style={styles.container}>
@@ -182,10 +241,10 @@ function holidaysListScreen({ navigation, route }) {
         ref={flatListRef}
         data={
           (filteredHolidays = sortByDateAndCategory(
-            route.params == undefined
+            route?.params?.category == undefined
               ? holidays
               : holidays.filter(
-                  (holiday) => holiday.category == route.params.category
+                  (holiday) => holiday.category == route?.params?.category
                 )
           ))
         }
@@ -198,8 +257,28 @@ function holidaysListScreen({ navigation, route }) {
                   ...getBorderStyles(item),
                 }}
               >
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.date}>
+                <Text
+                  style={{
+                    ...styles.name,
+                    ...{
+                      fontWeight: !!holidaysImportance[item.id]
+                        ? "bold"
+                        : "normal",
+                    },
+                  }}
+                >
+                  {item.name}
+                </Text>
+                <Text
+                  style={{
+                    ...styles.date,
+                    ...{
+                      fontWeight: !!holidaysImportance[item.id]
+                        ? "bold"
+                        : "normal",
+                    },
+                  }}
+                >
                   {item.date.day + " " + dictinory.months[item.date.month - 1]}
                 </Text>
               </View>

@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function settingsScreen_Language() {
+function settingsScreen_Language({ navigation }) {
   var notificationsTimerId;
 
   const { dictinory, language, setLanguage } =

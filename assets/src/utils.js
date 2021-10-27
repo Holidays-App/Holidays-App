@@ -218,7 +218,7 @@ export async function setHolidayNotificationAsync(holiday, language) {
       title: holiday.name,
       body: notificationText,
     },
-    trigger: { seconds: 10 }, //notificationDate,
+    trigger: notificationDate,
   });
 }
 
@@ -248,14 +248,6 @@ export async function setHolidaysNotificationsAsync(holidaysList, language) {
       language,
     });
 
-    let holidaysNotificationsRulesJSON = await AsyncStorage.getItem(
-      "holidaysNotificationsRules"
-    );
-    let holidaysNotificationsRules =
-      holidaysNotificationsRulesJSON == null
-        ? {}
-        : JSON.parse(holidaysNotificationsRulesJSON);
-
     if (
       notificationText != "" &&
       holidaysNotificationsRules[holiday.id] != false &&
@@ -277,7 +269,7 @@ export async function setHolidaysNotificationsAsync(holidaysList, language) {
           title: holiday.name,
           body: notificationText,
         },
-        trigger: { seconds: 10 }, //notificationDate,
+        trigger: notificationDate,
       });
     }
   }
@@ -306,7 +298,7 @@ export var ObjectFormatASDW = {
     key,
     dataForSave,
     sessionId = "",
-    delay = 1000,
+    delay = 0,
     onSuccess = (_isValueChanged) => {},
   }) => {
     if (

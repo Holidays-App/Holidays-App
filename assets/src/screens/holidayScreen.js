@@ -72,11 +72,7 @@ const styles = StyleSheet.create({
 
 const screenWidth = Dimensions.get("window").width;
 
-function StrokeWithCheckBox({
-  text,
-  onChange = (_value) => {},
-  initDataPromise,
-}) {
+function StrokeWithCheckBox({ text, onChange = (_value) => {}, initState }) {
   const styles = StyleSheet.create({
     checkboxContainer: {
       flexDirection: "row",
@@ -88,7 +84,7 @@ function StrokeWithCheckBox({
     },
   });
 
-  const [isChecked, setChecked] = React.useState(null);
+  const [isChecked, setChecked] = React.useState(initState);
 
   const onClick = () => {
     onChange(!isChecked);
@@ -96,19 +92,8 @@ function StrokeWithCheckBox({
   };
 
   React.useEffect(() => {
-    let stop = false;
-    if (!stop) {
-      (async () => {
-        let newValue = await initDataPromise;
-        if (isChecked == null) {
-          setChecked(newValue);
-        }
-      })();
-    }
-    return () => {
-      stop = true;
-    };
-  }, []);
+    setChecked(initState);
+  }, [initState]);
 
   return (
     <View style={styles.checkboxContainer}>
@@ -219,28 +204,75 @@ function Article({
   return <View style={containerStyle}>{renderElements}</View>;
 }
 
-function holidayScreen({ route }) {
+function holidayScreen({ navigation, route }) {
   const { dictinory, language } = React.useContext(LanguageContext);
 
   const [noteText, setNoteText] = React.useState(null);
 
+  const [holidayImportance, setHolidayImportance] = React.useState(null);
+
+  const [holidayNoatificationRule, setHolidayNoatificationRule] =
+    React.useState(null);
+
   React.useEffect(() => {
     let stop = false;
-    if (!stop && noteText === null) {
-      (async () => {
-        setNoteText(
-          await ObjectFormatASDW.getData({
-            dataName: "notes",
-            key: route.params.holiday.id,
-            defaultResult: "",
-          })
-        );
-      })();
-    }
+
+    const updateNoteText = async () => {
+      if (!stop) {
+        let value = await ObjectFormatASDW.getData({
+          dataName: "notes",
+          key: route.params.holiday.id,
+          defaultResult: "",
+        });
+        if (value != noteText) setNoteText(value);
+      }
+    };
+
+    const updateHolidayImportance = async () => {
+      if (!stop) {
+        let value = await ObjectFormatASDW.getData({
+          dataName: "holidaysImportance",
+          key: route.params.holiday.id,
+          defaultResult: false,
+        });
+        if (value != holidayImportance) {
+          setHolidayImportance(value);
+          console.log(value);
+        }
+      }
+    };
+
+    const updateHolidayNoatificationRule = async () => {
+      if (!stop) {
+        let value = await ObjectFormatASDW.getData({
+          dataName: "holidaysNotificationsRules",
+          key: route.params.holiday.id,
+          defaultResult: true,
+        });
+        if (value != holidayNoatificationRule)
+          setHolidayNoatificationRule(value);
+      }
+    };
+
+    const updateAll = async () => {
+      await updateNoteText();
+      await updateHolidayImportance();
+      await updateHolidayNoatificationRule();
+    };
+
+    updateAll();
+
     return () => {
       stop = true;
     };
   }, []);
+
+  React.useEffect(() => {
+    if (route.params.holidayLanguage != language) {
+      navigation.goBack();
+      navigation.dispatch(CommonActions.goBack());
+    }
+  }, [language]);
 
   return (
     /* 
@@ -296,17 +328,7 @@ function holidayScreen({ route }) {
                   sessionId: "saveHolidaysImportance",
                 });
               }}
-              initDataPromise={
-                new Promise(async (resolve, _reject) => {
-                  resolve(
-                    await ObjectFormatASDW.getData({
-                      dataName: "holidaysImportance",
-                      key: route.params.holiday.id,
-                      defaultResult: false,
-                    })
-                  );
-                })
-              }
+              initState={holidayImportance}
             />
             <StrokeWithCheckBox
               text={dictinory.holidayScreen.notificationCheckBox}
@@ -316,6 +338,7 @@ function holidayScreen({ route }) {
                   key: route.params.holiday.id,
                   dataForSave: isNotify,
                   sessionId: "saveHolidaysNotificationsRules",
+                  delay: 1000,
                   onSuccess: (isValueChanged) => {
                     if (isValueChanged) {
                       if (isNotify) {
@@ -329,17 +352,7 @@ function holidayScreen({ route }) {
                   },
                 });
               }}
-              initDataPromise={
-                new Promise(async (resolve, _reject) => {
-                  resolve(
-                    await ObjectFormatASDW.getData({
-                      dataName: "holidaysNotificationsRules",
-                      key: route.params.holiday.id,
-                      defaultResult: true,
-                    })
-                  );
-                })
-              }
+              initState={holidayNoatificationRule}
             />
           </View>
         </View>

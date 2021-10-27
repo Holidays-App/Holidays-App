@@ -32,8 +32,6 @@ const styles = StyleSheet.create({
 });
 
 function categoriesScreen({ navigation }) {
-  var categories;
-
   const { dictinory } = React.useContext(LanguageContext);
   const { holidays } = React.useContext(HolidaysContext);
 
@@ -50,7 +48,7 @@ function categoriesScreen({ navigation }) {
       <FlatList
         ref={flatListRef}
         data={(() => {
-          categories = [];
+          let categories = [];
           for (let category in require("../../dictinories/us.json")
             .categories) {
             if (holidays.some((holiday) => holiday.category == category)) {
