@@ -19,7 +19,6 @@ import {
   updateHolidaysAsync,
   setHolidaysNotificationsAsync,
   ColorSheet,
-  Callbacks,
 } from "../utils";
 
 function wait(ms) {
@@ -118,7 +117,48 @@ const styles = StyleSheet.create({
     paddingRight: "4%",
     paddingLeft: "3%",
   },
+  noImportantHolidaysText: {
+    top: "40%",
+    textAlign: "center",
+    fontSize: 19,
+    color: ColorSheet.primaryColor,
+    marginHorizontal: 20,
+  },
 });
+
+const getBorderStyles = (holiday, holidays) => {
+  let BorderStyles = {};
+  if (
+    holiday.date.day == new Date().getDate() &&
+    holiday.date.month == new Date().getMonth() + 1
+  ) {
+    BorderStyles.borderColor = ColorSheet.primaryColor;
+    BorderStyles.borderWidth = 4;
+
+    if (holidays.indexOf(holiday) != 0) {
+      BorderStyles.borderTopWidth = 0;
+    }
+
+    if (
+      holidays.indexOf(holiday) != holidays.length - 1 &&
+      holidays[holidays.indexOf(holiday) + 1].date.day ==
+        new Date().getDate() &&
+      holidays[holidays.indexOf(holiday) + 1].date.month ==
+        new Date().getMonth() + 1
+    ) {
+      BorderStyles.borderBottomWidth = 0;
+    }
+  }
+  return BorderStyles;
+};
+
+class ShowingImportantHolidaysListHelper {
+  constructor() {
+    this.flatListVerticalOffset = 0;
+    this.isOnlyImportantHolidays = false;
+  }
+  static helpers = {};
+}
 
 function holidaysListScreen({ navigation, route }) {
   const { dictinory, language } = React.useContext(LanguageContext);
@@ -127,6 +167,9 @@ function holidaysListScreen({ navigation, route }) {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const [holidaysImportance, setHolidaysImportance] = React.useState({});
+
+  const [isOnlyImportantHolidays, setIsOnlyImportantHolidays] =
+    React.useState(false);
 
   const forceUpdate = useForceUpdate();
 
@@ -145,39 +188,16 @@ function holidaysListScreen({ navigation, route }) {
     navigation.navigate("holidayScreen", parameters);
   };
 
-  const getBorderStyles = (holiday) => {
-    let BorderStyles = {};
-    if (
-      holiday.date.day == new Date().getDate() &&
-      holiday.date.month == new Date().getMonth() + 1
-    ) {
-      BorderStyles.borderColor = ColorSheet.primaryColor;
-      BorderStyles.borderWidth = 4;
-
-      if (filteredHolidays.indexOf(holiday) != 0) {
-        BorderStyles.borderTopWidth = 0;
-      }
-
-      if (
-        filteredHolidays.indexOf(holiday) != filteredHolidays.length - 1 &&
-        filteredHolidays[filteredHolidays.indexOf(holiday) + 1].date.day ==
-          new Date().getDate() &&
-        filteredHolidays[filteredHolidays.indexOf(holiday) + 1].date.month ==
-          new Date().getMonth() + 1
-      ) {
-        BorderStyles.borderBottomWidth = 0;
-      }
-    }
-    return BorderStyles;
-  };
+  let isMount;
 
   React.useEffect(() => {
+    isMount = true;
+
     let stop = false;
 
-    if (!!route?.params?.useCallback) {
-      Callbacks.setOnlyImportantHolidays = () => {
-        
-      };
+    if (!!route?.params?.useImportantHolidays) {
+      ShowingImportantHolidaysListHelper.helpers[route.key] =
+        new ShowingImportantHolidaysListHelper();
     }
 
     updateHolidaysAsync().then(async () => {
@@ -222,77 +242,130 @@ function holidaysListScreen({ navigation, route }) {
     return () => {
       stop = true;
       unsubscribeFromImportanceHolidaysUpdate();
+
+      if (ShowingImportantHolidaysListHelper.helpers[route.key] != undefined) {
+        delete ShowingImportantHolidaysListHelper.helpers[route.key];
+      }
     };
   }, []);
 
   React.useEffect(() => {
-    if (
-      route?.params?.category != undefined &&
-      !holidays.some((holiday) => holiday.category == route?.params?.category)
-    ) {
+    if (!isMount && navigation.getState().index != 0) {
       navigation.popToTop();
     }
-  }, [holidays]);
+
+    if (route?.params?.category == undefined) {
+      navigation.setOptions({
+        title: isOnlyImportantHolidays
+          ? dictinory.upcomingHolidaysScreen.importantHolidaysTitle
+          : dictinory.upcomingHolidaysScreen.title,
+      });
+    }
+
+    let unsubscribeFromTabPress = () => {};
+    if (!!route?.params?.useImportantHolidays) {
+      unsubscribeFromTabPress = navigation
+        .getParent()
+        .addListener("tabPress", (_e) => {
+          let helper = ShowingImportantHolidaysListHelper.helpers[route.key];
+          if (navigation.isFocused() && helper.flatListVerticalOffset == 0) {
+            setIsOnlyImportantHolidays(!helper.isOnlyImportantHolidays);
+
+            navigation.setOptions({
+              title: !helper.isOnlyImportantHolidays
+                ? dictinory.upcomingHolidaysScreen.importantHolidaysTitle
+                : dictinory.upcomingHolidaysScreen.title,
+            });
+
+            helper.isOnlyImportantHolidays = !helper.isOnlyImportantHolidays;
+          }
+        });
+    }
+
+    return () => {
+      unsubscribeFromTabPress();
+    };
+  }, [language]);
+
+  let filteredHolidays = sortByDateAndCategory(
+    holidays
+      .filter(
+        (holiday) =>
+          route?.params?.category == undefined ||
+          holiday.category == route?.params?.category
+      )
+      .filter(
+        (holiday) =>
+          !isOnlyImportantHolidays || !!holidaysImportance[holiday.id]
+      )
+  );
 
   return (
     <View style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={
-          (filteredHolidays = sortByDateAndCategory(
-            route?.params?.category == undefined
-              ? holidays
-              : holidays.filter(
-                  (holiday) => holiday.category == route?.params?.category
-                )
-          ))
-        }
-        renderItem={({ item }) => {
-          return (
-            <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
-              <View
-                style={{
-                  ...styles.listItem,
-                  ...getBorderStyles(item),
-                }}
-              >
-                <Text
+      {isOnlyImportantHolidays && filteredHolidays.length == 0 ? (
+        <Text style={styles.noImportantHolidaysText}>
+          {dictinory.upcomingHolidaysScreen.noImportantHolidaysInfo}
+        </Text>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          onScroll={(event) => {
+            if (!!route?.params?.useImportantHolidays) {
+              ShowingImportantHolidaysListHelper.helpers[
+                route.key
+              ].flatListVerticalOffset = event.nativeEvent.contentOffset.y;
+            }
+          }}
+          data={filteredHolidays}
+          renderItem={({ item }) => {
+            return (
+              <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
+                <View
                   style={{
-                    ...styles.name,
-                    ...{
-                      fontWeight: !!holidaysImportance[item.id]
-                        ? "bold"
-                        : "normal",
-                    },
+                    ...styles.listItem,
+                    ...getBorderStyles(item, filteredHolidays),
                   }}
                 >
-                  {item.name}
-                </Text>
-                <Text
-                  style={{
-                    ...styles.date,
-                    ...{
-                      fontWeight: !!holidaysImportance[item.id]
-                        ? "bold"
-                        : "normal",
-                    },
-                  }}
-                >
-                  {item.date.day + " " + dictinory.months[item.date.month - 1]}
-                </Text>
-              </View>
-            </TouchableNativeFeedback>
-          );
-        }}
-        keyExtractor={(_item, index) => index.toString()}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={[ColorSheet.primaryColor]}
-          />
-        }
-      />
+                  <Text
+                    style={{
+                      ...styles.name,
+                      ...{
+                        fontWeight: !!holidaysImportance[item.id]
+                          ? "bold"
+                          : "normal",
+                      },
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text
+                    style={{
+                      ...styles.date,
+                      ...{
+                        fontWeight: !!holidaysImportance[item.id]
+                          ? "bold"
+                          : "normal",
+                      },
+                    }}
+                  >
+                    {item.date.day +
+                      " " +
+                      dictinory.months[item.date.month - 1]}
+                  </Text>
+                </View>
+              </TouchableNativeFeedback>
+            );
+          }}
+          keyExtractor={(_item, index) => index.toString()}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              colors={[ColorSheet.primaryColor]}
+            />
+          }
+        />
+      )}
     </View>
   );
 }

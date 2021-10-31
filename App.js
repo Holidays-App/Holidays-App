@@ -19,7 +19,6 @@ import {
   ColorSheet,
   CustomFonts,
   getDictinoryByLanguage,
-  Callbacks,
 } from "./assets/src/utils";
 
 const Stack = createStackNavigator();
@@ -35,13 +34,6 @@ import firstLaunchScreen from "./assets/src/screens/firstLaunchScreen";
 function firstTabScreen({ navigation }) {
   const { dictinory } = React.useContext(LanguageContext);
 
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener("tabPress", (_e) => {
-      Callbacks.setOnlyImportantHolidays();
-    });
-    return unsubscribe;
-  }, [navigation]);
-
   return (
     <Stack.Navigator
       screenOptions={{
@@ -56,7 +48,9 @@ function firstTabScreen({ navigation }) {
         options={{
           title: dictinory.upcomingHolidaysScreen.title,
         }}
-        initialParams={{ useCallback: true }}
+        initialParams={{
+          useImportantHolidays: true,
+        }}
       />
       <Stack.Screen
         name="holidayScreen"

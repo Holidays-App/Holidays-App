@@ -10,7 +10,9 @@
     "finallyTabText": "Discover the wonderful world of holidays!"
   },
   "upcomingHolidaysScreen": {
-    "title": "Upcoming holidays"
+    "title": "Upcoming holidays",
+    "importantHolidaysTitle": "Important holidays",
+    "noImportantHolidaysInfo": "You have not marked a single important holiday yet :)\nSign important ones on its page"
   },
   "settingsScreen": {
     "title": "Settings",

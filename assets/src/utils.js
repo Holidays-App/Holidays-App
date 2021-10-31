@@ -333,12 +333,6 @@ export var ObjectFormatASDW = {
   },
 };
 
-//Callbacks
-
-export const Callbacks = {
-  setOnlyImportantHolidays: () => {},
-};
-
 // Dictionaries
 
 export const Dictionaries = {

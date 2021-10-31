@@ -270,12 +270,6 @@ function holidayScreen({ navigation, route }) {
     };
   }, []);
 
-  React.useEffect(() => {
-    if (route.params.holidayLanguage != language) {
-      navigation.popToTop();
-    }
-  }, [language]);
-
   return (
     /* 
     IOS bug: TextInput doesn't move up when keyboard shows
