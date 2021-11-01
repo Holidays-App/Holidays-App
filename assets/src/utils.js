@@ -31,6 +31,34 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
+function julianDateToNormal(year, month, day) {
+  var x = Math.floor((14 - month) / 12);
+  var y = year + 4800 - x;
+  var z = month - 3 + 12 * x;
+
+  var n =
+    day + Math.floor((153 * z + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083;
+
+  var a = n + 32044;
+  var b = Math.floor((4 * a + 3) / 146097);
+  var c = a - Math.floor((146097 * b) / 4);
+  var d = Math.floor((4 * c + 3) / 1461);
+  var e = c - Math.floor((1461 * d) / 4);
+  var f = Math.floor((5 * e + 2) / 153);
+
+  var D = e + 1 - Math.floor((153 * f + 2) / 5);
+  var M = f + 3 - 12 * Math.round(f / 10);
+  var Y = 100 * b + d - 4800 + Math.floor(f / 10);
+
+  return new Date(Y, M - 1, D);
+}
+
+function ignoreTimeZone(date) {
+  let result = date;
+  result.setTime(result.getTime() - result.getTimezoneOffset() * 60 * 1000);
+  return result;
+}
+
 //Holidays block
 
 export async function updateHolidaysAsync() {
@@ -93,6 +121,99 @@ export async function getHolidaysAsync(language) {
       : require("../holidays/us.json");
 
   return language == "ru" ? ruHolidays : usHolidays;
+}
+
+function getEasterDate(year, orthodox = false) {
+  let a = year % 19;
+  let b = year % 4;
+  let c = year % 7;
+
+  let k = Math.floor(year / 100);
+  let p = Math.floor((13 + 8 * k) / 25);
+  let q = Math.floor(k / 4);
+
+  let M = orthodox ? 15 : (15 - p + k - q) % 30;
+  let N = orthodox ? 6 : (4 + k - q) % 7;
+
+  let d = (19 * a + M) % 30;
+  let e = (2 * b + 4 * c + 6 * d + N) % 7;
+
+  let day;
+  if (d == 29 && e == 6) {
+    day = 19;
+  } else if (d == 28 && e == 6 && (11 * M + 11) % 30 < 19) {
+    day = 18;
+  } else {
+    day = 22 + d + e;
+  }
+
+  let dateWithTimezone;
+
+  if (orthodox) {
+    let helpDate = new Date(year, 2, day);
+    dateWithTimezone = julianDateToNormal(
+      helpDate.getFullYear(),
+      helpDate.getMonth() + 1,
+      helpDate.getDate()
+    );
+  } else {
+    dateWithTimezone = new Date(year, 2, day);
+  }
+
+  return ignoreTimeZone(dateWithTimezone);
+}
+
+function getMaslenitsaDate(year) {
+  let result = getEasterDate(year, true);
+  result.setDate(result.getDate() - 55);
+  return result;
+}
+
+export function getHolidayUniverseData(customFormatDate) {
+  let result;
+  let today = new Date();
+
+  switch (customFormatDate) {
+    case "еaster":
+      result = getEasterDate(today.getFullYear());
+      if (result < today) {
+        result = getEasterDate(today.getFullYear() + 1);
+      }
+      break;
+
+    case "orthodoxEaster":
+      result = getEasterDate(today.getFullYear(), true);
+      if (result < today) {
+        result = getEasterDate(today.getFullYear() + 1, true);
+      }
+      break;
+
+    case "maslenitsa":
+      result = getMaslenitsaDate(today.getFullYear());
+      if (result < today) {
+        result = getMaslenitsaDate(today.getFullYear() + 1);
+      }
+      break;
+      
+    case "mondayOfButterWeek":
+      result = getMaslenitsaDate(today.getFullYear());
+      result.setDate(result.getDate() - 6);
+
+      if (result < today) {
+        result = getMaslenitsaDate(today.getFullYear() + 1);
+        result.setDate(result.getDate() - 6);
+      }
+      break;
+
+    case "dayOfWeekInMonth":
+      break;
+
+    case "dayInYear":
+      break;
+
+    default:
+      break;
+  }
 }
 
 // Notifications block
