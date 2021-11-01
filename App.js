@@ -31,7 +31,7 @@ import settingsScreen from "./assets/src/screens/settingsScreen";
 import settingsScreen_Language from "./assets/src/screens/settingsScreen_Language";
 import firstLaunchScreen from "./assets/src/screens/firstLaunchScreen";
 
-function firstTabScreen({ navigation }) {
+function firstTabScreen() {
   const { dictinory } = React.useContext(LanguageContext);
 
   return (
@@ -45,9 +45,6 @@ function firstTabScreen({ navigation }) {
       <Stack.Screen
         name="upcomingHolidaysScreen"
         component={holidaysListScreen}
-        options={{
-          title: dictinory.upcomingHolidaysScreen.title,
-        }}
         initialParams={{
           useImportantHolidays: true,
         }}

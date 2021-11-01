@@ -189,10 +189,8 @@ function holidaysListScreen({ navigation, route }) {
   };
 
   let isMount;
-
   React.useEffect(() => {
     isMount = true;
-
     let stop = false;
 
     if (!!route?.params?.useImportantHolidays) {
@@ -221,7 +219,6 @@ function holidaysListScreen({ navigation, route }) {
     };
 
     let unsubscribeFromImportanceHolidaysUpdate = () => {};
-
     AsyncStorage.getItem("holidaysImportance").then(
       async (holidaysImportanceJSON) => {
         if (!stop) {
@@ -241,11 +238,12 @@ function holidaysListScreen({ navigation, route }) {
 
     return () => {
       stop = true;
-      unsubscribeFromImportanceHolidaysUpdate();
 
       if (ShowingImportantHolidaysListHelper.helpers[route.key] != undefined) {
         delete ShowingImportantHolidaysListHelper.helpers[route.key];
       }
+
+      unsubscribeFromImportanceHolidaysUpdate();
     };
   }, []);
 
@@ -262,9 +260,8 @@ function holidaysListScreen({ navigation, route }) {
       });
     }
 
-    let unsubscribeFromTabPress = () => {};
     if (!!route?.params?.useImportantHolidays) {
-      unsubscribeFromTabPress = navigation
+      let unsubscribeFromTabPress = navigation
         .getParent()
         .addListener("tabPress", (_e) => {
           let helper = ShowingImportantHolidaysListHelper.helpers[route.key];
@@ -280,11 +277,9 @@ function holidaysListScreen({ navigation, route }) {
             helper.isOnlyImportantHolidays = !helper.isOnlyImportantHolidays;
           }
         });
-    }
 
-    return () => {
-      unsubscribeFromTabPress();
-    };
+      return unsubscribeFromTabPress;
+    }
   }, [language]);
 
   let filteredHolidays = sortByDateAndCategory(
