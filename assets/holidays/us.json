@@ -9,7 +9,7 @@
       "month": 1
     },
     "category": "General holidays",
-    "notify": true
+    "defaultNotify": true
   },
   {
     "id": 0,
@@ -21,6 +21,6 @@
       "month": 3
     },
     "category": "General holidays",
-    "notify": true
+    "defaultNotify": true
   }
 ]

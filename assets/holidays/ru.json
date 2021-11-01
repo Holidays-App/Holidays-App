@@ -9,7 +9,7 @@
       "month": 3
     },
     "category": "General holidays",
-    "notify": true
+    "defaultNotify": true
   },
   {
     "id": 1,
@@ -21,7 +21,7 @@
       "month": 6
     },
     "category": "General holidays",
-    "notify": false
+    "defaultNotify": true
   },
   {
     "id": 2,
@@ -33,7 +33,7 @@
       "month": 1
     },
     "category": "Religious holiday",
-    "notify": true
+    "defaultNotify": true
   },
   {
     "id": 3,
@@ -48,7 +48,7 @@
       "day": 256
     },
     "category": "Professional Holiday",
-    "notify": false
+    "defaultNotify": true
   },
   {
     "id": 4,
@@ -60,7 +60,7 @@
       "month": 10
     },
     "category": "Professional Holiday",
-    "notify": true
+    "defaultNotify": true
   },
   {
     "id": 5,
@@ -72,7 +72,7 @@
       "month": 10
     },
     "category": "General holidays",
-    "notify": false
+    "defaultNotify": true
   },
   {
     "id": 6,
@@ -84,7 +84,7 @@
       "month": 5
     },
     "category": "General holidays",
-    "notify": true
+    "defaultNotify": true
   },
   {
     "id": 7,
@@ -96,7 +96,7 @@
       "month": 5
     },
     "category": "General holidays",
-    "notify": true
+    "defaultNotify": true
   },
   {
     "id": 8,
@@ -108,6 +108,6 @@
       "month": 11
     },
     "category": "General holidays",
-    "notify": true
+    "defaultNotify": true
   }
 ]

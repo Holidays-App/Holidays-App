@@ -195,7 +195,6 @@ function getDayOfWeekInMonth(year, month, dayOfWeek, number) {
 }
 
 function getDayInYear(year, day) {
-  console.log(day, year);
   return new Date(year, 0, day);
 }
 
@@ -362,7 +361,7 @@ export async function setHolidayNotificationAsync(holiday, language) {
     !ObjectFormatASDW.getData({
       dataName: "holidaysNotificationsRules",
       key: holiday.id,
-      defaultResult: true,
+      defaultResult: holiday.defaultNotify,
     })
   ) {
     return;
@@ -420,7 +419,9 @@ export async function setHolidaysNotificationsAsync(holidaysList, language) {
 
     if (
       notificationText != "" &&
-      holidaysNotificationsRules[holiday.id] != false &&
+      (holidaysNotificationsRules[holiday.id] == null
+        ? holiday.defaultNotify
+        : holidaysNotificationsRules[holiday.id]) &&
       !scheduledNotifications.some(
         (notificationRequest) =>
           notificationRequest.content.title == holiday.name &&

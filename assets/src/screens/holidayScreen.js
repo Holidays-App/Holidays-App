@@ -246,10 +246,11 @@ function holidayScreen({ navigation, route }) {
         let value = await ObjectFormatASDW.getData({
           dataName: "holidaysNotificationsRules",
           key: route.params.holiday.id,
-          defaultResult: true,
+          defaultResult: route.params.holiday.defaultNotify,
         });
-        if (value != holidayNoatificationRule)
+        if (value != holidayNoatificationRule) {
           setHolidayNoatificationRule(value);
+        }
       }
     };
 
