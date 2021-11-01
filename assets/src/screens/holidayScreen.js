@@ -18,6 +18,7 @@ import {
   cancelNotificationByTitleIfExist,
   ColorSheet,
   ObjectFormatASDW,
+  getHolidayUniverseDate,
 } from "../utils";
 
 const styles = StyleSheet.create({
@@ -270,6 +271,8 @@ function holidayScreen({ navigation, route }) {
     };
   }, []);
 
+  let date = getHolidayUniverseDate(route.params.holiday.date);
+
   return (
     /* 
     IOS bug: TextInput doesn't move up when keyboard shows
@@ -279,9 +282,7 @@ function holidayScreen({ navigation, route }) {
         <View style={styles.scrollViewContainer}>
           <Text style={styles.name}>{route.params.holiday.name}</Text>
           <Text style={styles.date}>
-            {route.params.holiday.date.day +
-              " " +
-              dictinory.months[route.params.holiday.date.month - 1]}
+            {date.getDate() + " " + dictinory.months[date.getMonth()]}
           </Text>
           <Article
             containerStyle={styles.article}

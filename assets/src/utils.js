@@ -53,12 +53,6 @@ function julianDateToNormal(year, month, day) {
   return new Date(Y, M - 1, D);
 }
 
-function ignoreTimeZone(date) {
-  let result = date;
-  result.setTime(result.getTime() - result.getTimezoneOffset() * 60 * 1000);
-  return result;
-}
-
 //Holidays block
 
 export async function updateHolidaysAsync() {
@@ -160,20 +154,57 @@ function getEasterDate(year, orthodox = false) {
     dateWithTimezone = new Date(year, 2, day);
   }
 
-  return ignoreTimeZone(dateWithTimezone);
+  return dateWithTimezone;
 }
 
 function getMaslenitsaDate(year) {
   let result = getEasterDate(year, true);
-  result.setDate(result.getDate() - 55);
+  result.setDate(result.getDate() - 49);
   return result;
 }
 
-export function getHolidayUniverseData(customFormatDate) {
+function getDayOfWeekInMonth(year, month, dayOfWeek, number) {
+  month--; // to js format
+
+  let date1;
+  let difference;
+
+  let jsDayOfWeek = dayOfWeek % 7;
+
+  if (number < 0) {
+    date1 = new Date(year, month + 1, 0);
+
+    difference = (date1.getDay() - jsDayOfWeek + 7) % 7;
+
+    return new Date(
+      year,
+      date1.getMonth(),
+      date1.getDate() + 7 * (number + 1) - difference
+    );
+  } else if (number > 0) {
+    date1 = new Date(year, month);
+
+    difference = (jsDayOfWeek - date1.getDay() + 7) % 7;
+
+    return new Date(
+      year,
+      date1.getMonth(),
+      date1.getDate() + 7 * (number - 1) + difference
+    );
+  }
+}
+
+function getDayInYear(year, day) {
+  console.log(day, year);
+  return new Date(year, 0, day);
+}
+
+export function getHolidayUniverseDate(customFormatDate) {
   let result;
+  let dateConfig;
   let today = new Date();
 
-  switch (customFormatDate) {
+  switch (customFormatDate.type) {
     case "еaster":
       result = getEasterDate(today.getFullYear());
       if (result < today) {
@@ -191,10 +222,10 @@ export function getHolidayUniverseData(customFormatDate) {
     case "maslenitsa":
       result = getMaslenitsaDate(today.getFullYear());
       if (result < today) {
-        result = getMaslenitsaDate(today.getFullYear() + 1);
+        result = getMaslenitsaDate(today.getFullYear(+1));
       }
       break;
-      
+
     case "mondayOfButterWeek":
       result = getMaslenitsaDate(today.getFullYear());
       result.setDate(result.getDate() - 6);
@@ -203,31 +234,52 @@ export function getHolidayUniverseData(customFormatDate) {
         result = getMaslenitsaDate(today.getFullYear() + 1);
         result.setDate(result.getDate() - 6);
       }
+
       break;
 
     case "dayOfWeekInMonth":
+      dateConfig = [
+        customFormatDate.month,
+        customFormatDate.dayOfWeek,
+        customFormatDate.number,
+      ];
+
+      result = getDayOfWeekInMonth(today.getFullYear(), ...dateConfig);
+
+      if (result < today) {
+        result = getDayOfWeekInMonth(today.getFullYear() + 1, ...dateConfig);
+      }
       break;
 
     case "dayInYear":
+      result = getDayInYear(today.getFullYear(), customFormatDate.day);
+
+      if (result < today) {
+        result = getDayInYear(today.getFullYear() + 1, customFormatDate.day);
+      }
       break;
 
     default:
+      dateConfig = [customFormatDate.month - 1, customFormatDate.day];
+
+      result = new Date(today.getFullYear(), ...dateConfig);
+      if (result < today) {
+        result = new Date(today.getFullYear() + 1, ...dateConfig);
+      }
       break;
   }
+  return result;
 }
 
 // Notifications block
 
-function getHolidayNotificationDate({ month, day }) {
-  const date = new Date();
-  let holidayDate = new Date(date.getFullYear(), month - 1, day, 9);
-
-  let nextYear = holidayDate.getTime() < date.getTime();
+function getHolidayNotificationDate(date) {
+  let holidayDate = getHolidayUniverseDate(date);
 
   let notificationDate = new Date(
-    date.getFullYear() + (nextYear ? 1 : 0),
-    month - 1,
-    day,
+    holidayDate.getFullYear(),
+    holidayDate.getMonth(),
+    holidayDate.getDay(),
     9
   );
 
@@ -329,10 +381,7 @@ export async function setHolidayNotificationAsync(holiday, language) {
     return;
   }
 
-  let notificationDate = getHolidayNotificationDate({
-    month: holiday.date.month,
-    day: holiday.date.day,
-  });
+  let notificationDate = getHolidayNotificationDate(holiday.date);
 
   Notifications.scheduleNotificationAsync({
     content: {
@@ -380,10 +429,7 @@ export async function setHolidaysNotificationsAsync(holidaysList, language) {
     ) {
       await cancelNotificationByTitleIfExist(holiday.name);
 
-      let notificationDate = getHolidayNotificationDate({
-        month: holiday.date.month,
-        day: holiday.date.day,
-      });
+      let notificationDate = getHolidayNotificationDate(holiday.date);
 
       Notifications.scheduleNotificationAsync({
         content: {

@@ -19,6 +19,7 @@ import {
   updateHolidaysAsync,
   setHolidaysNotificationsAsync,
   ColorSheet,
+  getHolidayUniverseDate,
 } from "../utils";
 
 function wait(ms) {
@@ -26,36 +27,17 @@ function wait(ms) {
 }
 
 function sortByDateAndCategory(holidaysList) {
-  const date = new Date();
   const categoriesList = [];
   for (const category in require("../../dictinories/us.json").categories) {
     categoriesList.push(category);
   }
 
-  const holidaysListLocal = holidaysList;
+  const holidaysListLocal = [...holidaysList];
 
   holidaysListLocal.sort((a, b) => {
-    const aDate =
-      a.date.month < date.getMonth() + 1 ||
-      (a.date.month == date.getMonth() + 1 && a.date.day < date.getDate())
-        ? a.date.month -
-          (date.getMonth() + 1) +
-          (a.date.day - date.getDate()) / 100 +
-          12.5
-        : a.date.month -
-          (date.getMonth() + 1) +
-          (a.date.day - date.getDate()) / 100;
+    const aDate = getHolidayUniverseDate(a.date);
 
-    const bDate =
-      b.date.month < date.getMonth() + 1 ||
-      (b.date.month == date.getMonth() + 1 && b.date.day < date.getDate())
-        ? b.date.month -
-          (date.getMonth() + 1) +
-          (b.date.day - date.getDate()) / 100 +
-          12.5
-        : b.date.month -
-          (date.getMonth() + 1) +
-          (b.date.day - date.getDate()) / 100;
+    const bDate = getHolidayUniverseDate(b.date);
 
     if (aDate < bDate) {
       return -1;
@@ -63,18 +45,17 @@ function sortByDateAndCategory(holidaysList) {
     if (aDate > bDate) {
       return 1;
     }
+
     if (aDate == bDate) {
       if (
         categoriesList.indexOf(a.category) < categoriesList.indexOf(b.category)
       ) {
         return -1;
-      }
-      if (
+      } else if (
         categoriesList.indexOf(a.category) > categoriesList.indexOf(b.category)
       ) {
         return 1;
-      }
-      if (
+      } else if (
         categoriesList.indexOf(a.category) == categoriesList.indexOf(b.category)
       ) {
         return 0;
@@ -127,10 +108,11 @@ const styles = StyleSheet.create({
 });
 
 const getBorderStyles = (holiday, holidays) => {
+  let today = new Date();
   let BorderStyles = {};
   if (
-    holiday.date.day == new Date().getDate() &&
-    holiday.date.month == new Date().getMonth() + 1
+    getHolidayUniverseDate(holiday.date).getDate() == today.getDate() &&
+    getHolidayUniverseDate(holiday.date).getMonth() == today.getMonth()
   ) {
     BorderStyles.borderColor = ColorSheet.primaryColor;
     BorderStyles.borderWidth = 4;
@@ -141,10 +123,12 @@ const getBorderStyles = (holiday, holidays) => {
 
     if (
       holidays.indexOf(holiday) != holidays.length - 1 &&
-      holidays[holidays.indexOf(holiday) + 1].date.day ==
-        new Date().getDate() &&
-      holidays[holidays.indexOf(holiday) + 1].date.month ==
-        new Date().getMonth() + 1
+      getHolidayUniverseDate(
+        holidays[holidays.indexOf(holiday) + 1].date
+      ).getDate() == today.getDate() &&
+      getHolidayUniverseDate(
+        holidays[holidays.indexOf(holiday) + 1].date
+      ).getMonth() == today.getMonth()
     ) {
       BorderStyles.borderBottomWidth = 0;
     }
@@ -313,6 +297,7 @@ function holidaysListScreen({ navigation, route }) {
           }}
           data={filteredHolidays}
           renderItem={({ item }) => {
+            let date = getHolidayUniverseDate(item.date);
             return (
               <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
                 <View
@@ -343,9 +328,7 @@ function holidaysListScreen({ navigation, route }) {
                       },
                     }}
                   >
-                    {item.date.day +
-                      " " +
-                      dictinory.months[item.date.month - 1]}
+                    {date.getDate() + " " + dictinory.months[date.getMonth()]}
                   </Text>
                 </View>
               </TouchableNativeFeedback>
