@@ -12,7 +12,7 @@
   "upcomingHolidaysScreen": {
     "title": "Upcoming holidays",
     "importantHolidaysTitle": "Important holidays",
-    "noImportantHolidaysInfo": "You have not marked a single important holiday yet :)\nSign important ones on its page"
+    "noImportantHolidaysInfo": "You have not marked a single holiday important :)\nMark the holiday important on its page and it will be displayed here"
   },
   "settingsScreen": {
     "title": "Settings",

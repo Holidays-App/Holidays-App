@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   LanguageContext,
   HolidaysContext,
+  SvgOrImageUri,
   getHolidaysAsync,
   updateHolidaysAsync,
   setHolidaysNotificationsAsync,
@@ -81,23 +82,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: ColorSheet.text.subtitle,
   },
+
   name: {
     fontSize: 19,
   },
+
   container: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: ColorSheet.backgroundColor,
   },
-  listItem: {
+
+  listItemContainer: {
     flex: 1,
-    width: "100%",
-    height: 80,
-    justifyContent: "center",
-    paddingRight: "4%",
-    paddingLeft: "3%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+
+    minHeight: 80,
+    paddingHorizontal: "4%",
+    paddingVertical: "3%",
   },
+
+  listItemTextContainer: {
+    justifyContent: "center",
+  },
+
+  listItemIconContainer: {
+    height: "100%",
+    width: "18%",
+    justifyContent: "center",
+  },
+
+  listItemIcon: {
+    height: 60,
+    width: 60,
+  },
+
   noImportantHolidaysText: {
     top: "40%",
     textAlign: "center",
@@ -107,34 +128,104 @@ const styles = StyleSheet.create({
   },
 });
 
-const getBorderStyles = (holiday, holidays) => {
+function getBorderStyles(holiday, holidays) {
   let today = new Date();
+
+  today.setHours(0);
+  today.setMinutes(0);
+  today.setSeconds(0);
+  today.setMilliseconds(0);
+
+  let todayGetTime = today.getTime();
+  let holidayUniverseDate = getHolidayUniverseDate(holiday.date);
+
   let BorderStyles = {};
-  if (
-    getHolidayUniverseDate(holiday.date).getDate() == today.getDate() &&
-    getHolidayUniverseDate(holiday.date).getMonth() == today.getMonth()
-  ) {
+
+  if (holidayUniverseDate.getTime() == todayGetTime) {
     BorderStyles.borderColor = ColorSheet.primaryColor;
     BorderStyles.borderWidth = 4;
 
-    if (holidays.indexOf(holiday) != 0) {
+    let indexOfHoliday = holidays.indexOf(holiday);
+
+    if (indexOfHoliday != 0) {
       BorderStyles.borderTopWidth = 0;
     }
 
     if (
-      holidays.indexOf(holiday) != holidays.length - 1 &&
-      getHolidayUniverseDate(
-        holidays[holidays.indexOf(holiday) + 1].date
-      ).getDate() == today.getDate() &&
-      getHolidayUniverseDate(
-        holidays[holidays.indexOf(holiday) + 1].date
-      ).getMonth() == today.getMonth()
+      indexOfHoliday != holidays.length - 1 &&
+      getHolidayUniverseDate(holidays[indexOfHoliday + 1].date).getTime() ==
+        todayGetTime
     ) {
       BorderStyles.borderBottomWidth = 0;
     }
   }
   return BorderStyles;
-};
+}
+
+function ListItem({
+  holiday,
+  isHolidayImportant,
+  openHolidayScreen,
+  holidaysList,
+}) {
+  const { dictinory } = React.useContext(LanguageContext);
+
+  let date = getHolidayUniverseDate(holiday.date);
+
+  return (
+    <TouchableNativeFeedback onPress={openHolidayScreen}>
+      <View
+        style={{
+          ...styles.listItemContainer,
+          ...getBorderStyles(holiday, holidaysList),
+        }}
+      >
+        <View
+          style={{
+            ...styles.listItemTextContainer,
+            ...(holiday?.icon == null
+              ? { width: "100%" }
+              : {
+                  width: "80%",
+                  paddingRight: "1%",
+                }),
+          }}
+        >
+          <Text
+            style={{
+              ...styles.name,
+              ...{
+                fontWeight: isHolidayImportant ? "bold" : "normal",
+              },
+            }}
+          >
+            {holiday.name}
+          </Text>
+          <Text
+            style={{
+              ...styles.date,
+              ...{
+                fontWeight: isHolidayImportant ? "bold" : "normal",
+              },
+            }}
+          >
+            {date.getDate() + " " + dictinory.months[date.getMonth()]}
+          </Text>
+        </View>
+        {holiday?.icon == null ? null : (
+          <View style={styles.listItemIconContainer}>
+            <SvgOrImageUri
+              type={holiday?.icon?.type}
+              uri={`http://holidays-app.github.io/holidays/icons/${holiday?.icon?.fileName}`}
+              height={styles.listItemIcon.height}
+              width={styles.listItemIcon.width}
+            />
+          </View>
+        )}
+      </View>
+    </TouchableNativeFeedback>
+  );
+}
 
 class ShowingImportantHolidaysListHelper {
   constructor() {
@@ -297,41 +388,15 @@ function holidaysListScreen({ navigation, route }) {
           }}
           data={filteredHolidays}
           renderItem={({ item }) => {
-            let date = getHolidayUniverseDate(item.date);
             return (
-              <TouchableNativeFeedback onPress={() => openHolidayScreen(item)}>
-                <View
-                  style={{
-                    ...styles.listItem,
-                    ...getBorderStyles(item, filteredHolidays),
-                  }}
-                >
-                  <Text
-                    style={{
-                      ...styles.name,
-                      ...{
-                        fontWeight: !!holidaysImportance[item.id]
-                          ? "bold"
-                          : "normal",
-                      },
-                    }}
-                  >
-                    {item.name}
-                  </Text>
-                  <Text
-                    style={{
-                      ...styles.date,
-                      ...{
-                        fontWeight: !!holidaysImportance[item.id]
-                          ? "bold"
-                          : "normal",
-                      },
-                    }}
-                  >
-                    {date.getDate() + " " + dictinory.months[date.getMonth()]}
-                  </Text>
-                </View>
-              </TouchableNativeFeedback>
+              <ListItem
+                holiday={item}
+                isHolidayImportant={!!holidaysImportance[item.id]}
+                holidaysList={filteredHolidays}
+                openHolidayScreen={() => {
+                  openHolidayScreen(item);
+                }}
+              />
             );
           }}
           keyExtractor={(_item, index) => index.toString()}

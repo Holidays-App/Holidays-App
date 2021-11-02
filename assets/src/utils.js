@@ -1,11 +1,32 @@
 import * as React from "react";
 
+import { Image } from "react-native";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { SvgCssUri } from "react-native-svg";
 
 import * as Notifications from "expo-notifications";
 
 export const LanguageContext = React.createContext();
 export const HolidaysContext = React.createContext();
+
+// React elemnts block
+
+export function SvgOrImageUri({ uri, type, height, width }) {
+  return type == "svg" ? (
+    <SvgCssUri width={width} height={height} uri={uri} />
+  ) : (
+    <Image
+      source={{
+        uri,
+      }}
+      style={{ height, width }}
+      resizeMode={"stretch"}
+      fadeDuration={0}
+    />
+  );
+}
 
 // Functional block
 
@@ -53,7 +74,7 @@ function julianDateToNormal(year, month, day) {
   return new Date(Y, M - 1, D);
 }
 
-//Holidays block
+// Holidays block
 
 export async function updateHolidaysAsync() {
   try {
@@ -201,7 +222,13 @@ function getDayInYear(year, day) {
 export function getHolidayUniverseDate(customFormatDate) {
   let result;
   let dateConfig;
+
   let today = new Date();
+
+  today.setHours(0);
+  today.setMinutes(0);
+  today.setSeconds(0);
+  today.setMilliseconds(0);
 
   switch (customFormatDate.type) {
     case "еaster":

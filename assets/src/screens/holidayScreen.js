@@ -14,6 +14,7 @@ import CheckBox from "react-native-check-box";
 
 import {
   LanguageContext,
+  SvgOrImageUri,
   setHolidayNotificationAsync,
   cancelNotificationByTitleIfExist,
   ColorSheet,
@@ -22,15 +23,32 @@ import {
 } from "../utils";
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+
+    top: 20,
+  },
+
+  nameAndDateContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
   name: {
     fontSize: 26,
-    top: 20,
   },
   date: {
     fontSize: 22,
     color: ColorSheet.text.subtitle,
-    top: 30,
   },
+
+  iconContainer: {
+    width: "20%",
+    justifyContent: "center",
+  },
+  icon: { height: 70, width: 70 },
+
   paragraph: {
     fontSize: 19,
     marginTop: 10,
@@ -214,6 +232,8 @@ function holidayScreen({ navigation, route }) {
   const [holidayNoatificationRule, setHolidayNoatificationRule] =
     React.useState(null);
 
+  let holiday = route.params.holiday;
+
   React.useEffect(() => {
     let stop = false;
 
@@ -221,7 +241,7 @@ function holidayScreen({ navigation, route }) {
       if (!stop) {
         let value = await ObjectFormatASDW.getData({
           dataName: "notes",
-          key: route.params.holiday.id,
+          key: holiday.id,
           defaultResult: "",
         });
         if (value != noteText) setNoteText(value);
@@ -232,7 +252,7 @@ function holidayScreen({ navigation, route }) {
       if (!stop) {
         let value = await ObjectFormatASDW.getData({
           dataName: "holidaysImportance",
-          key: route.params.holiday.id,
+          key: holiday.id,
           defaultResult: false,
         });
         if (value != holidayImportance) {
@@ -245,8 +265,8 @@ function holidayScreen({ navigation, route }) {
       if (!stop) {
         let value = await ObjectFormatASDW.getData({
           dataName: "holidaysNotificationsRules",
-          key: route.params.holiday.id,
-          defaultResult: route.params.holiday.defaultNotify,
+          key: holiday.id,
+          defaultResult: holiday.defaultNotify,
         });
         if (value != holidayNoatificationRule) {
           setHolidayNoatificationRule(value);
@@ -272,7 +292,7 @@ function holidayScreen({ navigation, route }) {
     };
   }, []);
 
-  let date = getHolidayUniverseDate(route.params.holiday.date);
+  let date = getHolidayUniverseDate(holiday.date);
 
   return (
     /* 
@@ -281,10 +301,35 @@ function holidayScreen({ navigation, route }) {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.scrollViewContainer}>
-          <Text style={styles.name}>{route.params.holiday.name}</Text>
-          <Text style={styles.date}>
-            {date.getDate() + " " + dictinory.months[date.getMonth()]}
-          </Text>
+          <View style={styles.headerContainer}>
+            <View
+              style={{
+                ...styles.nameAndDateContainer,
+                ...(holiday?.icon == null
+                  ? { width: "100%" }
+                  : {
+                      width: "79%",
+                      paddingRight: "1%",
+                    }),
+              }}
+            >
+              <Text style={styles.name}>{holiday.name}</Text>
+              <Text style={styles.date}>
+                {date.getDate() + " " + dictinory.months[date.getMonth()]}
+              </Text>
+            </View>
+            {holiday?.icon == null ? null : (
+              <View style={styles.iconContainer}>
+                <SvgOrImageUri
+                  type={holiday?.icon?.type}
+                  uri={`http://holidays-app.github.io/holidays/icons/${holiday?.icon?.fileName}`}
+                  height={styles.icon.height}
+                  width={styles.icon.width}
+                />
+              </View>
+            )}
+          </View>
+
           <Article
             containerStyle={styles.article}
             paragraphsStyle={styles.paragraph}
