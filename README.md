@@ -10,9 +10,9 @@ The app contains information about religious holidays, cultural holidays, job's 
 
 ## Screenshots 📱
 
-| Upcoming holidays                                                                             | Categories screen                                                                       | Settings screen                                                                       |
-| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| ![](http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png) | ![](http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png) | ![](http://holidays-app.github.io/assets/screenshots/us/settingsScreenScreenshot.png) |
+| Upcoming holidays                                                                                                             | Categories                                                                                                        | Settings                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| ![upcomingHolidaysScreenScreenshot](http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png) | ![categoriesScreenScreenshot](http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png) | ![settingsScreenScreenshot](http://holidays-app.github.io/assets/screenshots/us/settingsScreenScreenshot.png) |
 
 ## Download
 
@@ -21,6 +21,8 @@ You can download app for android from releases or on [this](https://holidays-app
 ## Thanks for help
 
 Thanks [Danil Kopysov](https://github.com/adnjoj) for website creation
+
 Thanks Alisa Dadueva for website design
 
-_App created by Fedor Bondarev - [@Trauer-1](https://github.com/Trauer-1)_
+##### Creator
+_Fedor Bondarev - [@Trauer-1](https://github.com/Trauer-1)_
