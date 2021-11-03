@@ -10,7 +10,7 @@ The app contains information about religious holidays, cultural holidays, job's 
 
 ## Screenshots 📱
 
-You can look on screenshots on [this website][lending]
+You can look on screenshots [this website][lending]
 
 ## Download
 
