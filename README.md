@@ -10,9 +10,13 @@ The app contains information about religious holidays, cultural holidays, job's 
 
 ## Screenshots 📱
 
-| Upcoming holidays                                                                                                             | Categories                                                                                                        | Settings                                                                                                      |
-| ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| ![upcomingHolidaysScreenScreenshot](http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png) | ![categoriesScreenScreenshot](http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png) | ![settingsScreenScreenshot](http://holidays-app.github.io/assets/screenshots/us/settingsScreenScreenshot.png) |
+| Upcoming holidays               | Categories                | Settings                |
+| ------------------------------- | ------------------------- | ----------------------- |
+| ![][upcomingholidaysscreenshot] | ![][categoriesscreenshot] | ![][settingsscreenshot] |
+
+[upcomingholidaysscreenshot]: http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png
+[categoriesscreenshot]: http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png
+[settingsscreenshot]: http://holidays-app.github.io/assets/screenshots/us/settingsScreenScreenshot.png
 
 ## Download
 
@@ -25,4 +29,5 @@ Thanks [Danil Kopysov](https://github.com/adnjoj) for website creation
 Thanks Alisa Dadueva for website design
 
 ##### Creator
+
 _Fedor Bondarev - [@Trauer-1](https://github.com/Trauer-1)_
