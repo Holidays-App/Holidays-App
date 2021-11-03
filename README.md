@@ -16,7 +16,7 @@ The app contains information about religious holidays, cultural holidays, job's 
 
 [upcomingholidaysscreenshot]: http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png
 [categoriesscreenshot]: http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png
-[settingsscreenshot]: http://holidays-app.github.io/assets/screenshots/us/settingsScreenScreenshot.png
+[settingsscreenshot]: http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png
 
 ## Download
 
