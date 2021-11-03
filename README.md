@@ -10,17 +10,11 @@ The app contains information about religious holidays, cultural holidays, job's 
 
 ## Screenshots 📱
 
-| Upcoming holidays               | Categories                | Settings                |
-| ------------------------------- | ------------------------- | ----------------------- |
-| ![][upcomingholidaysscreenshot] | ![][categoriesscreenshot] | ![][settingsscreenshot] |
-
-[upcomingholidaysscreenshot]: http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png
-[categoriesscreenshot]: http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png
-[settingsscreenshot]: http://holidays-app.github.io/assets/screenshots/us/categoriesScreenScreenshot.png
+You can look on screenshots on [this website][lending]
 
 ## Download
 
-You can download app for android from releases or on [this](https://holidays-app.github.io/) page
+You can download app for android from releases or on [this][lending] page
 
 ## Thanks for help
 
@@ -31,3 +25,5 @@ Thanks Alisa Dadueva for website design
 ##### Creator
 
 _Fedor Bondarev - [@Trauer-1](https://github.com/Trauer-1)_
+
+[lending]: https://holidays-app.github.io/
