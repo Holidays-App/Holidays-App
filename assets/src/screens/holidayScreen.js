@@ -133,8 +133,8 @@ function ArticleImage({ uri, maxSize, style = {} }) {
   Image loading for resizing, can take too much time on IOS
   */
   const [size, setSize] = React.useState({
-    height: screenWidth,
-    width: screenWidth,
+    height: 0,
+    width: 0,
   });
 
   const getSizePromise = new Promise((resolve, reject) => {

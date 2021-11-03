@@ -4,29 +4,12 @@ import { Image } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { SvgCssUri } from "react-native-svg";
+import { SvgCss } from "react-native-svg";
 
 import * as Notifications from "expo-notifications";
 
 export const LanguageContext = React.createContext();
 export const HolidaysContext = React.createContext();
-
-// React elemnts block
-
-export function SvgOrImageUri({ uri, type, height, width }) {
-  return type == "svg" ? (
-    <SvgCssUri width={width} height={height} uri={uri} />
-  ) : (
-    <Image
-      source={{
-        uri,
-      }}
-      style={{ height, width }}
-      resizeMode={"stretch"}
-      fadeDuration={0}
-    />
-  );
-}
 
 // Functional block
 
@@ -162,20 +145,20 @@ function getEasterDate(year, orthodox = false) {
     day = 22 + d + e;
   }
 
-  let dateWithTimezone;
+  let date;
 
   if (orthodox) {
     let helpDate = new Date(year, 2, day);
-    dateWithTimezone = julianDateToNormal(
+    date = julianDateToNormal(
       helpDate.getFullYear(),
       helpDate.getMonth() + 1,
       helpDate.getDate()
     );
   } else {
-    dateWithTimezone = new Date(year, 2, day);
+    date = new Date(year, 2, day);
   }
 
-  return dateWithTimezone;
+  return date;
 }
 
 function getMaslenitsaDate(year) {
@@ -308,6 +291,8 @@ function getHolidayNotificationDate(date) {
     holidayDate.getDay(),
     9
   );
+
+  //return { seconds: 2 };
 
   return notificationDate;
 }
@@ -470,6 +455,55 @@ export async function setHolidaysNotificationsAsync(holidaysList, language) {
   }
 }
 
+// Cache
+
+class RequestCacheController {
+  constructor(cacheGroupId) {
+    this.groupId = cacheGroupId;
+  }
+
+  async _loadGroupKeys() {
+    let allKeys = await AsyncStorage.getAllKeys();
+    let groupKeys = allKeys.filter((key) =>
+      key.startsWith(`cacheController/${this.groupId}/`)
+    );
+    this.groupKeys = groupKeys;
+  }
+
+  async getRequestCache(uri) {
+    return await AsyncStorage.getItem(`cacheController/${this.groupId}/${uri}`);
+  }
+
+  async setRequestCache(uri, value) {
+    return await AsyncStorage.setItem(
+      `cacheController/${this.groupId}/${uri}`,
+      value
+    );
+  }
+
+  async makeRequestAndCacheIt(uri) {
+    let savedValue = await AsyncStorage.getItem(
+      `cacheController/${this.groupId}/${uri}`
+    );
+    let netValue = await (await fetch(uri)).text();
+
+    if (savedValue != netValue) {
+      this.setRequestCache(uri, netValue);
+    }
+
+    return netValue;
+  }
+
+  async updateAllGroupCache() {
+    await this._loadGroupKeys();
+    let uriStartIndex = `cacheController/${this.groupId}/`.length;
+    for (groupKey in this.groupKeys) {
+      let uri = groupKey.substring(uriStartIndex);
+      this.makeRequestAndCacheIt(uri);
+    }
+  }
+}
+
 // Object Format Async Storage Data Worker
 
 export var ObjectFormatASDW = {
@@ -527,6 +561,51 @@ export var ObjectFormatASDW = {
     }, delay);
   },
 };
+
+// React elemnts block
+
+var fastSvgCache = new RequestCacheController("fastSvg");
+
+function FastSvgCssUri({ uri, height, width }) {
+  const [svgXml, setSvgXml] = React.useState(null);
+
+  React.useEffect(() => {
+    let stop = false;
+
+    fastSvgCache.getRequestCache(uri).then((savedValue) => {
+      if (stop) return;
+
+      setSvgXml(savedValue);
+
+      fastSvgCache.makeRequestAndCacheIt(uri).then((netValue) => {
+        if (netValue != savedValue && !stop) {
+          setSvgXml(netValue);
+        }
+      });
+    });
+
+    return () => {
+      stop = true;
+    };
+  }, []);
+
+  return <SvgCss xml={svgXml} width={width} height={height} />;
+}
+
+export function SvgOrImageUri({ uri, type, height, width }) {
+  return type == "svg" ? (
+    <FastSvgCssUri width={width} height={height} uri={uri} />
+  ) : (
+    <Image
+      source={{
+        uri,
+      }}
+      style={{ height, width }}
+      resizeMode={"stretch"}
+      fadeDuration={0}
+    />
+  );
+}
 
 // Dictionaries
 
