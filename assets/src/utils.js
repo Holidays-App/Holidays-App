@@ -635,6 +635,5 @@ export const ColorSheet = {
 };
 
 export const CustomFonts = {
-  RedHatDisplay_Bold: require("../fonts/RedHatDisplay-Bold.ttf"),
-  RedHatDisplay: require("../fonts/RedHatDisplay-VariableFont_wght.ttf"),
+  RedHatDisplay_Light: require("../fonts/RedHatDisplay-Light.ttf"),
 };

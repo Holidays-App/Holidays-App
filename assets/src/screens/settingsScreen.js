@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     bottom: 50,
 
     color: "#b0b0b0",
-    fontFamily: "RedHatDisplay_Bold",
+    fontFamily: "RedHatDisplay_Light",
     fontSize: 21,
   },
 });
