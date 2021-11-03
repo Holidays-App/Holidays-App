@@ -295,10 +295,12 @@ function fourthTabScreen({ navigation }) {
     navigation.dangerouslyGetParent().replace("mainScreen");
   };
 
-  navigation.addListener("focus", async () => {
-    let holidays = await getHolidaysAsync(language);
-    setHolidays(holidays);
-  });
+  React.useEffect(() => {
+    navigation.addListener("focus", async () => {
+      let holidays = await getHolidaysAsync(language);
+      setHolidays(holidays);
+    });
+  }, [language]);
 
   return (
     <View style={fourthTabStyles.container}>

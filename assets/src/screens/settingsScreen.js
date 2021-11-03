@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     fontSize: 21,
     color: "#FFFFFF",
   },
-  creatorName: {
+  creatorInfo: {
     position: "absolute",
     width: "100%",
     textAlign: "center",
@@ -55,7 +55,7 @@ function settingsScreen({ navigation }) {
           </Text>
         </View>
       </TouchableNativeFeedback>
-      <Text style={styles.creatorName}>{dictinory.creatorName}</Text>
+      <Text style={styles.creatorInfo}>{dictinory.creatorInfo}</Text>
     </View>
   );
 }

@@ -241,7 +241,11 @@ function holidaysListScreen({ navigation, route }) {
 
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const [holidaysImportance, setHolidaysImportance] = React.useState({});
+  const [holidaysImportance, setHolidaysImportance] = React.useState(
+    route?.params?.holidaysImportance != null
+      ? route?.params?.holidaysImportance
+      : {}
+  );
 
   const [isOnlyImportantHolidays, setIsOnlyImportantHolidays] =
     React.useState(false);
@@ -286,6 +290,7 @@ function holidaysListScreen({ navigation, route }) {
 
     const updateHolidaysImportance = async (holidaysImportanceJSON) => {
       if (
+        holidaysImportanceJSON != null &&
         holidaysImportanceJSON != JSON.stringify(holidaysImportance) &&
         !stop
       ) {

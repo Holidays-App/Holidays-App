@@ -597,9 +597,7 @@ export function SvgOrImageUri({ uri, type, height, width }) {
     <FastSvgCssUri width={width} height={height} uri={uri} />
   ) : (
     <Image
-      source={{
-        uri,
-      }}
+      source={{ uri }}
       style={{ height, width }}
       resizeMode={"stretch"}
       fadeDuration={0}
@@ -638,4 +636,5 @@ export const ColorSheet = {
 
 export const CustomFonts = {
   RedHatDisplay_Bold: require("../fonts/RedHatDisplay-Bold.ttf"),
+  RedHatDisplay: require("../fonts/RedHatDisplay-VariableFont_wght.ttf"),
 };

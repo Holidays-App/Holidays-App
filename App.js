@@ -4,7 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Icon } from "react-native-elements";
 
-import * as SplashScreen from "expo-splash-screen";
 import * as Localization from "expo-localization";
 import * as Font from "expo-font";
 
@@ -196,67 +195,66 @@ function App() {
     [holidays]
   );
 
-  const [alreadyLaunched, setAlreadyLaunched] = React.useState(null);
+  const [isFirstLaunch, setIsFirstLaunch] = React.useState(null);
+
+  const [ready, setReady] = React.useState(false);
+
+  const loadData = async () => {
+    //await AsyncStorage.clear();
+
+    let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
+      "language",
+      "alreadyLaunched",
+    ]);
+
+    if (language == null) {
+      language =
+        Localization.locale == "ru-RU" || Localization.locale == "ru"
+          ? "ru"
+          : "us";
+    }
+    setLanguage(language);
+
+    if (alreadyLaunched == null) {
+      setIsFirstLaunch(false);
+    } else {
+      setIsFirstLaunch(true);
+      let holidays = await getHolidaysAsync(language);
+      setHolidays(holidays);
+    }
+
+    await Font.loadAsync(CustomFonts);
+
+    setReady(true);
+  };
 
   React.useEffect(() => {
-    (async () => {
-      await SplashScreen.preventAutoHideAsync();
-
-      //await AsyncStorage.clear();
-
-      let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
-        "language",
-        "alreadyLaunched",
-      ]);
-
-      if (language == null) {
-        language =
-          Localization.locale == "ru-RU" || Localization.locale == "ru"
-            ? "ru"
-            : "us";
-      }
-      setLanguage(language);
-
-      if (alreadyLaunched == null) {
-        setAlreadyLaunched(false);
-      } else {
-        setAlreadyLaunched(true);
-        let holidays = await getHolidaysAsync(language);
-        setHolidays(holidays);
-      }
-
-      await Font.loadAsync(CustomFonts);
-
-      await SplashScreen.hideAsync();
-    })();
+    loadData();
   }, []);
 
-  return (
+  return ready ? (
     <LanguageContext.Provider value={languageContext}>
       <HolidaysContext.Provider value={holidaysContext}>
-        {language == null ||
-        (alreadyLaunched === false ? false : holidays == null) ? null : (
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName={
-                alreadyLaunched ? "mainScreen" : "firstLaunchScreen"
-              }
-              screenOptions={{
-                headerShown: false,
-                animationEnabled: false,
-              }}
-            >
-              <Stack.Screen
-                name="firstLaunchScreen"
-                component={firstLaunchScreen}
-              />
-              <Stack.Screen name="mainScreen" component={mainScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        )}
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName={
+              isFirstLaunch ? "mainScreen" : "firstLaunchScreen"
+            }
+            screenOptions={{
+              headerShown: false,
+              animationEnabled: false,
+            }}
+          >
+            <Stack.Screen
+              name="firstLaunchScreen"
+              component={firstLaunchScreen}
+            />
+            <Stack.Screen name="mainScreen" component={mainScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
       </HolidaysContext.Provider>
     </LanguageContext.Provider>
-  );
+  ) : null;
 }
 
 export default App;
