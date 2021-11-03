@@ -1,3 +1,26 @@
-# Holidays-App
+![logo](http://holidays-app.github.io/assets/icon.png)
 
-«Holidays» - is a simple and convenient event guide for any day. The app provides access to information about any holidays on Russian and English languages. The app contains information about religious holidays, cultural holidays, job's holidays, festivals and many other equally interesting events.
+# Holidays
+
+«Holidays» - is a simple and convenient event guide for any day 📅
+
+The app provides access to information about any holidays on Russian and English languages 🌐
+
+The app contains information about religious holidays, cultural holidays, job's holidays, festivals and many other equally interesting events 🎉
+
+## Screenshots 📱
+
+| Upcoming holidays                                                                             | Categories screen                                                                             | Settings screen                                                                               |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| ![](http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png) | ![](http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png) | ![](http://holidays-app.github.io/assets/screenshots/us/upcomingHolidaysScreenScreenshot.png) |
+
+## Download
+
+You can download app for android from releases or on [this](https://holidays-app.github.io/) page
+
+## Thanks for help
+
+Thanks Danil Kopysov for website creation
+Thanks Alisa Dadueva for website design
+
+_App created by Fedor Bondarev - [@Trauer-1](https://github.com/Trauer-1)_
