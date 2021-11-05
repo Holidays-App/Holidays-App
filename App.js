@@ -18,6 +18,8 @@ import {
   ColorSheet,
   CustomFonts,
   getDictinoryByLanguage,
+  updateHolidaysAsync,
+  setHolidaysNotificationsAsync,
 } from "./assets/src/utils";
 
 const Stack = createStackNavigator();
@@ -29,6 +31,7 @@ import categoriesScreen from "./assets/src/screens/categoriesScreen";
 import settingsScreen from "./assets/src/screens/settingsScreen";
 import settingsScreen_Language from "./assets/src/screens/settingsScreen_Language";
 import firstLaunchScreen from "./assets/src/screens/firstLaunchScreen";
+import { AppState } from "react-native";
 
 function firstTabScreen() {
   const { dictinory } = React.useContext(LanguageContext);
@@ -199,38 +202,68 @@ function App() {
 
   const [ready, setReady] = React.useState(false);
 
-  const loadData = async () => {
-    //await AsyncStorage.clear();
+  React.useEffect(() => {
+    let stop = false;
+    (async () => {
+      await AsyncStorage.clear();
 
-    let [[, language], [, alreadyLaunched]] = await AsyncStorage.multiGet([
-      "language",
-      "alreadyLaunched",
-    ]);
+      let [[, savedLanguage], [, alreadyLaunched]] =
+        await AsyncStorage.multiGet(["language", "alreadyLaunched"]);
 
-    if (language == null) {
-      language =
-        Localization.locale == "ru-RU" || Localization.locale == "ru"
-          ? "ru"
-          : "us";
-    }
-    setLanguage(language);
+      if (savedLanguage == null) {
+        savedLanguage =
+          Localization.locale == "ru-RU" || Localization.locale == "ru"
+            ? "ru"
+            : "us";
+      }
 
-    if (alreadyLaunched == null) {
-      setIsFirstLaunch(false);
-    } else {
-      setIsFirstLaunch(true);
-      let holidays = await getHolidaysAsync(language);
-      setHolidays(holidays);
-    }
+      await Font.loadAsync(CustomFonts);
 
-    await Font.loadAsync(CustomFonts);
+      let savedHolidays = await getHolidaysAsync(savedLanguage);
 
-    setReady(true);
-  };
+      if (!stop) {
+        setLanguage(savedLanguage);
+        setHolidays(savedHolidays);
+
+        if (alreadyLaunched == null) {
+          setIsFirstLaunch(true);
+        } else {
+          setIsFirstLaunch(false);
+        }
+
+        setReady(true);
+      }
+
+      await updateHolidaysAsync();
+
+      let updatedHolidays = await getHolidaysAsync(savedLanguage);
+
+      if (
+        JSON.stringify(updatedHolidays) != JSON.stringify(savedHolidays) &&
+        !stop
+      ) {
+        setHolidays(updatedHolidays);
+      }
+
+      setHolidaysNotificationsAsync(updatedHolidays, savedLanguage);
+    })();
+
+    return () => {
+      stop = true;
+    };
+  }, []);
 
   React.useEffect(() => {
-    loadData();
-  }, []);
+    let stop = false;
+
+    getHolidaysAsync(language).then((holidays) => {
+      if (!stop) setHolidays(holidays);
+    });
+
+    return () => {
+      stop = true;
+    };
+  }, [language]);
 
   return ready ? (
     <LanguageContext.Provider value={languageContext}>
@@ -238,7 +271,7 @@ function App() {
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName={
-              isFirstLaunch ? "mainScreen" : "firstLaunchScreen"
+              isFirstLaunch ? "firstLaunchScreen" : "mainScreen"
             }
             screenOptions={{
               headerShown: false,

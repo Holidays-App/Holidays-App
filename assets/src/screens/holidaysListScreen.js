@@ -237,7 +237,7 @@ class ShowingImportantHolidaysListHelper {
 
 function holidaysListScreen({ navigation, route }) {
   const { dictinory, language } = React.useContext(LanguageContext);
-  const { holidays, setHolidays } = React.useContext(HolidaysContext);
+  const { holidays } = React.useContext(HolidaysContext);
 
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -276,17 +276,6 @@ function holidaysListScreen({ navigation, route }) {
       ShowingImportantHolidaysListHelper.helpers[route.key] =
         new ShowingImportantHolidaysListHelper();
     }
-
-    updateHolidaysAsync().then(async () => {
-      let updatedHolidays = await getHolidaysAsync(language);
-      if (
-        JSON.stringify(updatedHolidays) != JSON.stringify(holidays) &&
-        !stop
-      ) {
-        setHolidays(updatedHolidays);
-      }
-      setHolidaysNotificationsAsync(updatedHolidays, language);
-    });
 
     const updateHolidaysImportance = async (holidaysImportanceJSON) => {
       if (

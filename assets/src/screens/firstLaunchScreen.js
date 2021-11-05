@@ -16,8 +16,6 @@ import { Icon } from "react-native-elements";
 
 import {
   LanguageContext,
-  HolidaysContext,
-  getHolidaysAsync,
   allowsNotificationsAsync,
   requestPermissionsAsync,
   ColorSheet,
@@ -268,8 +266,7 @@ function thirdTabScreen({ navigation }) {
 }
 
 function fourthTabScreen({ navigation }) {
-  const { dictinory, language } = React.useContext(LanguageContext);
-  const { setHolidays } = React.useContext(HolidaysContext);
+  const { dictinory } = React.useContext(LanguageContext);
 
   const fourthTabStyles = StyleSheet.create({
     container: {
@@ -294,13 +291,6 @@ function fourthTabScreen({ navigation }) {
     AsyncStorage.setItem("alreadyLaunched", JSON.stringify(true));
     navigation.dangerouslyGetParent().replace("mainScreen");
   };
-
-  React.useEffect(() => {
-    navigation.addListener("focus", async () => {
-      let holidays = await getHolidaysAsync(language);
-      setHolidays(holidays);
-    });
-  }, [language]);
 
   return (
     <View style={fourthTabStyles.container}>

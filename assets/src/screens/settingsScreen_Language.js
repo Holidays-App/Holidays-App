@@ -64,8 +64,6 @@ function settingsScreen_Language({ navigation }) {
   const { dictinory, language, setLanguage } =
     React.useContext(LanguageContext);
 
-  const { setHolidays } = React.useContext(HolidaysContext);
-
   const changeLanguage = async (newLanguage) => {
     if (language == newLanguage) return;
 
@@ -81,8 +79,6 @@ function settingsScreen_Language({ navigation }) {
       holidays,
       language
     );
-
-    setHolidays(holidays);
 
     setLanguage(newLanguage);
   };
