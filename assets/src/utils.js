@@ -288,7 +288,7 @@ function getHolidayNotificationDate(date) {
   let notificationDate = new Date(
     holidayDate.getFullYear(),
     holidayDate.getMonth(),
-    holidayDate.getDay(),
+    holidayDate.getDate(),
     9
   );
 
@@ -404,6 +404,7 @@ export async function setHolidayNotificationAsync(holiday, language) {
 }
 
 export async function setHolidaysNotificationsAsync(holidaysList, language) {
+  console.log(1);
   if (!(await allowsNotificationsAsync())) return;
 
   let scheduledNotifications =

@@ -16,8 +16,6 @@ import {
   LanguageContext,
   HolidaysContext,
   SvgOrImageUri,
-  getHolidaysAsync,
-  updateHolidaysAsync,
   setHolidaysNotificationsAsync,
   ColorSheet,
   getHolidayUniverseDate,
@@ -304,6 +302,8 @@ function holidaysListScreen({ navigation, route }) {
         }
       }
     );
+
+    setHolidaysNotificationsAsync(holidays, language);
 
     return () => {
       stop = true;

@@ -19,7 +19,7 @@ import {
   CustomFonts,
   getDictinoryByLanguage,
   updateHolidaysAsync,
-  setHolidaysNotificationsAsync,
+  canselAllNotificationsAsync,
 } from "./assets/src/utils";
 
 const Stack = createStackNavigator();
@@ -206,6 +206,7 @@ function App() {
     let stop = false;
     (async () => {
       // await AsyncStorage.clear();
+      //await canselAllNotificationsAsync();
 
       let [[, savedLanguage], [, alreadyLaunched]] =
         await AsyncStorage.multiGet(["language", "alreadyLaunched"]);
@@ -244,8 +245,6 @@ function App() {
       ) {
         setHolidays(updatedHolidays);
       }
-
-      setHolidaysNotificationsAsync(updatedHolidays, savedLanguage);
     })();
 
     return () => {
