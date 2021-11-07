@@ -1,4 +1,4 @@
-![logo](http://holidays-app.github.io/assets/icon.png)
+![logo](./assets/icon.png)
 
 # Holidays
 
