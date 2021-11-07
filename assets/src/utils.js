@@ -404,7 +404,6 @@ export async function setHolidayNotificationAsync(holiday, language) {
 }
 
 export async function setHolidaysNotificationsAsync(holidaysList, language) {
-  console.log(1);
   if (!(await allowsNotificationsAsync())) return;
 
   let scheduledNotifications =
