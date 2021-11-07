@@ -205,7 +205,7 @@ function App() {
   React.useEffect(() => {
     let stop = false;
     (async () => {
-      await AsyncStorage.clear();
+      // await AsyncStorage.clear();
 
       let [[, savedLanguage], [, alreadyLaunched]] =
         await AsyncStorage.multiGet(["language", "alreadyLaunched"]);
