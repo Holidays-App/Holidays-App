@@ -24,6 +24,6 @@ Thanks Alisa Dadueva for website design
 
 ##### Creator
 
-_Fedor Bondarev - [@Trauer-1](https://github.com/Trauer-1)_
+_Fedor Bondarev - [@fedorbondarev](https://github.com/fedorbondarev)_
 
 [lending]: https://holidays-app.github.io/
